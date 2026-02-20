@@ -1,0 +1,6 @@
+Sr.No,WHO Indicators,Reference value,Formula
+1,Average number of drugs per encounter,1.6 – 1.8 drugs per encounter,Total number of drugs prescribed ÷ Total number of encounters
+2,Percentage of drugs prescribed by generic name,100%,(Number of drugs prescribed by generic name ÷ Total number of drugs) × 100
+3,Percentage of encounters with an antibiotic prescribed,20 – 26.8%,(Number of encounters with ?1 antibiotic ÷ Total encounters) × 100
+4,Percentage of encounters with an injection prescribed,13.4 – 24.1%,(Number of encounters with ?1 injection ÷ Total encounters) × 100
+5,Percentage of drugs prescribed from Essential Drug List (EDL),100%,(Number of drugs from EML ÷ Total number of drugs) × 100
