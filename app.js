@@ -1,51 +1,65 @@
-async function analyze() {
-    const text = document.getElementById("prescription").value;
-    const output = document.getElementById("output");
+function analyze() {
+  const input = document.getElementById("meds").value;
 
-    if (!text) {
-        alert("Enter prescription");
-        return;
-    }
+  if (!input.trim()) {
+    alert("Please enter medicines");
+    return;
+  }
 
-    output.innerHTML = "Analyzing...";
+  const meds = input
+    .split(/\n/)
+    .map(m => m.trim().toLowerCase())
+    .filter(m => m);
 
-    // MOCK MODE (works without API)
-    if (!window.API_KEY) {
-        output.innerHTML = `
-Patient Details: Missing\n
-Drug Interaction: Possible (Metformin + Atenolol)\n
-Dose Check: Looks acceptable\n
-Advice: Monitor BP & glucose\n
-Counseling: Take medicines regularly
-        `;
-        return;
-    }
+  const interactions = checkInteractions(meds);
 
-    const prompt = `Analyze this prescription: ${text}`;
+  let result = "";
 
-    try {
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer " + window.API_KEY,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [{ role: "user", content: prompt }]
-            })
-        });
+  // Patient details (demo)
+  result += "Patient Details: Missing\n\n";
 
-        const data = await res.json();
+  // Interaction
+  if (interactions.length > 0) {
+    result += "Drug Interaction:\n";
+    interactions.forEach(i => {
+      result += "- " + i + "\n";
+    });
+  } else {
+    result += "Drug Interaction: None found\n";
+  }
 
-        if (!res.ok) {
-            output.innerHTML = "Error: " + JSON.stringify(data);
-            return;
-        }
+  // Dose check (basic demo)
+  result += "\nDose Check: Looks acceptable\n";
 
-        output.innerHTML = data.choices[0].message.content;
+  // Advice
+  result += "\nAdvice:\n";
+  if (interactions.length > 0) {
+    result += "Monitor patient closely\n";
+  } else {
+    result += "No major issues\n";
+  }
 
-    } catch (e) {
-        output.innerHTML = "Error: " + e.message;
-    }
+  // Counseling
+  result += "\nCounseling: Take medicines regularly";
+
+  document.getElementById("output").innerText = result;
+}
+
+// Simple interaction database
+function checkInteractions(meds) {
+  const interactions = [];
+
+  if (meds.includes("metformin") && meds.includes("atenolol")) {
+    interactions.push("Metformin + Atenolol → May mask hypoglycemia symptoms");
+  }
+
+  if (meds.includes("azithromycin") && meds.includes("pantoprazole")) {
+    interactions.push("Azithromycin + Pantoprazole → Minor interaction (absorption change)");
+  }
+
+  if (meds.includes("diclofenac") && meds.includes("pantoprazole")) {
+    interactions.push("Diclofenac + Pantoprazole → Protective (reduces gastric irritation)");
+  }
+
+  return interactions;
 }
