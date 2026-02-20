@@ -1,0 +1,19 @@
+/* style.css */
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+h2, h5 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.lead {
+  font-size: 1.125rem;
+}
+#result {
+  margin-top: 1rem;
+}
+.alert {
+  margin-top: 0.5rem;
+}
