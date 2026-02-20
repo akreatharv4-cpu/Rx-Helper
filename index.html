@@ -1,26 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Clinical Pharmacist</title>
-    <style>
-        body { font-family: Arial; background:#f4f6f9; text-align:center; padding:30px;}
-        .box { background:white; padding:20px; border-radius:10px; max-width:600px; margin:auto; }
-        textarea { width:100%; }
-        button { padding:10px 20px; background:#007bff; color:white; border:none; border-radius:5px; }
-        #output { margin-top:20px; text-align:left; white-space:pre-wrap;}
-    </style>
+  <meta charset="UTF-8" />
+  <title>AI Clinical Pharmacist</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+    .container {
+      width: 500px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: blue;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .result {
+      margin-top: 20px;
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-line;
+    }
+  </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>💊 AI Clinical Pharmacist</h2>
-    <textarea id="prescription" rows="8" placeholder="Enter prescription..."></textarea><br><br>
-    <button onclick="analyze()">Analyze</button>
-    <div id="output"></div>
+<div class="container">
+  <h2>💊 AI Clinical Pharmacist</h2>
+
+  <textarea id="meds" placeholder="Enter medicines (one per line)"></textarea>
+
+  <button onclick="analyze()">Analyze</button>
+
+  <div class="result" id="output"></div>
 </div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
