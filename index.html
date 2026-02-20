@@ -1,11 +1,63 @@
 <!DOCTYPE html>
-<html>
-<head><title>AI Clinical Pharmacist</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Clinical Pharmacist</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<h2>AI Prescription Analyzer</h2>
-<textarea id="text" rows="6" style="width:100%"></textarea><br>
-<button onclick="analyze()">Analyze</button>
-<div id="result"></div>
-<script src="app.js"></script>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><i class="fas fa-notes-medical"></i> Rx-Helper</a>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2>AI Prescription Analyzer</h2>
+    <p class="lead">Enter patient prescription details below:</p>
+
+    <!-- Input textarea -->
+    <div class="mb-3">
+      <textarea id="text" class="form-control" rows="6" placeholder="e.g. John Doe, 50 yr, metformin 500mg daily"></textarea>
+      <small class="form-text text-muted">For example: "Patient, 45 yr, aspirin 100 mg daily"</small>
+    </div>
+
+    <!-- Analyze button -->
+    <button id="analyzeBtn" class="btn btn-primary">
+      <i class="fas fa-chart-line"></i> Analyze
+    </button>
+
+    <hr>
+
+    <!-- Result area -->
+    <div id="result"></div>
+
+    <!-- Additional informational sections -->
+    <div id="infoSections" class="mt-4">
+      <h5>Search Suggestions</h5>
+      <ul>
+        <li>Enter patient age (e.g., “60 yr”) along with medications</li>
+        <li>Include drug strength (e.g., “500 mg”) for better analysis</li>
+        <li>Example: <code>Patient, 30 yr, atenolol 50 mg daily</code></li>
+      </ul>
+
+      <h5>Dosage Guidance</h5>
+      <p>Always verify dosages with clinical guidelines. For example, Metformin is commonly started at 500 mg twice daily (with food) for Type 2 diabetes. Refer to trusted resources (e.g., FDA label) for exact dosing.</p>
+
+      <h5>Drug Interactions</h5>
+      <p>This tool checks for known interactions. For instance, combining <strong>metformin</strong> and <strong>atenolol</strong> may mask hypoglycemia symptoms (moderate severity). Always consult a pharmacist for detailed interaction info.</p>
+    </div>
+  </div>
+
+  <!-- jQuery and App JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
