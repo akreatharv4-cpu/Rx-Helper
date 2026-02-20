@@ -3,7 +3,7 @@ import plotly.express as px
 import os
 
 # 1. Load and Clean Data
-df = pd.read_csv('OPD  CSV.csv')
+df = pd.read_csv('OPD CSV.csv', encoding='latin1')
 cols_to_fill = ['Sr.No', 'Patient Name', 'Age', 'Gender', 'Ward']
 df[cols_to_fill] = df[cols_to_fill].ffill()
 
