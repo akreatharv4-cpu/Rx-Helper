@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rx Helper AI</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            text-align: center;
+            padding: 30px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            background: #2b7cff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #output {
+            margin-top: 20px;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💊 AI Clinical Pharmacist</h1>
+
+    <textarea id="prescription" rows="8" style="width:100%;" 
+        placeholder="Paste prescription text here..."></textarea>
+
+    <br><br>
+
+    <button onclick="analyzePrescription()">Analyze</button>
+
+    <div id="output"></div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
