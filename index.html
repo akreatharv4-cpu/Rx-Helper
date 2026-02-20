@@ -2,49 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rx Helper AI</title>
+    <title>AI Clinical Pharmacist</title>
     <style>
-        body {
-            font-family: Arial;
-            background: #f5f7fa;
-            text-align: center;
-            padding: 30px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        button {
-            padding: 10px 20px;
-            background: #2b7cff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #output {
-            margin-top: 20px;
-            text-align: left;
-            white-space: pre-wrap;
-        }
+        body { font-family: Arial; background:#f4f6f9; text-align:center; padding:30px;}
+        .box { background:white; padding:20px; border-radius:10px; max-width:600px; margin:auto; }
+        textarea { width:100%; }
+        button { padding:10px 20px; background:#007bff; color:white; border:none; border-radius:5px; }
+        #output { margin-top:20px; text-align:left; white-space:pre-wrap;}
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>💊 AI Clinical Pharmacist</h1>
-
-    <textarea id="prescription" rows="8" style="width:100%;" 
-        placeholder="Paste prescription text here..."></textarea>
-
-    <br><br>
-
-    <button onclick="analyzePrescription()">Analyze</button>
-
+<div class="box">
+    <h2>💊 AI Clinical Pharmacist</h2>
+    <textarea id="prescription" rows="8" placeholder="Enter prescription..."></textarea><br><br>
+    <button onclick="analyze()">Analyze</button>
     <div id="output"></div>
 </div>
 
