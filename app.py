@@ -1,27 +1,30 @@
-from flask import Flask, request, jsonify
-import re
-app = Flask(__name__)
-INTERACTIONS = {("metformin","atenolol"): {"severity":"Moderate","msg":"May mask hypoglycemia symptoms"}}
+import os
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from datetime import datetime
 
-def extract_info(text):
-    data = {"age": None,"drugs": []}
-    age_match = re.search(r'(\d+)\s*yr', text.lower())
-    if age_match: data["age"] = age_match.group(1)
-    for line in text.split("\n"):
-        if "mg" in line.lower(): data["drugs"].append(line.strip())
-    return data
+from db import Base, engine, get_db
+from models import Prescription
+from schemas import AnalyzeTextRequest
+from utils import dumps, loads, iso
+from ocr import ocr_image_bytes, ocr_pdf_bytes
+from nlp import extract_structured
+from rules import classify_meds, apply_flags
+from who import compute_who
 
-@app.route("/analyze", methods=["POST"])
-def analyze():
-    text = request.json.get("text","")
-    data = extract_info(text)
-    alerts = []
-    if not data["age"]: alerts.append("Missing age")
-    interactions = []
-    if "metformin" in str(data["drugs"]).lower() and "atenolol" in str(data["drugs"]).lower():
-        interactions.append(INTERACTIONS[("metformin","atenolol")])
-    return jsonify({"data":data,"alerts":alerts,"interactions":interactions,"counseling":"Monitor BP & sugar"})
+Base.metadata.create_all(bind=engine)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+app = FastAPI(title="RxHelper API", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+@app.get("/health")
+def health():
+    return {"ok": True, "time": datetime.utcnow().isoformat()}
