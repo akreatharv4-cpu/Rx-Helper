@@ -1,5 +1,8 @@
 flask
+gunicorn
 pandas
 numpy
 python-dotenv
-gunicorn
+pytesseract
+pillow
+pdf2image
