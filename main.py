@@ -56,3 +56,10 @@ app = Flask(__name__, static_folder=".")
 @app.route("/")
 def home():
     return send_from_directory(".", "index.html")
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello World"
