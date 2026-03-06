@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AI Prescription Error Analysis System</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <!-- Chart library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -77,13 +78,9 @@
 <ul id="whoIndicators">
 
 <li>Average drugs per prescription: <span id="avgDrugs">0</span></li>
-
 <li>Antibiotic prescriptions: <span id="antibioticPercent">0%</span></li>
-
 <li>Injection prescriptions: <span id="injectionPercent">0%</span></li>
-
 <li>Generic drugs: <span id="genericPercent">0%</span></li>
-
 <li>Essential Drug List drugs: <span id="edlPercent">0%</span></li>
 
 </ul>
@@ -95,9 +92,7 @@
 <h2>Prescription Error Detection</h2>
 
 <div id="alerts">
-
 <p>No errors detected</p>
-
 </div>
 
 </section>
@@ -117,7 +112,7 @@
 
 </footer>
 
-<script src="app.js"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
 </html>
