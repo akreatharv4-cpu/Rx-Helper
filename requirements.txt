@@ -1,7 +1,5 @@
 flask
+pandas
+numpy
+python-dotenv
 gunicorn
-rapidfuzz
-fastapi
-uvicorn
-pydantic
-python-multipart
