@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Prescription Error Analysis System</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Chart library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<header>
+<h1>AI Mediated Prescription Error Analysis</h1>
+<p>Clinical Decision Support System using WHO Prescribing Indicators</p>
+</header>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Upload Prescription</a>
+<a href="#">Manual Entry</a>
+<a href="#">Analysis</a>
+<a href="#">Reports</a>
+</nav>
+
+<section class="container">
+
+<h2>Upload Prescription</h2>
+
+<form id="uploadForm">
+
+<label>Upload Prescription Image</label>
+<input type="file" id="prescriptionImage">
+
+<button type="submit">Analyze Prescription</button>
+
+</form>
+
+</section>
+
+<section class="container">
+
+<h2>Manual Prescription Entry</h2>
+
+<form id="manualForm">
+
+<label>Patient Name</label>
+<input type="text" placeholder="Enter patient name">
+
+<label>Drug Name</label>
+<input type="text" placeholder="Enter drug name">
+
+<label>Dose</label>
+<input type="text" placeholder="Dose">
+
+<label>Frequency</label>
+<input type="text" placeholder="Frequency">
+
+<label>Duration</label>
+<input type="text" placeholder="Duration">
+
+<button type="submit">Submit Prescription</button>
+
+</form>
+
+</section>
+
+<section class="container">
+
+<h2>WHO Prescribing Indicators</h2>
+
+<ul id="whoIndicators">
+
+<li>Average drugs per prescription: <span id="avgDrugs">0</span></li>
+
+<li>Antibiotic prescriptions: <span id="antibioticPercent">0%</span></li>
+
+<li>Injection prescriptions: <span id="injectionPercent">0%</span></li>
+
+<li>Generic drugs: <span id="genericPercent">0%</span></li>
+
+<li>Essential Drug List drugs: <span id="edlPercent">0%</span></li>
+
+</ul>
+
+</section>
+
+<section class="container">
+
+<h2>Prescription Error Detection</h2>
+
+<div id="alerts">
+
+<p>No errors detected</p>
+
+</div>
+
+</section>
+
+<section class="container">
+
+<h2>Data Visualization</h2>
+
+<canvas id="chart"></canvas>
+
+</section>
+
+<footer>
+
+<p>AI Based Clinical Prescription Analysis System</p>
+<p>Developed for Medication Safety & Rational Drug Use</p>
+
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+</html>
