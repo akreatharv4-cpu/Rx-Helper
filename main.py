@@ -1,24 +1,49 @@
-from fastapi import FastAPI\nfrom fastapi.middleware.cors import CORSMiddleware\n\napp = FastAPI()\n\napp.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])\n\n@app.get("/analyze-text")\ndef analyze_text(text: str):\n    # Your text analysis logic here\n    return {"result": "Analysis complete."}
-import pandas as pd
-import chardet
+from flask import Flask, request, jsonify
+import re
 
-# 1. Detect the encoding of the file
-try:
-    with open('OPD CSV.csv', 'rb') as f:
-        # Reading the first 10,000 bytes is usually enough to guess correctly
-        rawdata = f.read(10000)
-        result = chardet.detect(rawdata)
-        encoding_found = result['encoding']
-        print(f"Detected encoding: {encoding_found}")
+app = Flask(__name__)
 
-    # 2. Use the detected encoding (or fallback to latin1 if detection fails)
-    df = pd.read_csv('OPD CSV.csv', encoding=encoding_found or 'latin1')
-    
-    # Just to confirm it worked:
-    print("File loaded successfully!")
-    print(df.head())
+INTERACTIONS = {
+    ("metformin","atenolol"): {
+        "severity":"Moderate",
+        "msg":"May mask hypoglycemia symptoms"
+    }
+}
 
-except FileNotFoundError:
-    print("Error: The file 'OPD CSV.csv' was not found in the directory.")
-except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+def extract_info(text):
+    data = {"age": None, "drugs": []}
+
+    age_match = re.search(r'(\d+)\s*yr', text.lower())
+    if age_match:
+        data["age"] = age_match.group(1)
+
+    for line in text.split("\n"):
+        if "mg" in line.lower():
+            data["drugs"].append(line.strip())
+
+    return data
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    text = request.json.get("text","")
+
+    data = extract_info(text)
+
+    alerts = []
+    if not data["age"]:
+        alerts.append("Missing age")
+
+    interactions = []
+
+    if "metformin" in str(data["drugs"]).lower() and "atenolol" in str(data["drugs"]).lower():
+        interactions.append(INTERACTIONS[("metformin","atenolol")])
+
+    return jsonify({
+        "data": data,
+        "alerts": alerts,
+        "interactions": interactions,
+        "counseling": "Monitor BP & sugar"
+    })
+
+if __name__ == "__main__":
+    app.run()
