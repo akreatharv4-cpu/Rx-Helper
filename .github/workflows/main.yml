@@ -1,31 +1,17 @@
-name: Generate Clinical Dashboard
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+app = FastAPI()
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run Analysis
-        run: python main.py
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+@app.get("/analyze-text")
+def analyze_text(text: str):
+    # Your AI analysis logic here
+    return {"result": "Analysis complete"}
