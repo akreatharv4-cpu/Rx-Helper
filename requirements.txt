@@ -1,5 +1,2 @@
-FastAPI
-Uvicorn
-SQLAlchemy
-pytesseract
-Pillow
+flask
+gunicorn
