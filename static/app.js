@@ -1,20 +1,23 @@
-// Store prescriptions
+// Prescription storage
 let prescriptions = []
 
-// Sample drug classification database
+// Drug classification database
 const antibiotics = ["amoxicillin","azithromycin","ciprofloxacin","ceftriaxone"]
 const injections = ["ceftriaxone","insulin","diclofenac injection"]
 const edl = ["paracetamol","amoxicillin","metformin","insulin","atorvastatin"]
 
-// Manual prescription form
-document.getElementById("manualForm").addEventListener("submit", function(e){
+// ---------- MANUAL PRESCRIPTION ENTRY ----------
+
+document.getElementById("manualForm").addEventListener("submit", async function(e){
 
 e.preventDefault()
 
-let drug = document.querySelectorAll("#manualForm input")[1].value.toLowerCase()
-let dose = document.querySelectorAll("#manualForm input")[2].value
-let frequency = document.querySelectorAll("#manualForm input")[3].value
-let duration = document.querySelectorAll("#manualForm input")[4].value
+let inputs = document.querySelectorAll("#manualForm input")
+
+let drug = inputs[1].value.toLowerCase()
+let dose = inputs[2].value
+let frequency = inputs[3].value
+let duration = inputs[4].value
 
 let prescription = {
 drug,
@@ -25,13 +28,59 @@ duration
 
 prescriptions.push(prescription)
 
-analyzePrescription()
+analyzeLocal()
+
+// Send to backend
+let text = `${drug} ${dose}`
+
+let response = await fetch("/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({text:text})
+})
+
+let result = await response.json()
+
+showRisk(result.risk)
+showInteractions(result.interactions)
 
 this.reset()
 
 })
 
-function analyzePrescription(){
+// ---------- IMAGE PRESCRIPTION UPLOAD ----------
+
+document.getElementById("uploadForm").addEventListener("submit", async function(e){
+
+e.preventDefault()
+
+let file = document.getElementById("prescriptionImage").files[0]
+
+if(!file){
+alert("Please upload prescription image")
+return
+}
+
+let formData = new FormData()
+formData.append("file",file)
+
+let response = await fetch("/upload",{
+method:"POST",
+body:formData
+})
+
+let result = await response.json()
+
+showRisk(result.risk)
+showInteractions(result.interactions)
+
+})
+
+// ---------- LOCAL WHO ANALYSIS ----------
+
+function analyzeLocal(){
 
 let totalDrugs = prescriptions.length
 let antibioticCount = 0
@@ -63,40 +112,79 @@ alerts.push("Incomplete prescription information")
 if(totalDrugs > 5)
 alerts.push("Polypharmacy detected (>5 drugs)")
 
-// WHO indicators
-let avgDrugs = totalDrugs
 let antibioticPercent = (antibioticCount/totalDrugs)*100
 let injectionPercent = (injectionCount/totalDrugs)*100
 let genericPercent = (genericCount/totalDrugs)*100
 let edlPercent = (edlCount/totalDrugs)*100
 
-// Update UI
-document.getElementById("avgDrugs").innerText = avgDrugs.toFixed(2)
+document.getElementById("avgDrugs").innerText = totalDrugs.toFixed(2)
 document.getElementById("antibioticPercent").innerText = antibioticPercent.toFixed(1)+"%"
 document.getElementById("injectionPercent").innerText = injectionPercent.toFixed(1)+"%"
 document.getElementById("genericPercent").innerText = genericPercent.toFixed(1)+"%"
 document.getElementById("edlPercent").innerText = edlPercent.toFixed(1)+"%"
 
-// Show alerts
 let alertBox = document.getElementById("alerts")
 alertBox.innerHTML = ""
 
 if(alerts.length === 0){
-alertBox.innerHTML = "<p>No errors detected</p>"
+
+alertBox.innerHTML = "<div class='alert success'>No errors detected</div>"
+
 }else{
 
 alerts.forEach(a=>{
-let p = document.createElement("p")
-p.innerText = "⚠ "+a
-alertBox.appendChild(p)
+alertBox.innerHTML += "<div class='alert warning'>⚠ "+a+"</div>"
 })
 
 }
 
-// Update chart
 updateChart(antibioticPercent,injectionPercent,genericPercent,edlPercent)
 
 }
+
+// ---------- RISK DISPLAY ----------
+
+function showRisk(risk){
+
+let box = document.getElementById("alerts")
+
+if(risk==="safe"){
+box.innerHTML += "<div class='riskBox risk-safe'>SAFE PRESCRIPTION</div>"
+}
+
+if(risk==="moderate"){
+box.innerHTML += "<div class='riskBox risk-moderate'>MODERATE RISK INTERACTION</div>"
+}
+
+if(risk==="high"){
+box.innerHTML += "<div class='riskBox risk-high'>HIGH RISK PRESCRIPTION</div>"
+}
+
+}
+
+// ---------- INTERACTION DISPLAY ----------
+
+function showInteractions(interactions){
+
+if(!interactions || interactions.length===0)
+return
+
+let box = document.getElementById("alerts")
+
+interactions.forEach(i=>{
+
+box.innerHTML += `
+<div class="alert danger">
+<b>${i.severity} interaction</b><br>
+${i.msg}
+</div>
+`
+
+})
+
+}
+
+// ---------- CHART ----------
 
 let chart
 
@@ -118,8 +206,17 @@ labels:[
 ],
 datasets:[{
 label:"WHO Prescribing Indicators",
-data:[a,i,g,e]
+data:[a,i,g,e],
+backgroundColor:[
+"#ff7675",
+"#74b9ff",
+"#55efc4",
+"#ffeaa7"
+]
 }]
+},
+options:{
+responsive:true
 }
 })
 
