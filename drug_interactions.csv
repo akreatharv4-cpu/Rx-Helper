@@ -115,6 +115,120 @@ insulin,phenytoin,moderate,Reduced insulin effect
 insulin,haloperidol,moderate,Altered glucose levels
 insulin,omeprazole,low,Minor interaction
 insulin,aspirin,moderate,Enhanced hypoglycemic effect
+ibuprofen,warfarin,high,Bleeding risk
+clarithromycin,simvastatin,high,Rhabdomyolysis risk
+amoxicillin,warfarin,moderate,Increased anticoagulant effect
+metformin,cimetidine,moderate,Increased metformin levels
+aspirin,warfarin,high,Severe bleeding risk
+aspirin,ibuprofen,moderate,Reduced antiplatelet effect
+diclofenac,warfarin,high,Bleeding risk
+naproxen,warfarin,high,Bleeding risk
+ketorolac,warfarin,high,Severe bleeding risk
+clopidogrel,omeprazole,moderate,Reduced antiplatelet activity
+clopidogrel,esomeprazole,moderate,Reduced clopidogrel activation
+atorvastatin,clarithromycin,high,Myopathy risk
+atorvastatin,erythromycin,high,Increased statin toxicity
+simvastatin,clarithromycin,high,Rhabdomyolysis risk
+simvastatin,erythromycin,high,Rhabdomyolysis risk
+simvastatin,itraconazole,high,Severe myopathy risk
+simvastatin,ketoconazole,high,Increased statin toxicity
+rosuvastatin,gemfibrozil,high,Myopathy risk
+atorvastatin,gemfibrozil,high,Myopathy risk
+digoxin,verapamil,high,Increased digoxin levels
+digoxin,amiodarone,high,Digoxin toxicity risk
+digoxin,clarithromycin,high,Increased digoxin levels
+digoxin,furosemide,moderate,Hypokalemia increases toxicity
+digoxin,spironolactone,moderate,Altered digoxin levels
+warfarin,metronidazole,high,Increased bleeding risk
+warfarin,fluconazole,high,Increased anticoagulant effect
+warfarin,itraconazole,high,Increased bleeding risk
+warfarin,amiodarone,high,Increased anticoagulant effect
+warfarin,aspirin,high,Severe bleeding risk
+warfarin,clopidogrel,high,Increased bleeding risk
+warfarin,rifampicin,moderate,Reduced anticoagulant effect
+warfarin,phenytoin,moderate,Altered INR levels
+warfarin,carbamazepine,moderate,Reduced warfarin effect
+warfarin,paracetamol,moderate,Increased INR
+metformin,contrast media,high,Lactic acidosis risk
+metformin,alcohol,moderate,Lactic acidosis risk
+metformin,furosemide,moderate,Increased metformin levels
+metformin,nifedipine,moderate,Increased metformin absorption
+insulin,propranolol,moderate,Masked hypoglycemia symptoms
+insulin,atenolol,moderate,Masked hypoglycemia
+insulin,glimepiride,moderate,Increased hypoglycemia risk
+glimepiride,fluconazole,moderate,Increased hypoglycemia
+glibenclamide,clarithromycin,moderate,Hypoglycemia risk
+pioglitazone,insulin,moderate,Edema risk
+sitagliptin,insulin,moderate,Hypoglycemia risk
+dapagliflozin,diuretics,moderate,Dehydration risk
+empagliflozin,insulin,moderate,Hypoglycemia risk
+amlodipine,simvastatin,moderate,Increased statin levels
+verapamil,simvastatin,high,Myopathy risk
+diltiazem,simvastatin,high,Myopathy risk
+atenolol,verapamil,high,Heart block risk
+metoprolol,diltiazem,high,Bradycardia risk
+propranolol,verapamil,high,Severe bradycardia
+losartan,potassium chloride,moderate,Hyperkalemia risk
+spironolactone,potassium chloride,high,Severe hyperkalemia
+enalapril,spironolactone,high,Hyperkalemia risk
+ramipril,potassium supplements,moderate,Hyperkalemia risk
+furosemide,digoxin,moderate,Increased toxicity risk
+hydrochlorothiazide,lithium,high,Lithium toxicity risk
+lithium,ibuprofen,high,Increased lithium levels
+lithium,naproxen,high,Lithium toxicity
+lithium,ace inhibitors,high,Lithium toxicity
+fluoxetine,sertraline,moderate,Serotonin syndrome risk
+fluoxetine,tramadol,high,Serotonin syndrome risk
+sertraline,tramadol,high,Serotonin syndrome risk
+paroxetine,tramadol,high,Seizure risk
+duloxetine,tramadol,high,Serotonin syndrome risk
+venlafaxine,tramadol,high,Serotonin syndrome
+amitriptyline,fluoxetine,moderate,Increased TCA levels
+amitriptyline,sertraline,moderate,QT prolongation risk
+clonazepam,alprazolam,moderate,Increased sedation
+diazepam,opioids,high,Respiratory depression
+morphine,benzodiazepines,high,Respiratory depression
+fentanyl,benzodiazepines,high,Respiratory depression
+tramadol,ssri,high,Serotonin syndrome risk
+carbamazepine,phenytoin,moderate,Altered drug levels
+carbamazepine,warfarin,moderate,Reduced warfarin effect
+phenytoin,isoniazid,high,Phenytoin toxicity
+phenytoin,rifampicin,moderate,Reduced phenytoin levels
+valproate,lamotrigine,high,Lamotrigine toxicity
+valproate,carbamazepine,moderate,Altered anticonvulsant levels
+levothyroxine,iron,moderate,Reduced levothyroxine absorption
+levothyroxine,calcium carbonate,moderate,Reduced absorption
+levothyroxine,omeprazole,moderate,Reduced absorption
+fluconazole,warfarin,high,Increased bleeding risk
+ketoconazole,warfarin,high,Increased INR
+itraconazole,simvastatin,high,Rhabdomyolysis risk
+rifampicin,oral contraceptives,high,Reduced contraceptive efficacy
+rifampicin,warfarin,moderate,Reduced anticoagulant effect
+rifampicin,phenytoin,moderate,Altered phenytoin levels
+isoniazid,phenytoin,high,Phenytoin toxicity
+isoniazid,carbamazepine,moderate,Increased levels
+metronidazole,alcohol,high,Disulfiram-like reaction
+metronidazole,warfarin,high,Increased bleeding risk
+tinidazole,alcohol,high,Disulfiram-like reaction
+fluconazole,statins,moderate,Myopathy risk
+itraconazole,statins,high,Rhabdomyolysis risk
+erythromycin,statins,high,Myopathy risk
+clarithromycin,warfarin,high,Increased bleeding risk
+clarithromycin,digoxin,high,Digoxin toxicity
+azithromycin,warfarin,moderate,Increased bleeding risk
+ciprofloxacin,theophylline,high,Theophylline toxicity
+ciprofloxacin,warfarin,moderate,Increased INR
+levofloxacin,warfarin,moderate,Increased INR
+moxifloxacin,antiarrhythmics,high,QT prolongation
+ondansetron,ssri,moderate,QT prolongation risk
+ondansetron,amiodarone,high,QT prolongation
+domperidone,clarithromycin,high,Cardiac arrhythmia risk
+domperidone,ketoconazole,high,QT prolongation
+ranitidine,warfarin,moderate,Altered anticoagulant effect
+omeprazole,warfarin,moderate,Increased INR
+pantoprazole,clopidogrel,low,Minor interaction
+esomeprazole,clopidogrel,moderate,Reduced antiplatelet activity
+lansoprazole,warfarin,moderate,Increased INR
 insulin,losartan,low,Minor interaction
 insulin,amlodipine,low,Minor interaction
 insulin,digoxin,low,Minor interaction
