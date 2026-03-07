@@ -1,0 +1,121 @@
+drug1,drug2,severity,message
+warfarin,aspirin,high,High risk of bleeding
+warfarin,ibuprofen,high,Increased bleeding risk
+warfarin,diclofenac,high,Severe bleeding risk
+warfarin,naproxen,high,High gastrointestinal bleeding risk
+warfarin,clopidogrel,high,Severe bleeding risk
+warfarin,amoxicillin,moderate,Increased anticoagulant effect
+warfarin,metronidazole,high,Marked increase in INR
+warfarin,fluconazole,high,Increased anticoagulant effect
+warfarin,clarithromycin,high,Increased bleeding risk
+warfarin,erythromycin,high,Increased anticoagulant effect
+warfarin,ciprofloxacin,moderate,Enhanced anticoagulant effect
+warfarin,levofloxacin,moderate,Possible INR elevation
+warfarin,paracetamol,moderate,Possible increase in INR
+warfarin,amiodarone,high,Significant INR increase
+warfarin,phenytoin,moderate,Altered warfarin metabolism
+warfarin,rifampicin,high,Reduced anticoagulant effect
+warfarin,simvastatin,moderate,Increased bleeding risk
+warfarin,atorvastatin,moderate,Possible anticoagulant enhancement
+warfarin,omeprazole,moderate,Increased anticoagulant effect
+warfarin,fluoxetine,high,Increased bleeding risk
+aspirin,clopidogrel,high,Severe bleeding risk
+aspirin,ibuprofen,moderate,Increased gastrointestinal bleeding
+aspirin,diclofenac,high,Severe gastrointestinal bleeding
+aspirin,naproxen,high,High risk of GI bleeding
+aspirin,warfarin,high,High risk of bleeding
+aspirin,heparin,high,Major bleeding risk
+aspirin,alteplase,high,Severe bleeding risk
+aspirin,ketorolac,high,Contraindicated due to bleeding risk
+aspirin,spironolactone,moderate,Reduced diuretic effect
+aspirin,ramipril,moderate,Reduced antihypertensive effect
+aspirin,losartan,moderate,Reduced antihypertensive effect
+aspirin,furosemide,moderate,Reduced diuretic response
+aspirin,hydrochlorothiazide,moderate,Reduced diuretic effect
+aspirin,sertraline,high,Increased bleeding risk
+aspirin,fluoxetine,high,Increased bleeding tendency
+aspirin,prednisolone,moderate,Increased GI ulcer risk
+aspirin,alcohol,high,Severe gastrointestinal bleeding risk
+aspirin,insulin,moderate,Enhanced hypoglycemic effect
+aspirin,glimepiride,moderate,Increased hypoglycemia risk
+aspirin,metformin,low,Minor interaction possible
+metformin,atenolol,moderate,May mask hypoglycemia symptoms
+metformin,propranolol,moderate,May mask hypoglycemia symptoms
+metformin,cimetidine,moderate,Increased metformin levels
+metformin,contrast_media,high,Risk of lactic acidosis
+metformin,furosemide,moderate,Altered metformin levels
+metformin,nifedipine,moderate,Increased metformin absorption
+metformin,alcohol,high,Risk of lactic acidosis
+metformin,insulin,moderate,Enhanced hypoglycemic effect
+metformin,glyburide,moderate,Increased hypoglycemia risk
+metformin,glimepiride,moderate,Enhanced hypoglycemia
+metformin,ranitidine,low,Minor interaction possible
+metformin,trimethoprim,moderate,Increased metformin concentration
+metformin,hydrochlorothiazide,moderate,Hyperglycemia risk
+metformin,prednisolone,moderate,Reduced glucose control
+metformin,levothyroxine,moderate,Altered glycemic control
+metformin,rifampicin,moderate,Reduced metformin effectiveness
+metformin,amiodarone,moderate,Possible glucose imbalance
+metformin,atorvastatin,low,Minor interaction
+metformin,omeprazole,low,No significant interaction
+metformin,vitamin_b12,moderate,Reduced vitamin B12 absorption
+clarithromycin,simvastatin,high,Risk of rhabdomyolysis
+clarithromycin,atorvastatin,high,Risk of myopathy
+clarithromycin,warfarin,high,Increased anticoagulant effect
+clarithromycin,carbamazepine,moderate,Increased carbamazepine levels
+clarithromycin,theophylline,moderate,Increased theophylline toxicity
+clarithromycin,verapamil,high,Risk of hypotension
+clarithromycin,digoxin,high,Increased digoxin toxicity
+clarithromycin,midazolam,high,Increased sedation
+clarithromycin,amiodarone,high,Risk of QT prolongation
+clarithromycin,phenytoin,moderate,Altered phenytoin levels
+clarithromycin,alprazolam,moderate,Increased sedation
+clarithromycin,cyclosporine,high,Increased cyclosporine toxicity
+clarithromycin,rifabutin,moderate,Increased rifabutin toxicity
+clarithromycin,quinidine,high,QT prolongation risk
+clarithromycin,haloperidol,high,Risk of arrhythmia
+clarithromycin,cisapride,high,Serious cardiac arrhythmia
+clarithromycin,domperidone,high,Risk of QT prolongation
+clarithromycin,ondansetron,moderate,QT prolongation risk
+clarithromycin,fluconazole,moderate,Increased QT risk
+clarithromycin,metformin,low,Minor interaction
+simvastatin,clarithromycin,high,Risk of rhabdomyolysis
+simvastatin,erythromycin,high,Risk of myopathy
+simvastatin,itraconazole,high,Severe myopathy risk
+simvastatin,amiodarone,high,Increased myopathy risk
+simvastatin,verapamil,high,Risk of rhabdomyolysis
+simvastatin,diltiazem,high,Increased statin toxicity
+simvastatin,niacin,moderate,Increased myopathy risk
+simvastatin,gemfibrozil,high,Severe muscle toxicity
+simvastatin,fenofibrate,moderate,Increased myopathy risk
+simvastatin,warfarin,moderate,Increased anticoagulant effect
+simvastatin,atorvastatin,low,Minor statin interaction
+simvastatin,rosuvastatin,low,Minor statin interaction
+simvastatin,grapefruit_juice,high,Increased statin toxicity
+simvastatin,cyclosporine,high,Severe myopathy risk
+simvastatin,amitriptyline,low,Minor interaction
+simvastatin,fluoxetine,moderate,Increased myopathy risk
+simvastatin,ketoconazole,high,Severe toxicity risk
+simvastatin,rifampicin,moderate,Reduced statin effect
+simvastatin,phenytoin,moderate,Reduced statin level
+simvastatin,carbamazepine,moderate,Reduced statin level
+insulin,propranolol,moderate,May mask hypoglycemia symptoms
+insulin,atenolol,moderate,Mask hypoglycemia symptoms
+insulin,metformin,moderate,Enhanced glucose lowering
+insulin,glyburide,high,Severe hypoglycemia risk
+insulin,glimepiride,high,Severe hypoglycemia risk
+insulin,prednisolone,moderate,Reduced insulin effect
+insulin,hydrochlorothiazide,moderate,Hyperglycemia risk
+insulin,levothyroxine,moderate,Altered glycemic control
+insulin,alcohol,high,Severe hypoglycemia risk
+insulin,octreotide,moderate,Altered insulin requirement
+insulin,rifampicin,moderate,Reduced insulin effect
+insulin,niacin,moderate,Hyperglycemia risk
+insulin,phenytoin,moderate,Reduced insulin effect
+insulin,haloperidol,moderate,Altered glucose levels
+insulin,omeprazole,low,Minor interaction
+insulin,aspirin,moderate,Enhanced hypoglycemic effect
+insulin,losartan,low,Minor interaction
+insulin,amlodipine,low,Minor interaction
+insulin,digoxin,low,Minor interaction
+insulin,furosemide,moderate,Altered glucose control
