@@ -3,3 +3,6 @@ pandas
 numpy
 gunicorn
 python-dotenv
+pytesseract
+Pillow
+opencv-python
