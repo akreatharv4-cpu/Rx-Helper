@@ -8,26 +8,18 @@ from ocr_medicine_detector import detect_medicines
 
 app = Flask(**name**)
 
-# Load interaction database
+# ================= LOAD DATABASE =================
 
 interactions_df = pd.read_csv("drug_interactions.csv")
 
-# ---------------------------
-
-# Essential Drug List
-
-# ---------------------------
+# ================= ESSENTIAL DRUG LIST =================
 
 EDL = [
 "paracetamol","amoxicillin","metformin","insulin",
 "atorvastatin","aspirin","warfarin"
 ]
 
-# ---------------------------
-
-# ATC classification
-
-# ---------------------------
+# ================= ATC CLASSIFICATION =================
 
 ATC_CLASSES = {
 "amoxicillin":"Antibiotic",
@@ -42,4 +34,149 @@ ATC_CLASSES = {
 "paracetamol":"Analgesic"
 }
 
-# ---------------------
+# ================= EXTRACT PRESCRIPTION INFO =================
+
+def extract_info(text):
+
+```
+data={"age":None,"drugs":[]}
+
+text=text.lower()
+
+age_match=re.search(r'(\d+)\s*yr',text)
+
+if age_match:
+    data["age"]=age_match.group(1)
+
+for line in text.split("\n"):
+
+    if "mg" in line or "tablet" in line or "tab" in line:
+        data["drugs"].append(line.strip())
+
+return data
+```
+
+# ================= DRUG INTERACTION CHECK =================
+
+def check_interactions(drugs):
+
+```
+found=[]
+risk="safe"
+
+for i in range(len(drugs)):
+    for j in range(i+1,len(drugs)):
+
+        d1=drugs[i].split()[0]
+        d2=drugs[j].split()[0]
+
+        match=interactions_df[
+            ((interactions_df.drug1==d1)&(interactions_df.drug2==d2))|
+            ((interactions_df.drug1==d2)&(interactions_df.drug2==d1))
+        ]
+
+        if not match.empty:
+
+            row=match.iloc[0]
+
+            found.append({
+            "severity":row["severity"],
+            "msg":row["message"]
+            })
+
+            if row["severity"]=="high":
+                risk="high"
+            elif row["severity"]=="moderate" and risk!="high":
+                risk="moderate"
+
+return found,risk
+```
+
+# ================= SAFETY SCORE =================
+
+def safety_score(drugs,interactions):
+
+```
+score=100
+
+score-=len(drugs)*5
+
+for i in interactions:
+
+    if i["severity"]=="moderate":
+        score-=15
+
+    if i["severity"]=="high":
+        score-=30
+
+if score<0:
+    score=0
+
+return score
+```
+
+# ================= HOME PAGE =================
+
+@app.route("/")
+def home():
+return render_template("index.html")
+
+# ================= MANUAL PRESCRIPTION ANALYSIS =================
+
+@app.route("/analyze",methods=["POST"])
+def analyze():
+
+```
+data_req=request.get_json(silent=True) or {}
+
+text=data_req.get("text","")
+
+data=extract_info(text)
+
+interactions,interaction_risk=check_interactions(data["drugs"])
+
+score=safety_score(data["drugs"],interactions)
+
+return jsonify({
+"drugs":data["drugs"],
+"interactions":interactions,
+"safety_score":score
+})
+```
+
+# ================= OCR PRESCRIPTION UPLOAD =================
+
+@app.route("/upload",methods=["POST"])
+def upload():
+
+```
+file=request.files.get("file")
+
+if not file:
+    return jsonify({"error":"No file uploaded"})
+
+image=Image.open(file)
+
+text=pytesseract.image_to_string(image)
+
+detected_medicines,_ = detect_medicines(file)
+
+data=extract_info(text)
+
+interactions,interaction_risk=check_interactions(data["drugs"])
+
+score=safety_score(data["drugs"],interactions)
+
+return jsonify({
+"extracted_text":text,
+"detected_medicines":detected_medicines,
+"drug_lines":data["drugs"],
+"interactions":interactions,
+"safety_score":score
+})
+```
+
+# ================= RUN SERVER =================
+
+if **name**=="**main**":
+app.run(host="0.0.0.0",port=10000)
