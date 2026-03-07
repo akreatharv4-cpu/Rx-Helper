@@ -8,3 +8,4 @@ requests
 rapidfuzz
 gunicorn
 python-dotenv
+python-multipart
