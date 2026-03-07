@@ -30,27 +30,31 @@
 <a href="#reports">Reports</a>
 </nav>
 
+<!-- Upload Section -->
+
 <section class="container" id="upload">
 
 <h2>Upload Prescription</h2>
 
 <form id="uploadForm" enctype="multipart/form-data">
 
-<label>Upload Prescription Image</label> <input type="file" name="file" id="prescriptionImage" required>
+<label>Upload Prescription Image</label>
+
+<input type="file" id="prescriptionImage" name="file" accept="image/*" required>
+
+<br><br>
 
 <button type="submit">Analyze Prescription</button>
 
 </form>
 
-</section>
-
-<section class="container" id="analysis">
-
-<h2>Analysis Result</h2>
+<h3>Analysis Result</h3>
 
 <pre id="resultBox">Upload a prescription to see analysis...</pre>
 
 </section>
+
+<!-- Manual Entry -->
 
 <section class="container" id="manual">
 
@@ -74,7 +78,9 @@
 
 </section>
 
-<section class="container">
+<!-- WHO Indicators -->
+
+<section class="container" id="analysis">
 
 <h2>WHO Prescribing Indicators</h2>
 
@@ -82,4 +88,73 @@
 
 <li>Average drugs per prescription: <span id="avgDrugs">0</span></li>
 <li>Antibiotic prescriptions: <span id="antibioticPercent">0%</span></li>
-<li>Injection prescriptions: <span id="in
+<li>Injection prescriptions: <span id="injectionPercent">0%</span></li>
+<li>Generic drugs: <span id="genericPercent">0%</span></li>
+<li>Essential Drug List drugs: <span id="edlPercent">0%</span></li>
+
+</ul>
+
+</section>
+
+<!-- Alerts -->
+
+<section class="container">
+
+<h2>Prescription Error Detection</h2>
+
+<div id="alerts">
+<p>No errors detected</p>
+</div>
+
+</section>
+
+<!-- Visualization -->
+
+<section class="container">
+
+<h2>Data Visualization</h2>
+
+<canvas id="chart"></canvas>
+
+</section>
+
+<footer>
+
+<p>AI Based Clinical Prescription Analysis System</p>
+<p>Developed for Medication Safety & Rational Drug Use</p>
+
+</footer>
+
+<script>
+
+document.getElementById("uploadForm").addEventListener("submit", async function(e){
+
+e.preventDefault()
+
+const fileInput=document.getElementById("prescriptionImage")
+
+if(fileInput.files.length===0){
+alert("Please upload a prescription image")
+return
+}
+
+const formData=new FormData()
+
+formData.append("file",fileInput.files[0])
+
+const response=await fetch("/upload",{
+method:"POST",
+body:formData
+})
+
+const data=await response.json()
+
+document.getElementById("resultBox").innerText=
+JSON.stringify(data,null,2)
+
+})
+
+</script>
+
+</body>
+</html>
