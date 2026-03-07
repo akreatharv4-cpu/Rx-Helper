@@ -1,202 +1,245 @@
-/* GENERAL */
+/* ================= GENERAL ================= */
+
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg,#eef2ff,#f7fbff);
-  margin:0;
-  color:#1f2933;
+font-family: "Segoe UI", Arial, sans-serif;
+background: linear-gradient(135deg,#eef2ff,#f7fbff);
+margin:0;
+color:#1f2933;
 }
 
 .container{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
+max-width:1200px;
+margin:auto;
+padding:20px;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 
 header{
-  background:#1f6feb;
-  color:white;
-  padding:20px;
-  text-align:center;
-  border-radius:0 0 10px 10px;
+background:#1f6feb;
+color:white;
+padding:20px;
+text-align:center;
+border-radius:0 0 10px 10px;
 }
 
 header h1{
-  margin:0;
+margin:0;
 }
 
 nav{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  padding:10px;
-  background:#ffffff;
-  border-bottom:1px solid #e6e7ee;
+display:flex;
+justify-content:center;
+gap:20px;
+padding:10px;
+background:#ffffff;
+border-bottom:1px solid #e6e7ee;
 }
 
 nav a{
-  text-decoration:none;
-  color:#1f6feb;
-  font-weight:600;
+text-decoration:none;
+color:#1f6feb;
+font-weight:600;
 }
 
-/* CARDS */
+/* ================= CARDS ================= */
 
 .card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+background:white;
+border-radius:12px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 6px 18px rgba(0,0,0,0.08);
 }
 
-/* FORMS */
+/* ================= FORMS ================= */
 
 label{
-  font-weight:600;
-  margin-top:10px;
-  display:block;
+font-weight:600;
+margin-top:10px;
+display:block;
 }
 
 input, textarea{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ddd;
-  margin-top:4px;
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid #ddd;
+margin-top:4px;
 }
 
 textarea{
-  min-height:120px;
+min-height:120px;
 }
 
-/* BUTTONS */
+/* ================= BUTTONS ================= */
 
 button{
-  margin-top:12px;
-  padding:10px 16px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
+margin-top:12px;
+padding:10px 16px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:600;
 }
 
 button.primary{
-  background:#1f6feb;
-  color:white;
+background:#1f6feb;
+color:white;
 }
 
-button.primary:hover{
-  background:#1557c0;
+button.primary:hover
+
+/* ================= TABLE ================= */
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+background:white;
 }
 
-/* RISK STATUS */
+table th{
+background:#f1f5ff;
+padding:10px;
+border:1px solid #ddd;
+}
+
+table td{
+padding:10px;
+border:1px solid #ddd;
+}
+
+/* ================= IMAGE PREVIEW ================= */
+
+#preview{
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ================= SAFETY SCORE BAR ================= */
+
+.scoreContainer{
+width:100%;
+height:25px;
+background:#eee;
+border-radius:6px;
+margin-top:10px;
+overflow:hidden;
+}
+
+#scoreBar{
+height:100%;
+width:0%;
+border-radius:6px;
+transition:0.5s;
+}
+
+#scoreValue{
+font-weight:bold;
+margin-top:6px;
+}
+
+/* ================= RISK STATUS ================= */
 
 .riskBox{
-  font-size:18px;
-  font-weight:bold;
-  padding:15px;
-  border-radius:10px;
-  text-align:center;
-  margin-top:10px;
+font-size:18px;
+font-weight:bold;
+padding:15px;
+border-radius:10px;
+text-align:center;
+margin-top:10px;
 }
 
 /* SAFE */
 
 .risk-safe{
-  background:#e8f9f0;
-  border:2px solid #2ecc71;
-  color:#1e7e34;
+background:#e8f9f0;
+border:2px solid #2ecc71;
+color:#1e7e34;
 }
 
 /* MODERATE */
 
 .risk-moderate{
-  background:#fff9e6;
-  border:2px solid #f1c40f;
-  color:#856404;
+background:#fff9e6;
+border:2px solid #f1c40f;
+color:#856404;
 }
 
 /* HIGH */
 
 .risk-high{
-  background:#ffeaea;
-  border:2px solid #e74c3c;
-  color:#a71d2a;
+background:#ffeaea;
+border:2px solid #e74c3c;
+color:#a71d2a;
 }
 
-/* ALERT BOX */
+/* ================= ALERT BOX ================= */
 
 .alert{
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px;
+padding:12px;
+border-radius:8px;
+margin-top:10px;
+font-weight:500;
 }
 
 .alert.warning{
-  background:#fff3cd;
+background:#fff3cd;
 }
 
 .alert.danger{
-  background:#f8d7da;
+background:#f8d7da;
 }
 
 .alert.success{
-  background:#d4edda;
+background:#d4edda;
 }
 
-/* LIST */
+/* ================= LIST ================= */
 
 .list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+display:flex;
+flex-direction:column;
+gap:8px;
 }
 
-/* CHART AREA */
+/* ================= CHART AREA ================= */
 
 .chart-container{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
-  margin-top:20px;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(0,0,0,0.08);
+margin-top:20px;
 }
 
-/* BADGES */
+/* ================= BADGES ================= */
 
 .badge{
-  padding:4px 10px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:600;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:600;
 }
 
 .badge.safe{
-  background:#e8f9f0;
-  color:#1e7e34;
+background:#e8f9f0;
+color:#1e7e34;
 }
 
 .badge.moderate{
-  background:#fff9e6;
-  color:#856404;
+background:#fff9e6;
+color:#856404;
 }
 
 .badge.high{
-  background:#ffeaea;
-  color:#a71d2a;
+background:#ffeaea;
+color:#a71d2a;
 }
 
-/* FOOTER */
+/* ================= SCORE BOX ================= */
 
-footer{
-  text-align:center;
-  padding:20px;
-  margin-top:30px;
-  font-size:12px;
-  color:#555;
-}
 .scoreBox{
 font-size:28px;
 font-weight:bold;
@@ -205,9 +248,22 @@ border-radius:8px;
 margin-top:10px;
 }
 
+/* ================= RECOMMENDATIONS ================= */
+
 .recommendations{
 background:#f8f9fa;
 padding:12px;
 border-left:4px solid #1f6feb;
 margin-top:10px;
 }
+
+/* ================= FOOTER ================= */
+
+footer{
+text-align:center;
+padding:20px;
+margin-top:30px;
+font-size:12px;
+color:#555;
+}
+
