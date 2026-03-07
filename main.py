@@ -1,12 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import re
 
 app = Flask(__name__)
 
+# Example drug interaction database
 INTERACTIONS = {
-    ("metformin","atenolol"): {
-        "severity":"Moderate",
-        "msg":"May mask hypoglycemia symptoms"
+    ("metformin", "atenolol"): {
+        "severity": "Moderate",
+        "msg": "May mask hypoglycemia symptoms"
     }
 }
 
@@ -23,43 +24,36 @@ def extract_info(text):
 
     return data
 
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    text = request.json.get("text","")
 
+    text = request.json.get("text", "")
     data = extract_info(text)
 
     alerts = []
-    if not data["age"]:
-        alerts.append("Missing age")
-
     interactions = []
 
-    if "metformin" in str(data["drugs"]).lower() and "atenolol" in str(data["drugs"]).lower():
-        interactions.append(INTERACTIONS[("metformin","atenolol")])
+    if not data["age"]:
+        alerts.append("Missing patient age")
+
+    drug_text = str(data["drugs"]).lower()
+
+    if "metformin" in drug_text and "atenolol" in drug_text:
+        interactions.append(INTERACTIONS[("metformin", "atenolol")])
 
     return jsonify({
         "data": data,
         "alerts": alerts,
         "interactions": interactions,
-        "counseling": "Monitor BP & sugar"
+        "counseling": "Monitor BP and blood glucose"
     })
 
-if __name__ == "__main__":
-    app.run()
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-from flask import Flask, send_from_directory
-
-app = Flask(__name__, static_folder=".")
-
-@app.route("/")
-def home():
-    return send_from_directory(".", "index.html")
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return render_template("index.html")
