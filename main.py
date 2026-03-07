@@ -55,7 +55,7 @@ def extract_info(text):
     if age_match:
         data["age"] = age_match.group(1)
 
-    for line in text.split("\n"):
+    for line in text.split(""):
 
         if "mg" in line or "tablet" in line or "tab" in line:
             data["drugs"].append(line.strip())
