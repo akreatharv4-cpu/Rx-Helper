@@ -7,6 +7,7 @@ const antibiotics = ["amoxicillin","azithromycin","ciprofloxacin","ceftriaxone"]
 const injections = ["ceftriaxone","insulin","diclofenac injection"]
 const edl = ["paracetamol","amoxicillin","metformin","insulin","atorvastatin"]
 
+
 // ================= IMAGE PREVIEW =================
 
 document.getElementById("prescriptionImage").addEventListener("change",function(){
@@ -32,6 +33,7 @@ reader.readAsDataURL(file)
 
 })
 
+
 // ================= IMAGE PRESCRIPTION UPLOAD =================
 
 document.getElementById("uploadForm").addEventListener("submit", async function(e){
@@ -48,13 +50,22 @@ return
 let formData=new FormData()
 formData.append("file",file)
 
+try{
+
 let response=await fetch("/upload",{method:"POST",body:formData})
 
 let result=await response.json()
 
 displayResults(result)
 
+}catch(err){
+
+alert("Server error. Check backend.")
+
+}
+
 })
+
 
 // ================= MANUAL PRESCRIPTION ENTRY =================
 
@@ -77,6 +88,8 @@ analyzeLocal()
 
 let text=`${drug} ${dose}`
 
+try{
+
 let response=await fetch("/analyze",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
@@ -87,9 +100,16 @@ let result=await response.json()
 
 displayResults(result)
 
+}catch(err){
+
+alert("Server error while analyzing")
+
+}
+
 this.reset()
 
 })
+
 
 // ================= DISPLAY RESULTS =================
 
@@ -116,6 +136,7 @@ tableBody.innerHTML+=`
 
 }
 
+
 // ---------- interactions ----------
 
 let alertsBox=document.getElementById("alerts")
@@ -130,8 +151,9 @@ alertsBox.innerHTML+=`
 
 <div class="alert danger">
 <b>${i.severity} interaction</b><br>
-${i.msg}
+${i.message}
 </div>
+
 `
 
 })
@@ -141,6 +163,7 @@ ${i.msg}
 alertsBox.innerHTML="<div class='alert success'>No drug interactions detected</div>"
 
 }
+
 
 // ---------- safety score ----------
 
@@ -161,6 +184,7 @@ else bar.style.background="red"
 }
 
 }
+
 
 // ================= LOCAL WHO ANALYSIS =================
 
@@ -202,6 +226,7 @@ updateChart(antibioticPercent,injectionPercent,genericPercent,edlPercent)
 
 }
 
+
 // ================= CHART =================
 
 let chart
@@ -231,3 +256,7 @@ options:{responsive:true}
 })
 
 }
+
+
+
+
