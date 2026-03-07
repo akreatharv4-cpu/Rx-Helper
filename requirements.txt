@@ -1,9 +1,10 @@
 flask
 pandas
 numpy
-gunicorn
-python-dotenv
 pytesseract
 Pillow
 opencv-python
 requests
+rapidfuzz
+gunicorn
+python-dotenv
