@@ -6,3 +6,4 @@ python-dotenv
 pytesseract
 Pillow
 opencv-python
+requests
