@@ -3,17 +3,22 @@ import re
 import pandas as pd
 import pytesseract
 from PIL import Image
-import requests
+import io
 from ocr_medicine_detector import detect_medicines
 
-# Important for Render Linux server
+# Render Linux tesseract path
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 app = Flask(__name__)
 
 # ================= LOAD DATABASE =================
 
-interactions_df = pd.read_csv("drug_interactions.csv")
+try:
+    interactions_df = pd.read_csv("drug_interactions.csv")
+    interactions_df["drug1"] = interactions_df["drug1"].str.lower()
+    interactions_df["drug2"] = interactions_df["drug2"].str.lower()
+except:
+    interactions_df = pd.DataFrame(columns=["drug1","drug2","severity","message"])
 
 # ================= ESSENTIAL DRUG LIST =================
 
@@ -68,8 +73,8 @@ def check_interactions(drugs):
     for i in range(len(drugs)):
         for j in range(i+1, len(drugs)):
 
-            d1 = drugs[i].split()[0]
-            d2 = drugs[j].split()[0]
+            d1 = drugs[i].split()[0].lower()
+            d2 = drugs[j].split()[0].lower()
 
             match = interactions_df[
                 ((interactions_df.drug1 == d1) & (interactions_df.drug2 == d2)) |
@@ -81,6 +86,8 @@ def check_interactions(drugs):
                 row = match.iloc[0]
 
                 found.append({
+                    "drug1": d1,
+                    "drug2": d2,
                     "severity": row["severity"],
                     "message": row["message"]
                 })
@@ -122,7 +129,7 @@ def home():
     return render_template("index.html")
 
 
-# ================= MANUAL PRESCRIPTION ANALYSIS =================
+# ================= MANUAL TEXT ANALYSIS =================
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -152,17 +159,14 @@ def upload():
     file = request.files.get("file")
 
     if not file:
-        return jsonify({"error": "No file uploaded"})
+        return jsonify({"error": "No file uploaded"}), 400
 
     try:
 
-        # Open image for OCR
         image = Image.open(file.stream)
 
-        # Extract text
         text = pytesseract.image_to_string(image)
 
-        # Reset stream for second reading
         file.stream.seek(0)
 
         detected_medicines, _ = detect_medicines(file)
@@ -182,7 +186,7 @@ def upload():
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 
 # ================= RUN SERVER =================
