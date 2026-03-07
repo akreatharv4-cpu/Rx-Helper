@@ -6,6 +6,9 @@ from PIL import Image
 import requests
 from ocr_medicine_detector import detect_medicines
 
+# Important for Render Linux server
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 app = Flask(__name__)
 
 # ================= LOAD DATABASE =================
@@ -79,7 +82,7 @@ def check_interactions(drugs):
 
                 found.append({
                     "severity": row["severity"],
-                    "msg": row["message"]
+                    "message": row["message"]
                 })
 
                 if row["severity"] == "high":
@@ -151,32 +154,38 @@ def upload():
     if not file:
         return jsonify({"error": "No file uploaded"})
 
-    image = Image.open(file)
+    try:
 
-    text = pytesseract.image_to_string(image)
+        # Open image for OCR
+        image = Image.open(file.stream)
 
-    detected_medicines, _ = detect_medicines(file)
+        # Extract text
+        text = pytesseract.image_to_string(image)
 
-    data = extract_info(text)
+        # Reset stream for second reading
+        file.stream.seek(0)
 
-    interactions, interaction_risk = check_interactions(data["drugs"])
+        detected_medicines, _ = detect_medicines(file)
 
-    score = safety_score(data["drugs"], interactions)
+        data = extract_info(text)
 
-    return jsonify({
-        "extracted_text": text,
-        "detected_medicines": detected_medicines,
-        "drug_lines": data["drugs"],
-        "interactions": interactions,
-        "safety_score": score
-    })
+        interactions, interaction_risk = check_interactions(data["drugs"])
+
+        score = safety_score(data["drugs"], interactions)
+
+        return jsonify({
+            "extracted_text": text,
+            "detected_medicines": detected_medicines,
+            "drug_lines": data["drugs"],
+            "interactions": interactions,
+            "safety_score": score
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 
 # ================= RUN SERVER =================
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
-
-
-
