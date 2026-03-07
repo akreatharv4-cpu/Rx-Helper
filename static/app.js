@@ -25,7 +25,6 @@ prescriptions.push(prescription)
 
 analyzeLocal()
 
-// send to backend
 let text = `${drug} ${dose}`
 
 let response = await fetch("/analyze",{
@@ -36,7 +35,6 @@ body:JSON.stringify({text:text})
 
 let result = await response.json()
 
-showRisk(result.risk)
 showInteractions(result.interactions)
 showAdvancedResults(result)
 
@@ -64,7 +62,6 @@ let response = await fetch("/upload",{method:"POST",body:formData})
 
 let result = await response.json()
 
-showRisk(result.risk)
 showInteractions(result.interactions)
 showAdvancedResults(result)
 
@@ -104,44 +101,13 @@ let injectionPercent=(injectionCount/totalDrugs)*100
 let genericPercent=(genericCount/totalDrugs)*100
 let edlPercent=(edlCount/totalDrugs)*100
 
-document.getElementById("avgDrugs").innerText=totalDrugs.toFixed(2)
+document.getElementById("avgDrugs").innerText=totalDrugs
 document.getElementById("antibioticPercent").innerText=antibioticPercent.toFixed(1)+"%"
 document.getElementById("injectionPercent").innerText=injectionPercent.toFixed(1)+"%"
 document.getElementById("genericPercent").innerText=genericPercent.toFixed(1)+"%"
 document.getElementById("edlPercent").innerText=edlPercent.toFixed(1)+"%"
 
-let alertBox=document.getElementById("alerts")
-alertBox.innerHTML=""
-
-if(alerts.length===0){
-alertBox.innerHTML="<div class='alert success'>No errors detected</div>"
-}else{
-alerts.forEach(a=>{
-alertBox.innerHTML+="<div class='alert warning'>⚠ "+a+"</div>"
-})
-}
-
 updateChart(antibioticPercent,injectionPercent,genericPercent,edlPercent)
-
-}
-
-// ---------- RISK DISPLAY ----------
-
-function showRisk(risk){
-
-let box=document.getElementById("alerts")
-
-if(risk==="safe"){
-box.innerHTML+="<div class='riskBox risk-safe'>SAFE PRESCRIPTION</div>"
-}
-
-if(risk==="moderate"){
-box.innerHTML+="<div class='riskBox risk-moderate'>MODERATE RISK</div>"
-}
-
-if(risk==="high"){
-box.innerHTML+="<div class='riskBox risk-high'>HIGH RISK</div>"
-}
 
 }
 
@@ -149,13 +115,21 @@ box.innerHTML+="<div class='riskBox risk-high'>HIGH RISK</div>"
 
 function showInteractions(interactions){
 
-if(!interactions || interactions.length===0) return
-
 let box=document.getElementById("alerts")
+
+box.innerHTML=""
+
+if(!interactions || interactions.length===0){
+
+box.innerHTML="<div class='alert success'>No drug interactions detected</div>"
+
+return
+}
 
 interactions.forEach(i=>{
 
 box.innerHTML+=`
+
 <div class="alert danger">
 <b>${i.severity} interaction</b><br>
 ${i.msg}
@@ -175,44 +149,24 @@ let box=document.getElementById("alerts")
 // Safety score
 if(result.safety_score){
 box.innerHTML+=`
+
 <div class="scoreBox">
 Safety Score: ${result.safety_score}/100
 </div>
 `
 }
 
-// ADR risk
-if(result.adr_risk){
-box.innerHTML+=`<p><b>ADR Risk:</b> ${result.adr_risk}</p>`
-}
+// Detected medicines
+if(result.detected_medicines){
 
-// Polypharmacy
-if(result.polypharmacy){
-box.innerHTML+=`<p><b>Polypharmacy:</b> ${result.polypharmacy}</p>`
-}
+box.innerHTML+=`<h3>Detected Medicines</h3><ul>`
 
-// EDL compliance
-if(result.edl_percent){
-box.innerHTML+=`<p><b>EDL Compliance:</b> ${result.edl_percent.toFixed(1)}%</p>`
-}
-
-// Dose warnings
-if(result.dose_warnings){
-result.dose_warnings.forEach(w=>{
-box.innerHTML+=`<div class="alert warning">${w}</div>`
-})
-}
-
-// Clinical recommendations
-if(result.recommendations){
-
-box.innerHTML+=`<div class="recommendations"><b>Clinical Recommendations:</b><ul>`
-
-result.recommendations.forEach(r=>{
-box.innerHTML+=`<li>${r}</li>`
+result.detected_medicines.forEach(m=>{
+box.innerHTML+=`<li>${m}</li>`
 })
 
-box.innerHTML+=`</ul></div>`
+box.innerHTML+=`</ul>`
+
 }
 
 }
