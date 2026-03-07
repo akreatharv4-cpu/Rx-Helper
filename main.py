@@ -1,23 +1,23 @@
-from ocr_medicine_detector import detect_medicines
-from interaction_checker import check_interactionsfrom flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template
 import re
 import pandas as pd
 import pytesseract
 from PIL import Image
 import requests
+from ocr_medicine_detector import detect_medicines
 
 app = Flask(__name__)
 
 # Load drug interaction database
 interactions_df = pd.read_csv("drug_interactions.csv")
 
-# Essential Drug List (simplified example)
+# Essential Drug List
 EDL = [
 "paracetamol","amoxicillin","metformin","insulin",
 "atorvastatin","aspirin","warfarin"
 ]
 
-# ATC classification example
+# ATC classification
 ATC_CLASSES = {
 "amoxicillin":"Antibiotic",
 "azithromycin":"Antibiotic",
@@ -30,7 +30,6 @@ ATC_CLASSES = {
 "aspirin":"Antiplatelet",
 "paracetamol":"Analgesic"
 }
-
 
 # ---------------------------
 # Extract prescription info
@@ -368,9 +367,8 @@ def upload():
     if not file:
         return jsonify({"error":"No file uploaded"})
 
-    image=Image.open(file)
-
-    text=pytesseract.image_to_string(image)
+    # Detect medicines using OCR dataset
+    detected_medicines, text = detect_medicines(file)
 
     data=extract_info(text)
 
@@ -380,6 +378,8 @@ def upload():
 
     return jsonify({
     "extracted_text":text,
+    "detected_medicines":detected_medicines,
+    "drug_lines":data["drugs"],
     "interactions":interactions,
     "safety_score":score
     })
