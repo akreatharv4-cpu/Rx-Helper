@@ -1,5 +1,4 @@
-fastapi
-uvicorn
+flask
 pandas
 numpy
 pytesseract
@@ -7,5 +6,6 @@ Pillow
 opencv-python-headless
 requests
 rapidfuzz
+gunicorn
 python-dotenv
 python-multipart
