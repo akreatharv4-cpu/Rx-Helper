@@ -17,7 +17,7 @@ try:
     interactions_df = pd.read_csv("drug_interactions.csv")
     interactions_df["drug1"] = interactions_df["drug1"].str.lower()
     interactions_df["drug2"] = interactions_df["drug2"].str.lower()
-except:
+except Exception:
     interactions_df = pd.DataFrame(columns=["drug1","drug2","severity","message"])
 
 # ================= ESSENTIAL DRUG LIST =================
@@ -116,10 +116,7 @@ def safety_score(drugs, interactions):
         if i["severity"] == "high":
             score -= 30
 
-    if score < 0:
-        score = 0
-
-    return score
+    return max(score, 0)
 
 
 # ================= HOME PAGE =================
