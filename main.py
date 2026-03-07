@@ -14,12 +14,14 @@ INTERACTIONS = {
 def extract_info(text):
     data = {"age": None, "drugs": []}
 
-    age_match = re.search(r'(\d+)\s*yr', text.lower())
+    text = text.lower()
+
+    age_match = re.search(r'(\d+)\s*yr', text)
     if age_match:
         data["age"] = age_match.group(1)
 
     for line in text.split("\n"):
-        if "mg" in line.lower():
+        if "mg" in line:
             data["drugs"].append(line.strip())
 
     return data
@@ -33,7 +35,9 @@ def home():
 @app.route("/analyze", methods=["POST"])
 def analyze():
 
-    text = request.json.get("text", "")
+    data_req = request.get_json(silent=True) or {}
+    text = data_req.get("text", "")
+
     data = extract_info(text)
 
     alerts = []
