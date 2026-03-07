@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, render_template
+from ocr_medicine_detector import detect_medicines
+from interaction_checker import check_interactionsfrom flask import Flask, request, jsonify, render_template
 import re
 import pandas as pd
 import pytesseract
