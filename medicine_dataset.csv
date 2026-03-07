@@ -1,0 +1,891 @@
+medicine_name
+paracetamol
+acetaminophen
+aspirin
+ibuprofen
+diclofenac
+aceclofenac
+ketorolac
+naproxen
+indomethacin
+celecoxib
+etoricoxib
+tramadol
+codeine
+morphine
+fentanyl
+buprenorphine
+amoxicillin
+amoxicillin clavulanate
+ampicillin
+ampicillin sulbactam
+azithromycin
+clarithromycin
+erythromycin
+roxithromycin
+ceftriaxone
+cefotaxime
+cefixime
+cefuroxime
+cefepime
+cephalexin
+cefadroxil
+cefoperazone
+cefoperazone sulbactam
+piperacillin
+piperacillin tazobactam
+imipenem
+meropenem
+ertapenem
+ciprofloxacin
+levofloxacin
+ofloxacin
+moxifloxacin
+norfloxacin
+doxycycline
+tetracycline
+minocycline
+clindamycin
+linezolid
+vancomycin
+teicoplanin
+metronidazole
+tinidazole
+ornidazole
+rifampicin
+isoniazid
+ethambutol
+pyrazinamide
+pantoprazole
+omeprazole
+rabeprazole
+lansoprazole
+esomeprazole
+dexlansoprazole
+ranitidine
+famotidine
+cimetidine
+domperidone
+ondansetron
+granisetron
+metoclopramide
+itopride
+dicyclomine
+hyoscine butylbromide
+metformin
+glimepiride
+gliclazide
+glibenclamide
+pioglitazone
+sitagliptin
+vildagliptin
+linagliptin
+teneligliptin
+saxagliptin
+dapagliflozin
+empagliflozin
+canagliflozin
+insulin
+insulin glargine
+insulin lispro
+insulin aspart
+insulin detemir
+amlodipine
+nifedipine
+diltiazem
+verapamil
+atenolol
+metoprolol
+bisoprolol
+nebivolol
+propranolol
+carvedilol
+losartan
+telmisartan
+valsartan
+olmesartan
+irbesartan
+enalapril
+ramipril
+lisinopril
+perindopril
+hydrochlorothiazide
+chlorthalidone
+indapamide
+furosemide
+torsemide
+spironolactone
+eplerenone
+atorvastatin
+rosuvastatin
+simvastatin
+pravastatin
+fluvastatin
+fenofibrate
+gemfibrozil
+clopidogrel
+prasugrel
+ticagrelor
+warfarin
+heparin
+enoxaparin
+dabigatran
+rivaroxaban
+apixaban
+salbutamol
+terbutaline
+formoterol
+salmeterol
+budesonide
+beclomethasone
+fluticasone
+montelukast
+zafirlukast
+theophylline
+aminophylline
+cetirizine
+levocetirizine
+loratadine
+desloratadine
+fexofenadine
+chlorpheniramine
+diphenhydramine
+hydroxyzine
+prednisolone
+prednisone
+dexamethasone
+methylprednisolone
+hydrocortisone
+fluoxetine
+sertraline
+paroxetine
+escitalopram
+citalopram
+amitriptyline
+imipramine
+nortriptyline
+venlafaxine
+duloxetine
+alprazolam
+diazepam
+lorazepam
+clonazepam
+zolpidem
+zopiclone
+haloperidol
+risperidone
+olanzapine
+quetiapine
+aripiprazole
+clozapine
+levothyroxine
+carbimazole
+propylthiouracil
+allopurinol
+colchicine
+methotrexate
+cyclophosphamide
+azathioprine
+cyclosporine
+tacrolimus
+mycophenolate mofetil
+acyclovir
+valacyclovir
+ganciclovir
+oseltamivir
+remdesivir
+fluconazole
+itraconazole
+ketoconazole
+amphotericin b
+voriconazole
+posaconazole
+albendazole
+mebendazole
+ivermectin
+praziquantel
+diethylcarbamazine
+vitamin c
+vitamin d
+vitamin b12
+folic acid
+iron sucrose
+ferrous sulfate
+calcium carbonate
+calcium gluconate
+magnesium sulfate
+zinc sulfate
+lidocaine
+bupivacaine
+ropivacaine
+nitroglycerin
+isosorbide mononitrate
+isosorbide dinitrate
+digoxin
+amiodarone
+adenosine
+atropine
+epinephrine
+norepinephrine
+dopamine
+dobutamine
+oxytocin
+misoprostol
+methylergometrine
+lactulose
+bisacodyl
+senna
+polyethylene glycol
+tamsulosin
+finasteride
+dutasteride
+sildenafil
+tadalafil
+timolol
+latanoprost
+brimonidine
+glipizide
+repaglinide
+nateglinide
+acarbose
+miglitol
+voglibose
+alogliptin
+dutogliptin
+anagliptin
+ipragliflozin
+ertugliflozin
+sotagliflozin
+benazepril
+quinapril
+fosinopril
+trandolapril
+captopril
+azilsartan
+candesartan
+eprosartan
+aliskiren
+methyldopa
+clonidine
+guanfacine
+moxonidine
+nicardipine
+felodipine
+isradipine
+lacidipine
+nimodipine
+nisoldipine
+doxazosin
+prazosin
+terazosin
+alfuzosin
+propranolol extended release
+metoprolol succinate
+nadolol
+pindolol
+acebutolol
+labetalol
+sotalol
+torsemide
+bumetanide
+ethacrynic acid
+amiloride
+triamterene
+colesevelam
+cholestyramine
+ezetimibe
+icosapent ethyl
+niacin
+clofibrate
+dipyridamole
+cilostazol
+abciximab
+eptifibatide
+tirofiban
+fondaparinux
+argatroban
+bivalirudin
+desirudin
+betahistine
+meclizine
+prochlorperazine
+aprepitant
+fosaprepitant
+palonosetron
+scopolamine
+simethicone
+sucralfate
+misoprostol
+bismuth subsalicylate
+bismuth subcitrate
+mesalamine
+sulfasalazine
+balsalazide
+olsalazine
+loperamide
+racecadotril
+diphenoxylate
+cholestyramine resin
+pancrelipase
+pancreatin
+ursodeoxycholic acid
+obeticholic acid
+lactitol
+prucalopride
+linaclotide
+lubiprostone
+plecanatide
+tenecteplase
+alteplase
+streptokinase
+urokinase
+tranexamic acid
+aminocaproic acid
+protamine sulfate
+hydroxychloroquine
+chloroquine
+quinine
+artemether
+lumefantrine
+artesunate
+primaquine
+tafenoquine
+pyrimethamine
+sulfadiazine
+sulfamethoxazole
+trimethoprim
+cotrimoxazole
+nitrofurantoin
+fosfomycin
+fidaxomicin
+rifaximin
+delamanid
+bedaquiline
+pretomanid
+capreomycin
+kanamycin
+amikacin
+gentamicin
+tobramycin
+neomycin
+streptomycin
+colistin
+polymyxin b
+bacitracin
+mupirocin
+fusidic acid
+retapamulin
+daptomycin
+telavancin
+dalbavancin
+oritavancin
+tedizolid
+chloramphenicol
+rifabutin
+rifapentine
+ethionamide
+cycloserine
+para aminosalicylic acid
+clotrimazole
+econazole
+miconazole
+nystatin
+terbinafine
+griseofulvin
+caspofungin
+micafungin
+anidulafungin
+isavuconazole
+flucytosine
+ribavirin
+sofosbuvir
+ledipasvir
+velpatasvir
+daclatasvir
+glecaprevir
+pibrentasvir
+tenofovir
+emtricitabine
+lamivudine
+zidovudine
+abacavir
+efavirenz
+nevirapine
+lopinavir
+ritonavir
+darunavir
+atazanavir
+raltegravir
+dolutegravir
+cabotegravir
+maraviroc
+enfuvirtide
+palivizumab
+omalizumab
+mepolizumab
+benralizumab
+dupilumab
+omalizumab injection
+cyclophosphamide injection
+methotrexate injection
+vincristine
+vinblastine
+paclitaxel
+docetaxel
+cisplatin
+carboplatin
+oxaliplatin
+doxorubicin
+daunorubicin
+bleomycin
+etoposide
+topotecan
+irinotecan
+imatinib
+dasatinib
+nilotinib
+erlotinib
+gefitinib
+sorafenib
+sunitinib
+lenvatinib
+regorafenib
+bevacizumab
+rituximab
+trastuzumab
+pertuzumab
+nivolumab
+pembrolizumab
+ipilimumab
+atezolizumab
+durvalumab
+avelumab
+filgrastim
+pegfilgrastim
+epoetin alfa
+darbepoetin alfa
+romiplostim
+eltrombopag
+thalidomide
+lenalidomide
+pomalidomide
+zoledronic acid
+pamidronate
+alendronate
+risedronate
+ibandronate
+denosumab
+calcitonin
+teriparatide
+abaloparatide
+raloxifene
+tamoxifen
+anastrozole
+letrozole
+exemestane
+leuprolide
+goserelin
+triptorelin
+bicalutamide
+enzalutamide
+abiraterone
+finasteride topical
+dutasteride capsule
+oxybutynin
+tolterodine
+solifenacin
+darifenacin
+mirabegron
+desmopressin
+phenazopyridine
+potassium citrate
+sodium bicarbonate
+acetazolamide
+mannitol
+glycerol
+pilocarpine
+acetylcholine
+carbachol
+tropicamide
+cyclopentolate
+phenylephrine ophthalmic
+ketorolac ophthalmic
+nepafenac
+bromfenac
+olopatadine
+azelastine
+ketotifen
+sodium cromoglycate
+nedocromil
+montelukast sodium
+levosalbutamol
+indacaterol
+vilanterol
+umeclidinium
+glycopyrronium
+aclidinium
+tiotropium
+ciclesonide
+mometasone
+ciclesonide inhaler
+beclomethasone inhaler
+budesonide inhaler
+fluticasone inhaler
+ketamine
+propofol
+thiopental
+etomidate
+midazolam
+dexmedetomidine
+vecuronium
+rocuronium
+succinylcholine
+atracurium
+cisatracurium
+neostigmine
+glycopyrrolate
+sugammadex
+naloxone
+flumazenil
+dantrolene
+baclofen
+tizanidine
+cyclobenzaprine
+carisoprodol
+gabapentin
+pregabalin
+carbamazepine
+oxcarbazepine
+valproate
+lamotrigine
+topiramate
+levetiracetam
+phenytoin
+phenobarbital
+primidone
+ethosuximide
+lacosamide
+zonisamide
+rufinamide
+brivaracetam
+perampanel
+memantine
+donepezil
+rivastigmine
+galantamine
+selegiline
+rasagiline
+entacapone
+tolcapone
+amantadine
+ropinirole
+pramipexole
+rotigotine
+benztropine
+trihexyphenidyl
+chlorpropamide
+tolbutamide
+tolazamide
+glyburide
+saxagliptin
+evogliptin
+trelagliptin
+imeglimin
+colchicine probenecid
+probenecid
+benzbromarone
+febuxostat
+pegloticase
+sulfinpyrazone
+indapamide
+metolazone
+hydralazine
+minoxidil
+diazoxide
+nitroprusside
+clevidipine
+fenoldopam
+methysergide
+ergotamine
+sumatriptan
+rizatriptan
+zolmitriptan
+naratriptan
+eletriptan
+frovatriptan
+ubrogepant
+rimegepant
+lasmiditan
+butalbital
+caffeine
+ergotamine caffeine
+valproic acid
+divalproex
+ethotoin
+mephenytoin
+vigabatrin
+tiagabine
+felbamate
+gabapentin enacarbil
+pregabalin extended release
+amantadine hydrochloride
+benserazide
+levodopa
+levodopa carbidopa
+carbidopa
+carbidopa entacapone
+opicapone
+istradefylline
+pitolisant
+modafinil
+armodafinil
+solriamfetol
+suvorexant
+lemborexant
+ramelteon
+tasimelteon
+buspirone
+hydroxyzine pamoate
+clomipramine
+desipramine
+doxepin
+maprotiline
+trazodone
+nefazodone
+mirtazapine
+bupropion
+vilazodone
+vortioxetine
+agomelatine
+milnacipran
+levomilnacipran
+lithium carbonate
+lithium citrate
+asenapine
+lurasidone
+ziprasidone
+paliperidone
+iloperidone
+brexpiprazole
+cariprazine
+lumateperone
+thiothixene
+fluphenazine
+perphenazine
+chlorpromazine
+thioridazine
+loxapine
+molindone
+pimozide
+valbenazine
+deutetrabenazine
+tetrabenazine
+amantadine sulfate
+trihexyphenidyl hydrochloride
+diphenhydramine hydrochloride
+benztropine mesylate
+rivastigmine patch
+galantamine hydrobromide
+memantine hydrochloride
+donepezil hydrochloride
+prasugrel hydrochloride
+ticlopidine
+dipyridamole extended release
+vorapaxar
+edoxaban
+betrixaban
+phenprocoumon
+acenocoumarol
+sulodexide
+cilnidipine
+barnidipine
+lercanidipine
+manidipine
+efonidipine
+azelnidipine
+benidipine
+nilvadipine
+pranidipine
+clemastine
+brompheniramine
+triprolidine
+cyproheptadine
+ketotifen fumarate
+rupatadine
+bilastine
+mizolastine
+ebastine
+levocabastine
+azelastine nasal
+mometasone nasal
+fluticasone furoate
+triamcinolone nasal
+budesonide nasal
+ciclesonide nasal
+oxymetazoline
+xylometazoline
+phenylephrine nasal
+pseudoephedrine
+ephedrine
+guaifenesin
+dextromethorphan
+benzonatate
+noscapine
+ambroxol
+bromhexine
+acetylcysteine
+carbocisteine
+erdosteine
+theobromine
+diprophylline
+oxtriphylline
+acebrophylline
+roflumilast
+zileuton
+omalizumab injection
+reslizumab
+tezepelumab
+dupilumab injection
+omalizumab subcutaneous
+calcitriol
+alfacalcidol
+paricalcitol
+doxercalciferol
+ergocalciferol
+cholecalciferol
+menatetrenone
+phytonadione
+vitamin b1 thiamine
+vitamin b2 riboflavin
+vitamin b6 pyridoxine
+vitamin b7 biotin
+vitamin b3 niacinamide
+vitamin b5 pantothenic acid
+vitamin b9 folate
+cyanocobalamin
+hydroxocobalamin
+mecobalamin
+ferrous fumarate
+ferrous gluconate
+ferric carboxymaltose
+iron dextran
+iron polymaltose
+zinc acetate
+zinc gluconate
+selenium sulfide
+selenium yeast
+potassium chloride
+potassium iodide
+sodium chloride
+sodium citrate
+sodium bicarbonate injection
+sodium valproate
+sodium nitroprusside
+magnesium oxide
+magnesium hydroxide
+magnesium citrate
+aluminium hydroxide
+aluminium magnesium hydroxide
+magaldrate
+sucralfate suspension
+alginate sodium
+sodium alginate
+ranolazine
+ivabradine
+nicorandil
+trimetazidine
+perhexiline
+molsidomine
+dronedarone
+disopyramide
+procainamide
+flecainide
+propafenone
+mexiletine
+quinidine
+bretylium
+adenosine triphosphate
+digoxin immune fab
+lidocaine patch
+capsaicin cream
+menthol topical
+diclofenac gel
+ketoprofen gel
+piroxicam gel
+mupirocin ointment
+bacitracin ointment
+neomycin ointment
+fusidic acid cream
+silver sulfadiazine
+mafenide acetate
+nitrofurazone
+povidone iodine
+chlorhexidine
+benzalkonium chloride
+hydrogen peroxide
+ethanol topical
+isopropyl alcohol
+salicylic acid topical
+tretinoin
+isotretinoin
+adapalene
+tazarotene
+clindamycin topical
+erythromycin topical
+benzoyl peroxide
+azelaic acid
+hydroquinone
+kojic acid
+minoxidil topical
+finasteride topical
+dutasteride topical
+ketoconazole shampoo
+ciclopirox
+selenium sulfide shampoo
+coal tar
+calcipotriol
+betamethasone topical
+clobetasol
+mometasone cream
+fluocinonide
+triamcinolone cream
+hydrocortisone cream
+lidocaine topical
+pramoxine
+diphenhydramine topical
+doxepin cream
+capsaicin topical
+imiquimod
+podophyllotoxin
+cidofovir topical
+acyclovir cream
+penciclovir
+docosanol
+brimonidine gel
+oxymetazoline topical
+pilocarpine ophthalmic
+timolol ophthalmic
+betaxolol ophthalmic
+dorzolamide
+brinzolamide
+latanoprost ophthalmic
+travoprost
+bimatoprost
+tafluprost
+netarsudil
+riparsudil
+cyclosporine ophthalmic
+lifitegrast
+loteprednol
+prednisolone ophthalmic
+fluorometholone
+ketorolac eye drops
+diclofenac eye drops
+nepafenac eye drops
+bromfenac eye drops
+gatifloxacin eye drops
+moxifloxacin eye drops
+tobramycin eye drops
+gentamicin eye drops
+chloramphenicol eye drops
+sulfacetamide eye drops
