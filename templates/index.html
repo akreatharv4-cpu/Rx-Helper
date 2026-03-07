@@ -27,10 +27,9 @@
 <a href="#upload">Upload Prescription</a>
 <a href="#manual">Manual Entry</a>
 <a href="#analysis">Analysis</a>
-<a href="#reports">Reports</a>
 </nav>
 
-<!-- Upload Section -->
+<!-- ================= UPLOAD SECTION ================= -->
 
 <section class="container" id="upload">
 
@@ -44,23 +43,57 @@
 
 <br><br>
 
+<img id="preview" style="max-width:300px;display:none;margin-bottom:10px">
+
+<br>
+
 <button type="submit">Analyze Prescription</button>
 
 </form>
 
-<h3>Analysis Result</h3>
+</section>
 
-<pre id="resultBox">Upload a prescription to see analysis...</pre>
+<!-- ================= ANALYSIS RESULT ================= -->
+
+<section class="container" id="analysis">
+
+<h2>Detected Medicines</h2>
+
+<table id="medicineTable">
+
+<thead>
+<tr>
+<th>Medicine</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<h3>Prescription Safety Score</h3>
+
+<div class="scoreContainer">
+<div id="scoreBar"></div>
+</div>
+
+<p id="scoreValue"></p>
+
+<h3>Drug Interaction Alerts</h3>
+
+<div id="alerts">
+<p>No alerts</p>
+</div>
 
 </section>
 
-<!-- Manual Entry -->
+<!-- ================= MANUAL ENTRY ================= -->
 
 <section class="container" id="manual">
 
 <h2>Manual Prescription Entry</h2>
 
-<form>
+<form id="manualForm">
 
 <label>Patient Name</label> <input type="text" placeholder="Enter patient name">
 
@@ -78,9 +111,9 @@
 
 </section>
 
-<!-- WHO Indicators -->
+<!-- ================= WHO INDICATORS ================= -->
 
-<section class="container" id="analysis">
+<section class="container">
 
 <h2>WHO Prescribing Indicators</h2>
 
@@ -96,19 +129,7 @@
 
 </section>
 
-<!-- Alerts -->
-
-<section class="container">
-
-<h2>Prescription Error Detection</h2>
-
-<div id="alerts">
-<p>No errors detected</p>
-</div>
-
-</section>
-
-<!-- Visualization -->
+<!-- ================= VISUALIZATION ================= -->
 
 <section class="container">
 
@@ -126,6 +147,29 @@
 </footer>
 
 <script>
+
+document.getElementById("prescriptionImage").addEventListener("change",function(){
+
+let file=this.files[0]
+
+if(file){
+
+let reader=new FileReader()
+
+reader.onload=function(e){
+
+let preview=document.getElementById("preview")
+
+preview.src=e.target.result
+preview.style.display="block"
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+})
 
 document.getElementById("uploadForm").addEventListener("submit", async function(e){
 
@@ -149,10 +193,71 @@ body:formData
 
 const data=await response.json()
 
-document.getElementById("resultBox").innerText=
-JSON.stringify(data,null,2)
+displayResults(data)
 
 })
+
+function displayResults(data){
+
+// medicines table
+let tableBody=document.querySelector("#medicineTable tbody")
+tableBody.innerHTML=""
+
+if(data.detected_medicines){
+
+data.detected_medicines.forEach(m=>{
+
+tableBody.innerHTML+=`
+<tr>
+<td>${m}</td>
+</tr>
+`
+
+})
+
+}
+
+// interactions
+let alerts=document.getElementById("alerts")
+alerts.innerHTML=""
+
+if(data.interactions && data.interactions.length>0){
+
+data.interactions.forEach(i=>{
+
+alerts.innerHTML+=`
+<div class="alert danger">
+<b>${i.severity} interaction</b><br>
+${i.msg}
+</div>
+`
+
+})
+
+}else{
+
+alerts.innerHTML="<div class='alert success'>No interactions detected</div>"
+
+}
+
+// safety score
+if(data.safety_score){
+
+let score=data.safety_score
+
+document.getElementById("scoreValue").innerText="Safety Score: "+score+"/100"
+
+let bar=document.getElementById("scoreBar")
+
+bar.style.width=score+"%"
+
+if(score>80) bar.style.background="green"
+else if(score>60) bar.style.background="orange"
+else bar.style.background="red"
+
+}
+
+}
 
 </script>
 
