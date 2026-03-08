@@ -3,4 +3,4 @@ services:
     name: rx-helper
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn main:app -k uvicorn.workers.UvicornWorker
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker app:app
