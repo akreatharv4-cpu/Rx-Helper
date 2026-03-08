@@ -1,40 +1,13 @@
-// ================= FILE STORAGE =================
+let uploadedFile=null
+let analysisData=null
 
-let uploadedFile = null
-
-
-// ================= DRAG DROP =================
-
-const dropArea = document.getElementById("dropArea")
-
-if(dropArea){
-
-dropArea.addEventListener("dragover", e=>{
-e.preventDefault()
-})
-
-dropArea.addEventListener("drop", e=>{
-
-e.preventDefault()
-
-uploadedFile = e.dataTransfer.files[0]
-
-previewImage(uploadedFile)
-
-})
-
-}
-
-
-// ================= FILE INPUT =================
-
-const fileInput = document.getElementById("fileInput")
+const fileInput=document.getElementById("fileInput")
 
 if(fileInput){
 
-fileInput.addEventListener("change", function(){
+fileInput.addEventListener("change",function(){
 
-uploadedFile = this.files[0]
+uploadedFile=this.files[0]
 
 previewImage(uploadedFile)
 
@@ -42,19 +15,17 @@ previewImage(uploadedFile)
 
 }
 
-
-// ================= IMAGE PREVIEW =================
-
 function previewImage(file){
 
-let reader = new FileReader()
+let reader=new FileReader()
 
-reader.onload = function(e){
+reader.onload=function(e){
 
-let preview = document.getElementById("preview")
+let preview=document.getElementById("preview")
 
-preview.src = e.target.result
-preview.style.display = "block"
+preview.src=e.target.result
+
+preview.style.display="block"
 
 }
 
@@ -62,199 +33,148 @@ reader.readAsDataURL(file)
 
 }
 
-
-// ================= ANALYZE PRESCRIPTION =================
-
 async function analyzePrescription(){
 
 if(!uploadedFile){
 
 alert("Upload prescription image first")
+
 return
 
 }
 
-let formData = new FormData()
+let formData=new FormData()
 
-formData.append("file", uploadedFile)
+formData.append("file",uploadedFile)
 
-try{
+let response=await fetch("/upload",{
 
-let response = await fetch("/upload",{
 method:"POST",
+
 body:formData
+
 })
 
-let data = await response.json()
+let data=await response.json()
+
+analysisData=data
 
 displayResults(data)
 
-}catch(err){
-
-alert("Server error. Check backend.")
-
 }
-
-}
-
-
-// ================= DISPLAY RESULTS =================
 
 function displayResults(data){
 
-// ---------------- DASHBOARD ----------------
-
-if(data.dashboard){
-
-document.getElementById("totalMedicines").innerText =
+document.getElementById("totalMedicines").innerText=
 data.dashboard.total_medicines
 
-document.getElementById("antibioticCount").innerText =
+document.getElementById("antibioticCount").innerText=
 data.dashboard.antibiotic_count
 
-document.getElementById("injectionCount").innerText =
+document.getElementById("injectionCount").innerText=
 data.dashboard.injection_count
 
-document.getElementById("polypharmacy").innerText =
-data.dashboard.polypharmacy ? "YES ⚠" : "No"
+document.getElementById("polypharmacy").innerText=
+data.dashboard.polypharmacy ? "YES ⚠":"No"
 
-}
+let table=document.querySelector("#medicineTable tbody")
 
+table.innerHTML=""
 
-// ---------------- MEDICINE TABLE ----------------
+if(data.medicines_detected.length===0){
 
-let tableBody = document.querySelector("#medicineTable tbody")
+table.innerHTML="<tr><td colspan='2'>No medicines detected</td></tr>"
 
-tableBody.innerHTML = ""
-
-if(data.medicines_detected){
+}else{
 
 data.medicines_detected.forEach(m=>{
 
-let cls = data.drug_classification[m] || "Unknown"
+let cls=data.drug_classification[m] || "Unknown"
 
-tableBody.innerHTML += `
+table.innerHTML+=`
+
 <tr>
+
 <td>${m}</td>
+
 <td>${cls}</td>
+
 </tr>
+
 `
 
 })
 
 }
 
+let alerts=document.getElementById("alerts")
 
-// ---------------- INTERACTIONS ----------------
+alerts.innerHTML=""
 
-let alertsBox = document.getElementById("alerts")
-
-alertsBox.innerHTML = ""
-
-if(data.drug_interactions && data.drug_interactions.length > 0){
+if(data.drug_interactions.length>0){
 
 data.drug_interactions.forEach(i=>{
 
-let color="orange"
+alerts.innerHTML+=`
 
-if(i.severity==="high") color="red"
-if(i.severity==="low") color="green"
+<div class="alert">
 
-alertsBox.innerHTML += `
-<div class="alert" style="border-left:6px solid ${color}">
-<b>${i.severity.toUpperCase()} interaction</b><br>
+<b>${i.severity} interaction</b><br>
+
 ${i.drug1} + ${i.drug2}<br>
+
 ${i.message}
+
 </div>
+
 `
 
 })
 
 }else{
 
-alertsBox.innerHTML =
-"<div class='alert success'>No drug interactions detected</div>"
+alerts.innerHTML="<div>No interactions detected</div>"
 
 }
 
-
-// ---------------- CHART ----------------
-
-createChart(data)
-
 }
-
-
-// ================= MEDICINE CHART =================
-
-let chart
-
-function createChart(data){
-
-let ctx = document.getElementById("medicineChart")
-
-if(!ctx) return
-
-if(chart) chart.destroy()
-
-chart = new Chart(ctx,{
-
-type:"bar",
-
-data:{
-labels:data.medicines_detected,
-datasets:[{
-label:"Detected Medicines",
-data:data.medicines_detected.map(()=>1)
-}]
-},
-
-options:{
-responsive:true,
-plugins:{
-legend:{display:false}
-}
-}
-
-})
-
-}
-
-
-// ================= DOWNLOAD PDF REPORT =================
 
 async function downloadReport(){
 
-try{
+if(!analysisData){
 
-const response = await fetch("/report",{
+alert("Analyze prescription first")
+
+return
+
+}
+
+const response=await fetch("/report",{
 
 method:"POST",
+
 headers:{"Content-Type":"application/json"},
 
 body:JSON.stringify({
-medicines:[],
-interactions:[]
-})
+
+medicines:analysisData.medicines_detected,
+
+interactions:analysisData.drug_interactions
 
 })
 
-const blob = await response.blob()
+})
 
-const url = window.URL.createObjectURL(blob)
+const blob=await response.blob()
 
-const a = document.createElement("a")
+const url=window.URL.createObjectURL(blob)
 
-a.href = url
-a.download = "clinical_report.pdf"
+const a=document.createElement("a")
+
+a.href=url
+
+a.download="clinical_report.pdf"
 
 a.click()
 
-}catch(err){
-
-alert("Report generation failed")
-
 }
-
-}
-
