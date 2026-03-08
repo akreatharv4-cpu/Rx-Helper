@@ -1,25 +1,18 @@
-import pytesseract
+import easyocr
 from PIL import Image
 from pdf2image import convert_from_bytes
 import io
 import cv2
 import numpy as np
 
-# ---------------- TESSERACT PATH (Render Linux) ----------------
+# ---------------- EASY OCR INITIALIZE ----------------
 
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-
-
-# ---------------- OCR CONFIG ----------------
-
-OCR_CONFIG = r"--oem 3 --psm 6"
-
+reader = easyocr.Reader(['en'], gpu=False)
 
 # ---------------- IMAGE PREPROCESS ----------------
 
 def preprocess_image(img: Image.Image):
 
-    # convert PIL → numpy
     img = np.array(img)
 
     # ensure correct color format
@@ -35,7 +28,7 @@ def preprocess_image(img: Image.Image):
     # remove noise
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    # adaptive threshold (good for handwriting)
+    # adaptive threshold
     thresh = cv2.adaptiveThreshold(
         blur,
         255,
@@ -45,13 +38,9 @@ def preprocess_image(img: Image.Image):
         2
     )
 
-    # sharpen
-    kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-    sharpen = cv2.filter2D(thresh, -1, kernel)
-
-    # resize for OCR accuracy
+    # resize for better OCR accuracy
     resized = cv2.resize(
-        sharpen,
+        thresh,
         None,
         fx=1.5,
         fy=1.5,
@@ -72,10 +61,9 @@ def ocr_image_bytes(image_bytes: bytes) -> str:
 
     processed = preprocess_image(img)
 
-    text = pytesseract.image_to_string(
-        processed,
-        config=OCR_CONFIG
-    )
+    results = reader.readtext(processed)
+
+    text = " ".join([res[1] for res in results])
 
     return text.strip()
 
@@ -100,10 +88,9 @@ def ocr_pdf_bytes(pdf_bytes: bytes, max_pages: int = 3) -> str:
 
         processed = preprocess_image(page)
 
-        text = pytesseract.image_to_string(
-            processed,
-            config=OCR_CONFIG
-        )
+        results = reader.readtext(processed)
+
+        text = " ".join([res[1] for res in results])
 
         out.append(text)
 
