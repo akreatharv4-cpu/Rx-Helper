@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pandas
 numpy
 pytesseract
@@ -9,3 +9,5 @@ rapidfuzz
 python-multipart
 gunicorn
 pdf2image
+jinja2
+reportlab
