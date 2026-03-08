@@ -11,3 +11,4 @@ gunicorn
 python-dotenv
 python-multipart
 reportlab
+jinja2
