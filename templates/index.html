@@ -1,157 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Rx Helper AI – Prescription Analyzer</title>
-
-<link rel="stylesheet" href="/static/style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-</head>
-
-
-<body>
-
-<header>
-
-<h1>Rx Helper AI</h1>
-<p>AI Clinical Prescription Decision Support System</p>
-
-</header>
-
-
-<!-- ================= UPLOAD SECTION ================= -->
-
-<section class="container">
-
-<h2>Upload Prescription</h2>
-
-<div class="upload-box" id="dropArea">
-
-<p>📷 Drag & Drop Prescription Image</p>
-
-<input type="file" id="fileInput" hidden>
-
-<button onclick="document.getElementById('fileInput').click()">Choose File</button>
-
-</div>
-
-<img id="preview" style="max-width:300px;display:none;margin-top:10px">
-
-<br>
-
-<button onclick="analyzePrescription()">Analyze Prescription</button>
-
-</section>
-
-
-<!-- ================= DASHBOARD ================= -->
-
-<section class="container">
-
-<h2>Clinical Dashboard</h2>
-
-<div class="dashboard">
-
-<div class="card">
-<h3>Total Medicines</h3>
-<p id="totalMedicines">0</p>
-</div>
-
-<div class="card">
-<h3>Antibiotics</h3>
-<p id="antibioticCount">0</p>
-</div>
-
-<div class="card">
-<h3>Injections</h3>
-<p id="injectionCount">0</p>
-</div>
-
-<div class="card">
-<h3>Polypharmacy</h3>
-<p id="polypharmacy">No</p>
-</div>
-
-</div>
-
-</section>
-
-
-<!-- ================= MEDICINES ================= -->
-
-<section class="container">
-
-<h2>Detected Medicines</h2>
-
-<table id="medicineTable">
-
-<thead>
-<tr>
-<th>Medicine</th>
-<th>Class</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-
-</table>
-
-</section>
-
-
-<!-- ================= INTERACTIONS ================= -->
-
-<section class="container">
-
-<h2>Drug Interaction Alerts</h2>
-
-<div id="alerts">
-
-<p>No alerts</p>
-
-</div>
-
-</section>
-
-
-<!-- ================= CHART ================= -->
-
-<section class="container">
-
-<h2>Medicine Analytics</h2>
-
-<canvas id="medicineChart"></canvas>
-
-</section>
-
-
-<!-- ================= PDF REPORT ================= -->
-
-<section class="container">
-
-<h2>Generate Clinical Report</h2>
-
-<button onclick="downloadReport()">Download PDF Report</button>
-
-</section>
-
-
-<footer>
-
-<p>Rx Helper AI – Clinical Decision Support System</p>
-
-</footer>
-
-
 <script>
 
 let uploadedFile=null
+let analysisData=null
 
 const dropArea=document.getElementById("dropArea")
 
@@ -187,7 +37,6 @@ reader.onload=function(e){
 let preview=document.getElementById("preview")
 
 preview.src=e.target.result
-
 preview.style.display="block"
 
 }
@@ -202,7 +51,6 @@ async function analyzePrescription(){
 if(!uploadedFile){
 
 alert("Upload prescription first")
-
 return
 
 }
@@ -211,16 +59,24 @@ let formData=new FormData()
 
 formData.append("file",uploadedFile)
 
-const response=await fetch("/upload",{
+try{
 
+const response=await fetch("/upload",{
 method:"POST",
 body:formData
-
 })
 
 const data=await response.json()
 
+analysisData=data
+
 displayResults(data)
+
+}catch(e){
+
+alert("Analysis failed")
+
+}
 
 }
 
@@ -228,23 +84,39 @@ displayResults(data)
 function displayResults(data){
 
 // dashboard
-document.getElementById("totalMedicines").innerText=data.dashboard.total_medicines
 
-document.getElementById("antibioticCount").innerText=data.dashboard.antibiotic_count
+document.getElementById("totalMedicines").innerText=
+data.dashboard?.total_medicines || 0
 
-document.getElementById("injectionCount").innerText=data.dashboard.injection_count
+document.getElementById("antibioticCount").innerText=
+data.dashboard?.antibiotic_count || 0
 
-document.getElementById("polypharmacy").innerText=data.dashboard.polypharmacy ? "YES ⚠" : "No"
+document.getElementById("injectionCount").innerText=
+data.dashboard?.injection_count || 0
+
+document.getElementById("polypharmacy").innerText=
+data.dashboard?.polypharmacy ? "YES ⚠":"No"
 
 
 // medicine table
+
 let tableBody=document.querySelector("#medicineTable tbody")
 
 tableBody.innerHTML=""
 
+if(!data.medicines_detected || data.medicines_detected.length===0){
+
+tableBody.innerHTML="<tr><td colspan='2'>No medicines detected</td></tr>"
+
+}else{
+
 data.medicines_detected.forEach(m=>{
 
-let cls=data.drug_classification[m]
+let cls="Unknown"
+
+if(data.drug_classification){
+cls=data.drug_classification[m] || "Unknown"
+}
 
 tableBody.innerHTML+=`
 <tr>
@@ -255,33 +127,30 @@ tableBody.innerHTML+=`
 
 })
 
+}
+
 
 // interactions
+
 let alerts=document.getElementById("alerts")
 
 alerts.innerHTML=""
 
-if(data.drug_interactions.length>0){
+if(data.drug_interactions && data.drug_interactions.length>0){
 
 data.drug_interactions.forEach(i=>{
 
 alerts.innerHTML+=`
 <div class="alert">
-
 <b>${i.severity}</b><br>
-
 ${i.drug1} + ${i.drug2}<br>
-
 ${i.message}
-
 </div>
 `
 
 })
 
-}
-
-else{
+}else{
 
 alerts.innerHTML="<p>No interactions detected</p>"
 
@@ -289,6 +158,7 @@ alerts.innerHTML="<p>No interactions detected</p>"
 
 
 // chart
+
 createChart(data)
 
 }
@@ -301,10 +171,10 @@ new Chart(document.getElementById("medicineChart"),{
 type:"bar",
 
 data:{
-labels:data.medicines_detected,
+labels:data.medicines_detected || [],
 datasets:[{
 label:"Detected Medicines",
-data:data.medicines_detected.map(()=>1)
+data:(data.medicines_detected || []).map(()=>1)
 }]
 }
 
@@ -315,13 +185,26 @@ data:data.medicines_detected.map(()=>1)
 
 async function downloadReport(){
 
+if(!analysisData){
+
+alert("Analyze prescription first")
+return
+
+}
+
 const response=await fetch("/report",{
+
 method:"POST",
+
 headers:{"Content-Type":"application/json"},
+
 body:JSON.stringify({
-medicines:[],
-interactions:[]
+
+medicines:analysisData.medicines_detected,
+interactions:analysisData.drug_interactions
+
 })
+
 })
 
 const blob=await response.blob()
@@ -331,7 +214,6 @@ const url=window.URL.createObjectURL(blob)
 const a=document.createElement("a")
 
 a.href=url
-
 a.download="clinical_report.pdf"
 
 a.click()
@@ -339,13 +221,3 @@ a.click()
 }
 
 </script>
-
-</body>
-
-</html>
-
-
-
-
-
-
