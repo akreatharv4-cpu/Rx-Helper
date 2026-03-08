@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: rx-helper
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker main:app
