@@ -20,17 +20,15 @@ ESSENTIAL_MEDICINES = {
 # ---------------- DEMO DRUG INTERACTIONS ----------------
 
 DDI_RULES = {
-    tuple(sorted(("warfarin","metronidazole"))):(
-        "major","Increased bleeding risk; monitor INR."
-    ),
 
-    tuple(sorted(("aceclofenac","warfarin"))):(
-        "major","Bleeding risk increases with NSAIDs."
-    ),
+    tuple(sorted(("warfarin","metronidazole"))):
+        ("major","Increased bleeding risk; monitor INR."),
 
-    tuple(sorted(("ibuprofen","warfarin"))):(
-        "major","Bleeding risk increases with NSAIDs."
-    ),
+    tuple(sorted(("aceclofenac","warfarin"))):
+        ("major","Bleeding risk increases with NSAIDs."),
+
+    tuple(sorted(("ibuprofen","warfarin"))):
+        ("major","Bleeding risk increases with NSAIDs."),
 }
 
 
@@ -57,7 +55,8 @@ def classify_meds(extracted: Dict[str, Any]) -> Dict[str, Any]:
         m["normalized_name"] = name
 
 
-        # antibiotic detection
+        # ---------- antibiotic detection ----------
+
         m["is_antibiotic"] = bool(
             name and any(
                 fuzz.partial_ratio(name, ab) >= 90
@@ -66,21 +65,26 @@ def classify_meds(extracted: Dict[str, Any]) -> Dict[str, Any]:
         )
 
 
-        # injection detection
+        # ---------- injection detection ----------
+
+        raw_line = (m.get("raw_line") or "").lower()
+
         m["is_injection"] = bool(
             (m.get("route") in {"IV","IM","SC"})
             or (m.get("form") in INJECTION_HINT_FORMS)
-            or ("inj" in (m.get("raw_line") or "").lower())
+            or ("inj" in raw_line)
         )
 
 
-        # generic name detection
+        # ---------- generic name detection ----------
+
         m["is_generic"] = bool(
             m.get("drug_name") and m["drug_name"].islower()
         )
 
 
-        # essential medicines list detection
+        # ---------- essential medicines list ----------
+
         m["is_eml"] = bool(
             name and any(
                 fuzz.partial_ratio(name, eml) >= 90
@@ -113,6 +117,7 @@ def apply_flags(extracted: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     if len(meds) == 0:
         missing.append("medications")
+
 
     for i, m in enumerate(meds):
 
