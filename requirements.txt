@@ -3,11 +3,13 @@ uvicorn
 gunicorn
 pandas
 numpy
-pytesseract
 Pillow
 opencv-python-headless
-python-multipart
 rapidfuzz
+python-multipart
+jinja2
 reportlab
 pdf2image
-jinja2
+easyocr
+torch
+torchvision
