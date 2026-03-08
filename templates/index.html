@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -7,55 +6,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AI Prescription Error Analysis System</title>
+<title>Rx Helper AI – Prescription Analyzer</title>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="/static/style.css">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
+
 <body>
 
 <header>
-<h1>AI Mediated Prescription Error Analysis</h1>
-<p>Clinical Decision Support System using WHO Prescribing Indicators</p>
+
+<h1>Rx Helper AI</h1>
+<p>AI Clinical Prescription Decision Support System</p>
+
 </header>
 
-<nav>
-<a href="/">Home</a>
-<a href="#upload">Upload Prescription</a>
-<a href="#manual">Manual Entry</a>
-<a href="#analysis">Analysis</a>
-</nav>
 
 <!-- ================= UPLOAD SECTION ================= -->
 
-<section class="container" id="upload">
+<section class="container">
 
 <h2>Upload Prescription</h2>
 
-<form id="uploadForm" enctype="multipart/form-data">
+<div class="upload-box" id="dropArea">
 
-<label>Upload Prescription Image</label>
+<p>📷 Drag & Drop Prescription Image</p>
 
-<input type="file" id="prescriptionImage" name="file" accept="image/*" required>
+<input type="file" id="fileInput" hidden>
 
-<br><br>
+<button onclick="document.getElementById('fileInput').click()">Choose File</button>
 
-<img id="preview" style="max-width:300px;display:none;margin-bottom:10px">
+</div>
+
+<img id="preview" style="max-width:300px;display:none;margin-top:10px">
 
 <br>
 
-<button type="submit">Analyze Prescription</button>
-
-</form>
+<button onclick="analyzePrescription()">Analyze Prescription</button>
 
 </section>
 
-<!-- ================= ANALYSIS RESULT ================= -->
 
-<section class="container" id="analysis">
+<!-- ================= DASHBOARD ================= -->
+
+<section class="container">
+
+<h2>Clinical Dashboard</h2>
+
+<div class="dashboard">
+
+<div class="card">
+<h3>Total Medicines</h3>
+<p id="totalMedicines">0</p>
+</div>
+
+<div class="card">
+<h3>Antibiotics</h3>
+<p id="antibioticCount">0</p>
+</div>
+
+<div class="card">
+<h3>Injections</h3>
+<p id="injectionCount">0</p>
+</div>
+
+<div class="card">
+<h3>Polypharmacy</h3>
+<p id="polypharmacy">No</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= MEDICINES ================= -->
+
+<section class="container">
 
 <h2>Detected Medicines</h2>
 
@@ -64,6 +94,7 @@
 <thead>
 <tr>
 <th>Medicine</th>
+<th>Class</th>
 </tr>
 </thead>
 
@@ -71,88 +102,83 @@
 
 </table>
 
-<h3>Prescription Safety Score</h3>
+</section>
 
-<div class="scoreContainer">
-<div id="scoreBar"></div>
-</div>
 
-<p id="scoreValue"></p>
+<!-- ================= INTERACTIONS ================= -->
 
-<h3>Drug Interaction Alerts</h3>
+<section class="container">
+
+<h2>Drug Interaction Alerts</h2>
 
 <div id="alerts">
+
 <p>No alerts</p>
+
 </div>
 
 </section>
 
-<!-- ================= MANUAL ENTRY ================= -->
 
-<section class="container" id="manual">
-
-<h2>Manual Prescription Entry</h2>
-
-<form id="manualForm">
-
-<label>Patient Name</label> <input type="text" placeholder="Enter patient name">
-
-<label>Drug Name</label> <input type="text" placeholder="Enter drug name">
-
-<label>Dose</label> <input type="text" placeholder="Dose">
-
-<label>Frequency</label> <input type="text" placeholder="Frequency">
-
-<label>Duration</label> <input type="text" placeholder="Duration">
-
-<button type="submit">Submit Prescription</button>
-
-</form>
-
-</section>
-
-<!-- ================= WHO INDICATORS ================= -->
+<!-- ================= CHART ================= -->
 
 <section class="container">
 
-<h2>WHO Prescribing Indicators</h2>
+<h2>Medicine Analytics</h2>
 
-<ul>
-
-<li>Average drugs per prescription: <span id="avgDrugs">0</span></li>
-<li>Antibiotic prescriptions: <span id="antibioticPercent">0%</span></li>
-<li>Injection prescriptions: <span id="injectionPercent">0%</span></li>
-<li>Generic drugs: <span id="genericPercent">0%</span></li>
-<li>Essential Drug List drugs: <span id="edlPercent">0%</span></li>
-
-</ul>
+<canvas id="medicineChart"></canvas>
 
 </section>
 
-<!-- ================= VISUALIZATION ================= -->
+
+<!-- ================= PDF REPORT ================= -->
 
 <section class="container">
 
-<h2>Data Visualization</h2>
+<h2>Generate Clinical Report</h2>
 
-<canvas id="chart"></canvas>
+<button onclick="downloadReport()">Download PDF Report</button>
 
 </section>
+
 
 <footer>
 
-<p>AI Based Clinical Prescription Analysis System</p>
-<p>Developed for Medication Safety & Rational Drug Use</p>
+<p>Rx Helper AI – Clinical Decision Support System</p>
 
 </footer>
 
+
 <script>
 
-document.getElementById("prescriptionImage").addEventListener("change",function(){
+let uploadedFile=null
 
-let file=this.files[0]
+const dropArea=document.getElementById("dropArea")
 
-if(file){
+dropArea.addEventListener("dragover",e=>{
+e.preventDefault()
+})
+
+dropArea.addEventListener("drop",e=>{
+
+e.preventDefault()
+
+uploadedFile=e.dataTransfer.files[0]
+
+previewImage(uploadedFile)
+
+})
+
+document.getElementById("fileInput").addEventListener("change",function(){
+
+uploadedFile=this.files[0]
+
+previewImage(uploadedFile)
+
+})
+
+
+function previewImage(file){
 
 let reader=new FileReader()
 
@@ -161,6 +187,7 @@ reader.onload=function(e){
 let preview=document.getElementById("preview")
 
 preview.src=e.target.result
+
 preview.style.display="block"
 
 }
@@ -169,97 +196,156 @@ reader.readAsDataURL(file)
 
 }
 
-})
 
-document.getElementById("uploadForm").addEventListener("submit", async function(e){
+async function analyzePrescription(){
 
-e.preventDefault()
+if(!uploadedFile){
 
-const fileInput=document.getElementById("prescriptionImage")
+alert("Upload prescription first")
 
-if(fileInput.files.length===0){
-alert("Please upload a prescription image")
 return
+
 }
 
-const formData=new FormData()
+let formData=new FormData()
 
-formData.append("file",fileInput.files[0])
+formData.append("file",uploadedFile)
 
 const response=await fetch("/upload",{
+
 method:"POST",
 body:formData
+
 })
 
 const data=await response.json()
 
 displayResults(data)
 
-})
+}
+
 
 function displayResults(data){
 
-// medicines table
+// dashboard
+document.getElementById("totalMedicines").innerText=data.dashboard.total_medicines
+
+document.getElementById("antibioticCount").innerText=data.dashboard.antibiotic_count
+
+document.getElementById("injectionCount").innerText=data.dashboard.injection_count
+
+document.getElementById("polypharmacy").innerText=data.dashboard.polypharmacy ? "YES ⚠" : "No"
+
+
+// medicine table
 let tableBody=document.querySelector("#medicineTable tbody")
+
 tableBody.innerHTML=""
 
-if(data.detected_medicines){
+data.medicines_detected.forEach(m=>{
 
-data.detected_medicines.forEach(m=>{
+let cls=data.drug_classification[m]
 
 tableBody.innerHTML+=`
 <tr>
 <td>${m}</td>
+<td>${cls}</td>
 </tr>
 `
 
 })
 
-}
 
 // interactions
 let alerts=document.getElementById("alerts")
+
 alerts.innerHTML=""
 
-if(data.interactions && data.interactions.length>0){
+if(data.drug_interactions.length>0){
 
-data.interactions.forEach(i=>{
+data.drug_interactions.forEach(i=>{
 
 alerts.innerHTML+=`
-<div class="alert danger">
-<b>${i.severity} interaction</b><br>
-${i.msg}
+<div class="alert">
+
+<b>${i.severity}</b><br>
+
+${i.drug1} + ${i.drug2}<br>
+
+${i.message}
+
 </div>
 `
 
 })
 
-}else{
+}
 
-alerts.innerHTML="<div class='alert success'>No interactions detected</div>"
+else{
+
+alerts.innerHTML="<p>No interactions detected</p>"
 
 }
 
-// safety score
-if(data.safety_score){
 
-let score=data.safety_score
-
-document.getElementById("scoreValue").innerText="Safety Score: "+score+"/100"
-
-let bar=document.getElementById("scoreBar")
-
-bar.style.width=score+"%"
-
-if(score>80) bar.style.background="green"
-else if(score>60) bar.style.background="orange"
-else bar.style.background="red"
+// chart
+createChart(data)
 
 }
+
+
+function createChart(data){
+
+new Chart(document.getElementById("medicineChart"),{
+
+type:"bar",
+
+data:{
+labels:data.medicines_detected,
+datasets:[{
+label:"Detected Medicines",
+data:data.medicines_detected.map(()=>1)
+}]
+}
+
+})
+
+}
+
+
+async function downloadReport(){
+
+const response=await fetch("/report",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+medicines:[],
+interactions:[]
+})
+})
+
+const blob=await response.blob()
+
+const url=window.URL.createObjectURL(blob)
+
+const a=document.createElement("a")
+
+a.href=url
+
+a.download="clinical_report.pdf"
+
+a.click()
 
 }
 
 </script>
 
 </body>
+
 </html>
+
+
+
+
+
+
