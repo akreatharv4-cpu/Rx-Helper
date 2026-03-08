@@ -1,4 +1,5 @@
-flask
+fastapi
+uvicorn
 pandas
 numpy
 pytesseract
@@ -9,3 +10,4 @@ rapidfuzz
 gunicorn
 python-dotenv
 python-multipart
+reportlab
