@@ -3,10 +3,14 @@ from typing import Any, Optional, List, Dict
 from datetime import datetime
 
 
+# ---------------- REQUEST MODEL ----------------
+
 class AnalyzeTextRequest(BaseModel):
     text: str
     filename: Optional[str] = None
 
+
+# ---------------- PRESCRIPTION OUTPUT ----------------
 
 class PrescriptionOut(BaseModel):
     id: int
@@ -17,6 +21,8 @@ class PrescriptionOut(BaseModel):
     extracted: Dict[str, Any]
     flags: List[Dict[str, Any]]
 
+
+# ---------------- WHO PRESCRIBING METRICS ----------------
 
 class WhoMetricsOut(BaseModel):
     total_prescriptions: int
