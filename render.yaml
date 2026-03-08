@@ -6,6 +6,6 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       apt-get update
-      apt-get install -y tesseract-ocr
+      apt-get install -y tesseract-ocr poppler-utils
 
     startCommand: gunicorn main:app -k uvicorn.workers.UvicornWorker
