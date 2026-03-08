@@ -16,7 +16,11 @@ from reportlab.pdfgen import canvas
 from rapidfuzz import process
 from pdf2image import convert_from_bytes
 
-app = FastAPI()
+app = FastAPI()from fastapi.responses import FileResponse
+
+@app.get("/")
+def home():
+    return FileResponse("index.html")
 
 # ---------------- STATIC + TEMPLATES ----------------
 
