@@ -10,6 +10,7 @@ import pandas as pd
 import io
 import cv2
 import numpy as np
+import re
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from rapidfuzz import process
@@ -31,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- TESSERACT PATH ----------------
+# ---------------- TESSERACT ----------------
 
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
@@ -50,43 +51,13 @@ try:
 except:
     medicine_list = []
 
-# ---------------- DRUG CLASSES ----------------
-
-drug_classes = {
-    "amoxicillin":"Antibiotic",
-    "azithromycin":"Antibiotic",
-    "ceftriaxone":"Antibiotic",
-    "ciprofloxacin":"Antibiotic",
-    "doxycycline":"Antibiotic",
-    "paracetamol":"Analgesic",
-    "ibuprofen":"NSAID",
-    "metformin":"Antidiabetic",
-    "insulin":"Antidiabetic",
-    "atenolol":"Antihypertensive",
-    "pantoprazole":"Antacid"
-}
-
-antibiotics = [
-    "amoxicillin","azithromycin","ciprofloxacin",
-    "ceftriaxone","doxycycline","levofloxacin"
-]
-
-injections = [
-    "ceftriaxone","insulin","diclofenac",
-    "heparin","vitamin b12"
-]
-
 # ---------------- HOME ----------------
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
-
-# ---------------- OCR PREPROCESS ----------------
+# ---------------- IMAGE PREPROCESS ----------------
 
 def preprocess_image(image):
 
@@ -96,10 +67,29 @@ def preprocess_image(image):
 
     blur = cv2.GaussianBlur(gray,(5,5),0)
 
-    thresh = cv2.threshold(blur,150,255,cv2.THRESH_BINARY)[1]
+    thresh = cv2.adaptiveThreshold(
+        blur,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11,
+        2
+    )
 
-    return thresh
+    kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+    sharpen = cv2.filter2D(thresh,-1,kernel)
 
+    return sharpen
+
+# ---------------- TEXT CLEAN ----------------
+
+def clean_text(text):
+
+    text = text.lower()
+
+    text = re.sub(r'[^a-z0-9\s]', ' ', text)
+
+    return text
 
 # ---------------- MEDICINE MATCH ----------------
 
@@ -111,17 +101,47 @@ def find_medicines(text):
 
     for word in words:
 
-        match = process.extractOne(word, medicine_list)
+        if len(word) < 4:
+            continue
+
+        match = process.extractOne(
+            word,
+            medicine_list,
+            score_cutoff=80
+        )
 
         if match:
-
-            name, score, _ = match
-
-            if score > 85:
-                detected.append(name)
+            detected.append(match[0])
 
     return list(set(detected))
 
+# ---------------- DOSE DETECTION ----------------
+
+def extract_doses(text):
+
+    pattern = r'\d+\s*(mg|mcg|g|ml|units)'
+    return re.findall(pattern, text)
+
+# ---------------- FREQUENCY DETECTION ----------------
+
+frequency_map = {
+    "od":"once daily",
+    "bd":"twice daily",
+    "tds":"three times daily",
+    "qid":"four times daily",
+    "sos":"as needed"
+}
+
+def detect_frequency(text):
+
+    results = []
+
+    for key,val in frequency_map.items():
+
+        if key in text:
+            results.append(val)
+
+    return results
 
 # ---------------- PRESCRIPTION ANALYSIS ----------------
 
@@ -136,27 +156,22 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
     processed = preprocess_image(image)
 
-    text = pytesseract.image_to_string(processed).lower()
+    config = r'--oem 3 --psm 6'
+
+    text = pytesseract.image_to_string(
+        processed,
+        config=config
+    )
+
+    text = clean_text(text)
 
     detected_medicines = find_medicines(text)
 
-    detected_antibiotics = [
-        m for m in detected_medicines if m in antibiotics
-    ]
+    doses = extract_doses(text)
 
-    detected_injections = [
-        m for m in detected_medicines if m in injections
-    ]
+    frequencies = detect_frequency(text)
 
-    # ---------------- CLASSIFICATION ----------------
-
-    classifications = {}
-
-    for med in detected_medicines:
-
-        classifications[med] = drug_classes.get(med,"Unknown")
-
-    # ---------------- DRUG INTERACTIONS ----------------
+    # ---------------- INTERACTIONS ----------------
 
     interaction_results = []
 
@@ -187,17 +202,14 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
     dashboard = {
         "total_medicines": len(detected_medicines),
-        "antibiotic_count": len(detected_antibiotics),
-        "injection_count": len(detected_injections),
         "polypharmacy": polypharmacy
     }
 
     return {
         "extracted_text": text,
         "medicines_detected": detected_medicines,
-        "antibiotics_detected": detected_antibiotics,
-        "injections_detected": detected_injections,
-        "drug_classification": classifications,
+        "doses_detected": doses,
+        "frequency_detected": frequencies,
         "drug_interactions": interaction_results,
         "dashboard": dashboard
     }
@@ -212,6 +224,7 @@ def generate_report(data: dict):
     c = canvas.Canvas(file_name, pagesize=letter)
 
     y = 750
+
     c.drawString(50, y, "Rx Helper Clinical Report")
 
     y -= 40
@@ -220,6 +233,7 @@ def generate_report(data: dict):
     interactions = data.get("interactions", [])
 
     c.drawString(50, y, "Medicines Detected:")
+
     y -= 20
 
     for m in medicines:
@@ -229,6 +243,7 @@ def generate_report(data: dict):
     y -= 20
 
     c.drawString(50, y, "Drug Interactions:")
+
     y -= 20
 
     for i in interactions:
@@ -236,11 +251,9 @@ def generate_report(data: dict):
         txt = f"{i['drug1']} + {i['drug2']} : {i['severity']} risk"
 
         c.drawString(60, y, txt)
+
         y -= 20
 
     c.save()
 
     return FileResponse(file_name)
-
-
-
