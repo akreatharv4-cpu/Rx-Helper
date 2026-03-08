@@ -11,16 +11,14 @@ import io
 import cv2
 import numpy as np
 import re
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from rapidfuzz import process
 from pdf2image import convert_from_bytes
 
-app = FastAPI()from fastapi.responses import FileResponse
 
-@app.get("/")
-def home():
-    return FileResponse("index.html")
+app = FastAPI()
 
 # ---------------- STATIC + TEMPLATES ----------------
 
@@ -37,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- TESSERACT ----------------
+# ---------------- TESSERACT PATH ----------------
 
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
@@ -47,13 +45,13 @@ try:
     interactions = pd.read_csv("drug_interactions.csv")
     interactions["drug1"] = interactions["drug1"].str.lower()
     interactions["drug2"] = interactions["drug2"].str.lower()
-except:
-    interactions = pd.DataFrame(columns=["drug1","drug2","severity","message"])
+except Exception:
+    interactions = pd.DataFrame(columns=["drug1", "drug2", "severity", "message"])
 
 try:
     medicines = pd.read_csv("medicines.csv")
     medicine_list = medicines["medicine_name"].str.lower().tolist()
-except:
+except Exception:
     medicine_list = []
 
 # ---------------- HOME ----------------
@@ -68,12 +66,9 @@ def preprocess_image(image):
 
     img = np.array(image)
 
-    # FIX: PIL images are RGB
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    blur = cv2.GaussianBlur(gray,(5,5),0)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
 
     thresh = cv2.adaptiveThreshold(
         blur,
@@ -85,7 +80,7 @@ def preprocess_image(image):
     )
 
     kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-    sharpen = cv2.filter2D(thresh,-1,kernel)
+    sharpen = cv2.filter2D(thresh, -1, kernel)
 
     return sharpen
 
@@ -126,7 +121,7 @@ def find_medicines(text):
 
 def extract_doses(text):
 
-    pattern = r'\d+\s?(mg|mcg|g|ml|units)'
+    pattern = r'\d+\s?(?:mg|mcg|g|ml|units)'
     matches = re.findall(pattern, text)
 
     return matches
@@ -134,18 +129,18 @@ def extract_doses(text):
 # ---------------- FREQUENCY DETECTION ----------------
 
 frequency_map = {
-    "od":"once daily",
-    "bd":"twice daily",
-    "tds":"three times daily",
-    "qid":"four times daily",
-    "sos":"as needed"
+    "od": "once daily",
+    "bd": "twice daily",
+    "tds": "three times daily",
+    "qid": "four times daily",
+    "sos": "as needed"
 }
 
 def detect_frequency(text):
 
     results = []
 
-    for key,val in frequency_map.items():
+    for key, val in frequency_map.items():
 
         if key in text:
             results.append(val)
@@ -156,7 +151,7 @@ def detect_frequency(text):
 
 def run_ocr(image):
 
-    image = image.resize((1500,1500))
+    image = image.resize((1500, 1500))
 
     processed = preprocess_image(image)
 
@@ -189,7 +184,6 @@ async def analyze_prescription(file: UploadFile = File(...)):
         for page in pages[:3]:
 
             text = run_ocr(page)
-
             full_text += text + "\n"
 
     else:
@@ -212,7 +206,7 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
     for i in range(len(detected_medicines)):
 
-        for j in range(i+1, len(detected_medicines)):
+        for j in range(i + 1, len(detected_medicines)):
 
             d1 = detected_medicines[i]
             d2 = detected_medicines[j]
@@ -265,7 +259,7 @@ def generate_report(data: dict):
     y -= 40
 
     medicines = data.get("medicines", [])
-    interactions = data.get("interactions", [])
+    interactions_list = data.get("interactions", [])
 
     c.drawString(50, y, "Medicines Detected:")
 
@@ -281,7 +275,7 @@ def generate_report(data: dict):
 
     y -= 20
 
-    for i in interactions:
+    for i in interactions_list:
 
         txt = f"{i['drug1']} + {i['drug2']} : {i['severity']} risk"
 
@@ -292,3 +286,10 @@ def generate_report(data: dict):
     c.save()
 
     return FileResponse(file_name)
+
+
+
+
+
+
+ 
