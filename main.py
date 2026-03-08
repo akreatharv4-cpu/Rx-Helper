@@ -1,6 +1,9 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 import pytesseract
 from PIL import Image
 import pandas as pd
@@ -12,6 +15,12 @@ from reportlab.pdfgen import canvas
 
 
 app = FastAPI()
+
+# ---------------- STATIC + TEMPLATES ----------------
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+templates = Jinja2Templates(directory="templates")
 
 
 # ---------------- CORS ----------------
@@ -78,18 +87,21 @@ antibiotics = [
     "ceftriaxone","doxycycline","levofloxacin"
 ]
 
-
 injections = [
     "ceftriaxone","insulin","diclofenac injection",
     "heparin","vitamin b12 injection"
 ]
 
 
-# ---------------- HOME ----------------
+# ---------------- HOME PAGE ----------------
 
-@app.get("/")
-def home():
-    return {"message": "Rx Helper API Running"}
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
 
 # ---------------- PRESCRIPTION ANALYSIS ----------------
@@ -101,12 +113,9 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
     image = Image.open(io.BytesIO(contents))
 
-
-    # resize large images
     image = image.resize((1500,1500))
 
 
-    # OCR preprocessing
     img = np.array(image)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -114,7 +123,6 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
 
     words = text.split()
-
 
     detected_medicines = []
     detected_antibiotics = []
@@ -151,7 +159,6 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
     interaction_results = []
 
-
     for i in range(len(detected_medicines)):
 
         for j in range(i+1, len(detected_medicines)):
@@ -180,8 +187,6 @@ async def analyze_prescription(file: UploadFile = File(...)):
                 })
 
 
-    # ---------------- POLYPHARMACY ----------------
-
     polypharmacy = len(detected_medicines) >= 5
 
 
@@ -198,17 +203,11 @@ async def analyze_prescription(file: UploadFile = File(...)):
     return {
 
         "extracted_text": text,
-
         "medicines_detected": detected_medicines,
-
         "antibiotics_detected": detected_antibiotics,
-
         "injections_detected": detected_injections,
-
         "drug_classification": classifications,
-
         "drug_interactions": interaction_results,
-
         "dashboard": dashboard
 
     }
@@ -236,11 +235,9 @@ def generate_report(data: dict):
     c.drawString(50, y, "Medicines Detected:")
     y -= 20
 
-
     for m in medicines:
 
         c.drawString(60, y, m)
-
         y -= 20
 
 
@@ -255,10 +252,13 @@ def generate_report(data: dict):
         text = f"{i['drug1']} + {i['drug2']} : {i['severity']} risk"
 
         c.drawString(60, y, text)
-
         y -= 20
 
 
     c.save()
 
     return FileResponse(file_name)
+
+
+    
+   
