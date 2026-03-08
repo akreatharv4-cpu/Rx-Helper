@@ -9,3 +9,4 @@ rapidfuzz
 python-multipart
 reportlab
 jinja2
+pdf2image
