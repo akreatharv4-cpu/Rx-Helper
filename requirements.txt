@@ -7,6 +7,5 @@ Pillow
 opencv-python-headless
 rapidfuzz
 python-multipart
-reportlab
-jinja2
+gunicorn
 pdf2image
