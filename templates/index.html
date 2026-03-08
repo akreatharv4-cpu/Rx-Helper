@@ -1,43 +1,62 @@
 <script>
 
-let uploadedFile=null
-let analysisData=null
+let uploadedFile = null
+let analysisData = null
+let medicineChart = null
 
-const dropArea=document.getElementById("dropArea")
+const dropArea = document.getElementById("dropArea")
 
-dropArea.addEventListener("dragover",e=>{
+if (dropArea) {
+
+dropArea.addEventListener("dragover", e => {
 e.preventDefault()
 })
 
-dropArea.addEventListener("drop",e=>{
+dropArea.addEventListener("drop", e => {
 
 e.preventDefault()
 
-uploadedFile=e.dataTransfer.files[0]
+uploadedFile = e.dataTransfer.files[0]
 
 previewImage(uploadedFile)
 
 })
 
-document.getElementById("fileInput").addEventListener("change",function(){
+}
 
-uploadedFile=this.files[0]
+const fileInput = document.getElementById("fileInput")
+
+if (fileInput) {
+
+fileInput.addEventListener("change", function () {
+
+uploadedFile = this.files[0]
 
 previewImage(uploadedFile)
 
 })
 
+}
+
+
+// ---------------- IMAGE PREVIEW ----------------
 
 function previewImage(file){
 
-let reader=new FileReader()
+if(!file) return
 
-reader.onload=function(e){
+let reader = new FileReader()
 
-let preview=document.getElementById("preview")
+reader.onload = function(e){
 
-preview.src=e.target.result
-preview.style.display="block"
+let preview = document.getElementById("preview")
+
+if(preview){
+
+preview.src = e.target.result
+preview.style.display = "block"
+
+}
 
 }
 
@@ -45,6 +64,8 @@ reader.readAsDataURL(file)
 
 }
 
+
+// ---------------- ANALYZE PRESCRIPTION ----------------
 
 async function analyzePrescription(){
 
@@ -55,70 +76,76 @@ return
 
 }
 
-let formData=new FormData()
+let formData = new FormData()
 
-formData.append("file",uploadedFile)
+formData.append("file", uploadedFile)
 
 try{
 
-const response=await fetch("/upload",{
+const response = await fetch("/upload",{
 method:"POST",
 body:formData
 })
 
-const data=await response.json()
+const data = await response.json()
 
-analysisData=data
+analysisData = data
 
 displayResults(data)
 
 }catch(e){
 
 alert("Analysis failed")
+console.error(e)
 
 }
 
 }
 
+
+// ---------------- DISPLAY RESULTS ----------------
 
 function displayResults(data){
 
 // dashboard
 
-document.getElementById("totalMedicines").innerText=
+document.getElementById("totalMedicines").innerText =
 data.dashboard?.total_medicines || 0
 
-document.getElementById("antibioticCount").innerText=
+document.getElementById("antibioticCount").innerText =
 data.dashboard?.antibiotic_count || 0
 
-document.getElementById("injectionCount").innerText=
+document.getElementById("injectionCount").innerText =
 data.dashboard?.injection_count || 0
 
-document.getElementById("polypharmacy").innerText=
-data.dashboard?.polypharmacy ? "YES ⚠":"No"
+document.getElementById("polypharmacy").innerText =
+data.dashboard?.polypharmacy ? "YES ⚠" : "No"
 
 
 // medicine table
 
-let tableBody=document.querySelector("#medicineTable tbody")
+let tableBody = document.querySelector("#medicineTable tbody")
 
-tableBody.innerHTML=""
+if(tableBody){
 
-if(!data.medicines_detected || data.medicines_detected.length===0){
+tableBody.innerHTML = ""
 
-tableBody.innerHTML="<tr><td colspan='2'>No medicines detected</td></tr>"
+if(!data.medicines_detected || data.medicines_detected.length === 0){
+
+tableBody.innerHTML =
+"<tr><td colspan='2'>No medicines detected</td></tr>"
 
 }else{
 
 data.medicines_detected.forEach(m=>{
 
-let cls="Unknown"
+let cls = "Unknown"
 
 if(data.drug_classification){
-cls=data.drug_classification[m] || "Unknown"
+cls = data.drug_classification[m] || "Unknown"
 }
 
-tableBody.innerHTML+=`
+tableBody.innerHTML += `
 <tr>
 <td>${m}</td>
 <td>${cls}</td>
@@ -129,18 +156,22 @@ tableBody.innerHTML+=`
 
 }
 
+}
+
 
 // interactions
 
-let alerts=document.getElementById("alerts")
+let alerts = document.getElementById("alerts")
 
-alerts.innerHTML=""
+if(alerts){
 
-if(data.drug_interactions && data.drug_interactions.length>0){
+alerts.innerHTML = ""
+
+if(data.drug_interactions && data.drug_interactions.length > 0){
 
 data.drug_interactions.forEach(i=>{
 
-alerts.innerHTML+=`
+alerts.innerHTML += `
 <div class="alert">
 <b>${i.severity}</b><br>
 ${i.drug1} + ${i.drug2}<br>
@@ -152,7 +183,9 @@ ${i.message}
 
 }else{
 
-alerts.innerHTML="<p>No interactions detected</p>"
+alerts.innerHTML = "<p>No interactions detected</p>"
+
+}
 
 }
 
@@ -164,24 +197,43 @@ createChart(data)
 }
 
 
+// ---------------- CHART ----------------
+
 function createChart(data){
 
-new Chart(document.getElementById("medicineChart"),{
+const ctx = document.getElementById("medicineChart")
+
+if(!ctx) return
+
+if(medicineChart){
+medicineChart.destroy()
+}
+
+medicineChart = new Chart(ctx,{
 
 type:"bar",
 
 data:{
-labels:data.medicines_detected || [],
+labels: data.medicines_detected || [],
 datasets:[{
 label:"Detected Medicines",
 data:(data.medicines_detected || []).map(()=>1)
 }]
+},
+
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+}
 }
 
 })
 
 }
 
+
+// ---------------- DOWNLOAD REPORT ----------------
 
 async function downloadReport(){
 
@@ -192,11 +244,15 @@ return
 
 }
 
-const response=await fetch("/report",{
+try{
+
+const response = await fetch("/report",{
 
 method:"POST",
 
-headers:{"Content-Type":"application/json"},
+headers:{
+"Content-Type":"application/json"
+},
 
 body:JSON.stringify({
 
@@ -207,16 +263,27 @@ interactions:analysisData.drug_interactions
 
 })
 
-const blob=await response.blob()
+const blob = await response.blob()
 
-const url=window.URL.createObjectURL(blob)
+const url = window.URL.createObjectURL(blob)
 
-const a=document.createElement("a")
+const a = document.createElement("a")
 
-a.href=url
-a.download="clinical_report.pdf"
+a.href = url
+a.download = "clinical_report.pdf"
+
+document.body.appendChild(a)
 
 a.click()
+
+a.remove()
+
+}catch(e){
+
+alert("Report download failed")
+console.error(e)
+
+}
 
 }
 
