@@ -14,6 +14,7 @@ import re
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from rapidfuzz import process
+from pdf2image import convert_from_bytes
 
 app = FastAPI()
 
@@ -63,6 +64,9 @@ def preprocess_image(image):
 
     img = np.array(image)
 
+    # FIX: PIL images are RGB
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     blur = cv2.GaussianBlur(gray,(5,5),0)
@@ -86,7 +90,6 @@ def preprocess_image(image):
 def clean_text(text):
 
     text = text.lower()
-
     text = re.sub(r'[^a-z0-9\s]', ' ', text)
 
     return text
@@ -119,8 +122,10 @@ def find_medicines(text):
 
 def extract_doses(text):
 
-    pattern = r'\d+\s*(mg|mcg|g|ml|units)'
-    return re.findall(pattern, text)
+    pattern = r'\d+\s?(mg|mcg|g|ml|units)'
+    matches = re.findall(pattern, text)
+
+    return matches
 
 # ---------------- FREQUENCY DETECTION ----------------
 
@@ -143,14 +148,9 @@ def detect_frequency(text):
 
     return results
 
-# ---------------- PRESCRIPTION ANALYSIS ----------------
+# ---------------- OCR FUNCTION ----------------
 
-@app.post("/upload")
-async def analyze_prescription(file: UploadFile = File(...)):
-
-    contents = await file.read()
-
-    image = Image.open(io.BytesIO(contents))
+def run_ocr(image):
 
     image = image.resize((1500,1500))
 
@@ -163,7 +163,38 @@ async def analyze_prescription(file: UploadFile = File(...)):
         config=config
     )
 
-    text = clean_text(text)
+    return text
+
+# ---------------- PRESCRIPTION ANALYSIS ----------------
+
+@app.post("/upload")
+async def analyze_prescription(file: UploadFile = File(...)):
+
+    contents = await file.read()
+
+    filename = file.filename.lower()
+
+    # ---------- HANDLE PDF ----------
+
+    if filename.endswith(".pdf"):
+
+        pages = convert_from_bytes(contents, dpi=300)
+
+        full_text = ""
+
+        for page in pages[:3]:
+
+            text = run_ocr(page)
+
+            full_text += text + "\n"
+
+    else:
+
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+
+        full_text = run_ocr(image)
+
+    text = clean_text(full_text)
 
     detected_medicines = find_medicines(text)
 
