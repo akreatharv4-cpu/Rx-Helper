@@ -1,7 +1,10 @@
-import pytesseract
+import easyocr
 from PIL import Image
+import numpy as np
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# ---------------- EASY OCR INITIALIZE ----------------
+
+reader = easyocr.Reader(['en'], gpu=False)
 
 medicine_list = [
     "paracetamol",
@@ -12,11 +15,22 @@ medicine_list = [
     "azithromycin"
 ]
 
-img = Image.open("prescription.jpg")
-text = pytesseract.image_to_string(img)
+# ---------------- LOAD IMAGE ----------------
+
+img = Image.open("prescription.jpg").convert("RGB")
+
+img = np.array(img)
+
+# ---------------- OCR TEXT EXTRACTION ----------------
+
+results = reader.readtext(img)
+
+text = " ".join([r[1] for r in results])
 
 print("\nExtracted Text:\n")
 print(text)
+
+# ---------------- MEDICINE DETECTION ----------------
 
 detected = []
 
