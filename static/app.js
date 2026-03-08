@@ -19,15 +19,18 @@ previewImage(uploadedFile)
 
 function previewImage(file) {
 
+if (!file) return
+
 let reader = new FileReader()
 
 reader.onload = function (e) {
 
 let preview = document.getElementById("preview")
 
+if (preview) {
 preview.src = e.target.result
-
 preview.style.display = "block"
+}
 
 }
 
@@ -42,7 +45,6 @@ async function analyzePrescription() {
 if (!uploadedFile) {
 
 alert("Upload prescription image first")
-
 return
 
 }
@@ -56,7 +58,6 @@ try {
 let response = await fetch("/upload", {
 
 method: "POST",
-
 body: formData
 
 })
@@ -70,7 +71,6 @@ displayResults(data)
 } catch (error) {
 
 alert("Analysis failed")
-
 console.error(error)
 
 }
@@ -82,18 +82,18 @@ console.error(error)
 function displayResults(data) {
 
 document.getElementById("totalMedicines").innerText =
-data.dashboard.total_medicines || 0
+data.dashboard?.total_medicines || 0
 
 document.getElementById("polypharmacy").innerText =
-data.dashboard.polypharmacy ? "YES ⚠" : "No"
+data.dashboard?.polypharmacy ? "YES ⚠" : "No"
 
-// optional values (avoid JS crash)
+// optional values
 
 document.getElementById("antibioticCount").innerText =
-data.dashboard.antibiotic_count || 0
+data.dashboard?.antibiotic_count || 0
 
 document.getElementById("injectionCount").innerText =
-data.dashboard.injection_count || 0
+data.dashboard?.injection_count || 0
 
 
 let table = document.querySelector("#medicineTable tbody")
@@ -159,16 +159,19 @@ async function downloadReport() {
 if (!analysisData) {
 
 alert("Analyze prescription first")
-
 return
 
 }
+
+try {
 
 const response = await fetch("/report", {
 
 method: "POST",
 
-headers: { "Content-Type": "application/json" },
+headers: {
+"Content-Type": "application/json"
+},
 
 body: JSON.stringify({
 
@@ -188,6 +191,16 @@ const a = document.createElement("a")
 a.href = url
 a.download = "clinical_report.pdf"
 
+document.body.appendChild(a)
 a.click()
+
+a.remove()
+
+} catch (error) {
+
+alert("Report generation failed")
+console.error(error)
+
+}
 
 }
