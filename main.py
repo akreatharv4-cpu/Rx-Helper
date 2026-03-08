@@ -5,12 +5,17 @@ import pytesseract
 from PIL import Image
 import pandas as pd
 import io
+import cv2
+import numpy as np
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
+
 app = FastAPI()
 
-# Enable CORS
+
+# ---------------- CORS ----------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,25 +24,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Tesseract path (Render)
+
+# ---------------- TESSERACT PATH ----------------
+
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
-# Load datasets
+# ---------------- LOAD DATASETS ----------------
+
 try:
     interactions = pd.read_csv("drug_interactions.csv")
+
+    interactions["drug1"] = interactions["drug1"].str.lower()
+    interactions["drug2"] = interactions["drug2"].str.lower()
+
 except:
     interactions = pd.DataFrame(columns=["drug1","drug2","severity","message"])
 
+
 try:
     medicines = pd.read_csv("medicines.csv")
+
     medicine_list = medicines["medicine_name"].str.lower().tolist()
+
 except:
     medicine_list = []
 
 
-# Drug classifications
+# ---------------- DRUG CLASSIFICATION ----------------
+
 drug_classes = {
+
     "amoxicillin":"Antibiotic",
     "azithromycin":"Antibiotic",
     "ceftriaxone":"Antibiotic",
@@ -61,31 +78,48 @@ antibiotics = [
     "ceftriaxone","doxycycline","levofloxacin"
 ]
 
+
 injections = [
     "ceftriaxone","insulin","diclofenac injection",
     "heparin","vitamin b12 injection"
 ]
 
 
+# ---------------- HOME ----------------
+
 @app.get("/")
 def home():
     return {"message": "Rx Helper API Running"}
 
 
+# ---------------- PRESCRIPTION ANALYSIS ----------------
+
 @app.post("/upload")
 async def analyze_prescription(file: UploadFile = File(...)):
 
     contents = await file.read()
+
     image = Image.open(io.BytesIO(contents))
 
-    # OCR extraction
-    text = pytesseract.image_to_string(image).lower()
+
+    # resize large images
+    image = image.resize((1500,1500))
+
+
+    # OCR preprocessing
+    img = np.array(image)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    text = pytesseract.image_to_string(gray).lower()
+
 
     words = text.split()
+
 
     detected_medicines = []
     detected_antibiotics = []
     detected_injections = []
+
 
     for word in words:
 
@@ -104,54 +138,60 @@ async def analyze_prescription(file: UploadFile = File(...)):
     detected_injections = list(set(detected_injections))
 
 
-    # Drug classification
+    # ---------------- CLASSIFICATION ----------------
+
     classifications = {}
 
     for med in detected_medicines:
-        if med in drug_classes:
-            classifications[med] = drug_classes[med]
-        else:
-            classifications[med] = "Unknown"
+
+        classifications[med] = drug_classes.get(med,"Unknown")
 
 
-    # Drug interaction checking
+    # ---------------- DRUG INTERACTIONS ----------------
+
     interaction_results = []
 
+
     for i in range(len(detected_medicines)):
+
         for j in range(i+1, len(detected_medicines)):
 
             d1 = detected_medicines[i]
             d2 = detected_medicines[j]
+
 
             match = interactions[
                 ((interactions["drug1"] == d1) & (interactions["drug2"] == d2)) |
                 ((interactions["drug1"] == d2) & (interactions["drug2"] == d1))
             ]
 
+
             if not match.empty:
 
-                severity = match.iloc[0]["severity"]
+                row = match.iloc[0]
 
                 interaction_results.append({
+
                     "drug1": d1,
                     "drug2": d2,
-                    "severity": severity,
-                    "message": match.iloc[0]["message"]
+                    "severity": row["severity"],
+                    "message": row["message"]
+
                 })
 
 
-    # Polypharmacy detection
-    polypharmacy = False
-    if len(detected_medicines) >= 5:
-        polypharmacy = True
+    # ---------------- POLYPHARMACY ----------------
+
+    polypharmacy = len(detected_medicines) >= 5
 
 
-    # Dashboard data
     dashboard = {
+
         "total_medicines": len(detected_medicines),
         "antibiotic_count": len(detected_antibiotics),
         "injection_count": len(detected_injections),
         "polypharmacy": polypharmacy
+
     }
 
 
@@ -170,11 +210,12 @@ async def analyze_prescription(file: UploadFile = File(...)):
         "drug_interactions": interaction_results,
 
         "dashboard": dashboard
+
     }
 
 
+# ---------------- PDF REPORT ----------------
 
-# PDF report generator
 @app.post("/report")
 def generate_report(data: dict):
 
@@ -191,22 +232,32 @@ def generate_report(data: dict):
     medicines = data.get("medicines", [])
     interactions = data.get("interactions", [])
 
+
     c.drawString(50, y, "Medicines Detected:")
     y -= 20
 
+
     for m in medicines:
+
         c.drawString(60, y, m)
+
         y -= 20
+
 
     y -= 20
 
     c.drawString(50, y, "Drug Interactions:")
     y -= 20
 
+
     for i in interactions:
+
         text = f"{i['drug1']} + {i['drug2']} : {i['severity']} risk"
+
         c.drawString(60, y, text)
+
         y -= 20
+
 
     c.save()
 
