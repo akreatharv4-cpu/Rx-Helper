@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-import pytesseract
+import easyocr
 from PIL import Image
 import pandas as pd
 import io
@@ -20,6 +20,10 @@ from pdf2image import convert_from_bytes
 
 app = FastAPI()
 
+# ---------------- EASY OCR INITIALIZE ----------------
+
+reader = easyocr.Reader(['en'], gpu=False)
+
 # ---------------- STATIC + TEMPLATES ----------------
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -34,10 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ---------------- TESSERACT PATH ----------------
-
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 # ---------------- LOAD DATASETS ----------------
 
@@ -79,10 +79,7 @@ def preprocess_image(image):
         2
     )
 
-    kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-    sharpen = cv2.filter2D(thresh, -1, kernel)
-
-    return sharpen
+    return thresh
 
 # ---------------- TEXT CLEAN ----------------
 
@@ -153,14 +150,13 @@ def run_ocr(image):
 
     image = image.resize((1500, 1500))
 
+    img = np.array(image)
+
     processed = preprocess_image(image)
 
-    config = r'--oem 3 --psm 6'
+    results = reader.readtext(processed)
 
-    text = pytesseract.image_to_string(
-        processed,
-        config=config
-    )
+    text = " ".join([res[1] for res in results])
 
     return text
 
@@ -286,10 +282,5 @@ def generate_report(data: dict):
     c.save()
 
     return FileResponse(file_name)
-
-
-
-
-
-
- 
+   
+   
