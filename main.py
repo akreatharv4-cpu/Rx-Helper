@@ -1,13 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import pytesseract
 from PIL import Image
 import pandas as pd
 import io
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 app = FastAPI()
 
-# Allow frontend access
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,8 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Tesseract path for Render
+# Tesseract path (Render)
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 
 # Load datasets
 try:
@@ -30,6 +34,27 @@ try:
     medicine_list = medicines["medicine_name"].str.lower().tolist()
 except:
     medicine_list = []
+
+
+# Drug classifications
+drug_classes = {
+    "amoxicillin":"Antibiotic",
+    "azithromycin":"Antibiotic",
+    "ceftriaxone":"Antibiotic",
+    "ciprofloxacin":"Antibiotic",
+    "doxycycline":"Antibiotic",
+
+    "paracetamol":"Analgesic",
+    "ibuprofen":"NSAID",
+
+    "metformin":"Antidiabetic",
+    "insulin":"Antidiabetic",
+
+    "atenolol":"Antihypertensive",
+
+    "pantoprazole":"Antacid"
+}
+
 
 antibiotics = [
     "amoxicillin","azithromycin","ciprofloxacin",
@@ -63,6 +88,7 @@ async def analyze_prescription(file: UploadFile = File(...)):
     detected_injections = []
 
     for word in words:
+
         if word in medicine_list:
             detected_medicines.append(word)
 
@@ -71,6 +97,22 @@ async def analyze_prescription(file: UploadFile = File(...)):
 
         if word in injections:
             detected_injections.append(word)
+
+
+    detected_medicines = list(set(detected_medicines))
+    detected_antibiotics = list(set(detected_antibiotics))
+    detected_injections = list(set(detected_injections))
+
+
+    # Drug classification
+    classifications = {}
+
+    for med in detected_medicines:
+        if med in drug_classes:
+            classifications[med] = drug_classes[med]
+        else:
+            classifications[med] = "Unknown"
+
 
     # Drug interaction checking
     interaction_results = []
@@ -87,17 +129,85 @@ async def analyze_prescription(file: UploadFile = File(...)):
             ]
 
             if not match.empty:
+
+                severity = match.iloc[0]["severity"]
+
                 interaction_results.append({
                     "drug1": d1,
                     "drug2": d2,
-                    "severity": match.iloc[0]["severity"],
+                    "severity": severity,
                     "message": match.iloc[0]["message"]
                 })
 
-    return {
-        "extracted_text": text,
-        "medicines_detected": list(set(detected_medicines)),
-        "antibiotics_detected": list(set(detected_antibiotics)),
-        "injections_detected": list(set(detected_injections)),
-        "drug_interactions": interaction_results
+
+    # Polypharmacy detection
+    polypharmacy = False
+    if len(detected_medicines) >= 5:
+        polypharmacy = True
+
+
+    # Dashboard data
+    dashboard = {
+        "total_medicines": len(detected_medicines),
+        "antibiotic_count": len(detected_antibiotics),
+        "injection_count": len(detected_injections),
+        "polypharmacy": polypharmacy
     }
+
+
+    return {
+
+        "extracted_text": text,
+
+        "medicines_detected": detected_medicines,
+
+        "antibiotics_detected": detected_antibiotics,
+
+        "injections_detected": detected_injections,
+
+        "drug_classification": classifications,
+
+        "drug_interactions": interaction_results,
+
+        "dashboard": dashboard
+    }
+
+
+
+# PDF report generator
+@app.post("/report")
+def generate_report(data: dict):
+
+    file_name = "clinical_report.pdf"
+
+    c = canvas.Canvas(file_name, pagesize=letter)
+
+    y = 750
+
+    c.drawString(50, y, "Rx Helper Clinical Report")
+
+    y -= 40
+
+    medicines = data.get("medicines", [])
+    interactions = data.get("interactions", [])
+
+    c.drawString(50, y, "Medicines Detected:")
+    y -= 20
+
+    for m in medicines:
+        c.drawString(60, y, m)
+        y -= 20
+
+    y -= 20
+
+    c.drawString(50, y, "Drug Interactions:")
+    y -= 20
+
+    for i in interactions:
+        text = f"{i['drug1']} + {i['drug2']} : {i['severity']} risk"
+        c.drawString(60, y, text)
+        y -= 20
+
+    c.save()
+
+    return FileResponse(file_name)
