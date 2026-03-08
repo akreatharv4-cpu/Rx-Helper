@@ -1,36 +1,42 @@
 import csv
-import pytesseract
+import easyocr
 from PIL import Image
+import numpy as np
 
-# Tesseract path
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# ---------------- EASY OCR INITIALIZE ----------------
 
-# Load medicines from CSV
+reader = easyocr.Reader(['en'], gpu=False)
+
+# ---------------- LOAD MEDICINES ----------------
+
 medicine_list = []
 
 with open("medicine_dataset.csv", "r", encoding="utf-8") as file:
-    reader = csv.DictReader(file)
-    for row in reader:
+    reader_csv = csv.DictReader(file)
+
+    for row in reader_csv:
         medicine_list.append(row["medicine_name"].lower())
 
 print("Total medicines loaded:", len(medicine_list))
 
 
-# -----------------------------
-# OCR TEXT EXTRACTION
-# -----------------------------
+# ---------------- OCR TEXT EXTRACTION ----------------
+
 def extract_text(image_file):
 
-    img = Image.open(image_file)
+    img = Image.open(image_file).convert("RGB")
 
-    text = pytesseract.image_to_string(img)
+    img = np.array(img)
+
+    results = reader.readtext(img)
+
+    text = " ".join([r[1] for r in results])
 
     return text
 
 
-# -----------------------------
-# MEDICINE DETECTION
-# -----------------------------
+# ---------------- MEDICINE DETECTION ----------------
+
 def detect_medicines(image_file):
 
     text = extract_text(image_file)
@@ -38,17 +44,17 @@ def detect_medicines(image_file):
     detected = []
 
     for med in medicine_list:
+
         if med in text.lower():
             detected.append(med)
 
-    detected = list(set(detected))   # remove duplicates
+    detected = list(set(detected))
 
     return detected, text
 
 
-# -----------------------------
-# OPTIONAL TEST RUN
-# -----------------------------
+# ---------------- OPTIONAL TEST RUN ----------------
+
 if __name__ == "__main__":
 
     medicines, text = detect_medicines("prescription.jpg")
