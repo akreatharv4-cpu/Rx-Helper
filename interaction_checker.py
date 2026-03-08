@@ -1,23 +1,47 @@
 import pandas as pd
 
-def check_interactions(medicine_list):
+# ---------------- LOAD INTERACTION DATABASE ----------------
 
-    interactions = pd.read_csv("drug_interactions.csv")
+try:
+    interactions_df = pd.read_csv("drug_interactions.csv")
+
+    # normalize drug names
+    interactions_df["drug1"] = interactions_df["drug1"].str.lower()
+    interactions_df["drug2"] = interactions_df["drug2"].str.lower()
+
+except Exception:
+    interactions_df = pd.DataFrame(columns=["drug1", "drug2", "severity", "message"])
+
+
+# ---------------- INTERACTION CHECK ----------------
+
+def check_interactions(medicine_list):
 
     alerts = []
 
-    for i in range(len(medicine_list)):
-        for j in range(i+1, len(medicine_list)):
+    # normalize medicine names
+    meds = [m.lower() for m in medicine_list]
 
-            drug1 = medicine_list[i]
-            drug2 = medicine_list[j]
+    for i in range(len(meds)):
+        for j in range(i + 1, len(meds)):
 
-            result = interactions[
-                ((interactions["drug1"] == drug1) & (interactions["drug2"] == drug2)) |
-                ((interactions["drug1"] == drug2) & (interactions["drug2"] == drug1))
+            drug1 = meds[i]
+            drug2 = meds[j]
+
+            result = interactions_df[
+                ((interactions_df["drug1"] == drug1) & (interactions_df["drug2"] == drug2)) |
+                ((interactions_df["drug1"] == drug2) & (interactions_df["drug2"] == drug1))
             ]
 
             if not result.empty:
-                alerts.append(result.iloc[0].to_dict())
+
+                row = result.iloc[0]
+
+                alerts.append({
+                    "drug1": drug1,
+                    "drug2": drug2,
+                    "severity": row["severity"],
+                    "message": row["message"]
+                })
 
     return alerts
