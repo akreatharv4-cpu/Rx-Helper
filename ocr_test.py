@@ -1,10 +1,48 @@
-import easyocr
+import pytesseract
 from PIL import Image
+import cv2
 import numpy as np
 
-# ---------------- EASY OCR INITIALIZE ----------------
+# ---------- IMAGE PREPROCESSING ----------
 
-reader = easyocr.Reader(['en'], gpu=False)
+def preprocess_image(image_path):
+
+    img = cv2.imread(image_path)
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Remove noise
+    blur = cv2.GaussianBlur(gray, (5,5), 0)
+
+    # Adaptive threshold
+    thresh = cv2.adaptiveThreshold(
+        blur,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11,
+        2
+    )
+
+    return thresh
+
+
+# ---------- OCR FUNCTION ----------
+
+def extract_text(image_path):
+
+    processed = preprocess_image(image_path)
+
+    # OCR configuration
+    config = "--oem 3 --psm 6"
+
+    text = pytesseract.image_to_string(processed, config=config)
+
+    return text
+
+
+# ---------- MEDICINE DETECTION ----------
 
 medicine_list = [
     "paracetamol",
@@ -15,28 +53,29 @@ medicine_list = [
     "azithromycin"
 ]
 
-# ---------------- LOAD IMAGE ----------------
+def detect_medicine(text):
 
-img = Image.open("prescription.jpg").convert("RGB")
+    detected = []
 
-img = np.array(img)
+    for med in medicine_list:
+        if med.lower() in text.lower():
+            detected.append(med)
 
-# ---------------- OCR TEXT EXTRACTION ----------------
+    return detected
 
-results = reader.readtext(img)
 
-text = " ".join([r[1] for r in results])
+# ---------- RUN TEST ----------
 
-print("\nExtracted Text:\n")
-print(text)
+if __name__ == "__main__":
 
-# ---------------- MEDICINE DETECTION ----------------
+    image_path = "prescription.jpg"
 
-detected = []
+    text = extract_text(image_path)
 
-for med in medicine_list:
-    if med.lower() in text.lower():
-        detected.append(med)
+    print("\nExtracted Text:\n")
+    print(text)
 
-print("\nDetected Medicines:")
-print(detected)
+    detected = detect_medicine(text)
+
+    print("\nDetected Medicines:\n")
+    print(detected)
