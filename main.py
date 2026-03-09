@@ -3,38 +3,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import easyocr
-from PIL import Image
 import pandas as pd
-import io
-import cv2
-import numpy as np
-import re
 import os
+import re
+from rapidfuzz import process
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from rapidfuzz import process
-from pdf2image import convert_from_bytes
+
+# Import your corrected OCR functions from ocr.py
+from ocr import ocr_image_bytes, ocr_pdf_bytes
 
 app = FastAPI()
 
-# --- HEALTH CHECK FOR RENDER ---
+# ---------------- RENDER HEALTH CHECK ----------------
+# This prevents Render from "timing out" during deployment
 @app.get("/healthz")
 async def health_check():
     return {"status": "ok"}
 
-# --- INITIALIZE EASYOCR ---
-reader = easyocr.Reader(['en'], gpu=False)
-
-# --- STATIC + TEMPLATES ---
-# Ensure directories exist to avoid errors
-if not os.path.exists("static"): os.makedirs("static")
-if not os.path.exists("templates"): os.makedirs("templates")
+# ---------------- STATIC & TEMPLATES ----------------
+# This creates the folders if they don't exist yet
+for folder in ["static", "templates"]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# --- CORS ---
+# ---------------- CORS SETTINGS ----------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,27 +39,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- LOAD DATASETS ---
+# ---------------- DATASET LOADING ----------------
 try:
     interactions = pd.read_csv("drug_interactions.csv")
     interactions["drug1"] = interactions["drug1"].str.lower()
     interactions["drug2"] = interactions["drug2"].str.lower()
-except:
+except Exception as e:
+    print(f"Interaction data load failed: {e}")
     interactions = pd.DataFrame(columns=["drug1", "drug2", "severity", "message"])
 
 try:
     medicines = pd.read_csv("medicines.csv")
     medicine_list = medicines["medicine_name"].str.lower().tolist()
-except:
+except Exception as e:
+    print(f"Medicine list load failed: {e}")
     medicine_list = []
 
-# --- OCR & ANALYSIS LOGIC (Your original code continues below) ---
-def preprocess_image(image):
-    img = np.array(image)
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-    return thresh
+# ---------------- UTILITY FUNCTIONS ----------------
 
 def clean_text(text):
     text = text.lower()
@@ -74,24 +66,15 @@ def find_medicines(text):
     detected = []
     words = text.split()
     for word in words:
-        if len(word) < 4: continue
-        match = process.extractOne(word, medicine_list, score_cutoff=80)
-        if match: detected.append(match[0])
+        if len(word) < 4:
+            continue
+        # Using a score_cutoff of 85 to be accurate
+        match = process.extractOne(word, medicine_list, score_cutoff=85)
+        if match:
+            detected.append(match[0])
     return list(set(detected))
 
-def extract_doses(text):
-    return re.findall(r'\d+\s?(?:mg|mcg|g|ml|units)', text)
-
-frequency_map = {"od": "once daily", "bd": "twice daily", "tds": "three times daily", "qid": "four times daily", "sos": "as needed"}
-
-def detect_frequency(text):
-    return [val for key, val in frequency_map.items() if key in text]
-
-def run_ocr(image):
-    image = image.resize((1500, 1500))
-    processed = preprocess_image(image)
-    results = reader.readtext(processed)
-    return " ".join([res[1] for res in results])
+# ---------------- ROUTES ----------------
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
@@ -101,44 +84,56 @@ def home(request: Request):
 async def analyze_prescription(file: UploadFile = File(...)):
     contents = await file.read()
     filename = file.filename.lower()
+
+    # Call your OCR functions from ocr.py
     if filename.endswith(".pdf"):
-        pages = convert_from_bytes(contents, dpi=300)
-        full_text = ""
-        for page in pages[:3]:
-            full_text += run_ocr(page) + "\n"
+        full_text = ocr_pdf_bytes(contents)
     else:
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        full_text = run_ocr(image)
-    
+        full_text = ocr_image_bytes(contents)
+
     text = clean_text(full_text)
-    detected_medicines = find_medicines(text)
-    
+    detected_meds = find_medicines(text)
+
+    # Analyze Interactions
     interaction_results = []
-    for i in range(len(detected_medicines)):
-        for j in range(i + 1, len(detected_medicines)):
-            d1, d2 = detected_medicines[i], detected_medicines[j]
-            match = interactions[((interactions["drug1"] == d1) & (interactions["drug2"] == d2)) | ((interactions["drug1"] == d2) & (interactions["drug2"] == d1))]
+    for i in range(len(detected_meds)):
+        for j in range(i + 1, len(detected_meds)):
+            d1, d2 = detected_meds[i], detected_meds[j]
+            match = interactions[
+                ((interactions["drug1"] == d1) & (interactions["drug2"] == d2)) |
+                ((interactions["drug1"] == d2) & (interactions["drug2"] == d1))
+            ]
             if not match.empty:
                 row = match.iloc[0]
-                interaction_results.append({"drug1": d1, "drug2": d2, "severity": row["severity"], "message": row["message"]})
+                interaction_results.append({
+                    "drug1": d1,
+                    "drug2": d2,
+                    "severity": row["severity"],
+                    "message": row["message"]
+                })
 
     return {
         "extracted_text": text,
-        "medicines_detected": detected_medicines,
-        "doses_detected": extract_doses(text),
-        "frequency_detected": detect_frequency(text),
+        "medicines_detected": detected_meds,
         "drug_interactions": interaction_results,
-        "dashboard": {"total_medicines": len(detected_medicines), "polypharmacy": len(detected_medicines) >= 5}
+        "dashboard": {
+            "total_medicines": len(detected_meds),
+            "polypharmacy": len(detected_meds) >= 5
+        }
     }
 
 @app.post("/report")
 def generate_report(data: dict):
     file_name = "clinical_report.pdf"
     c = canvas.Canvas(file_name, pagesize=letter)
-    c.drawString(50, 750, "Rx Helper Clinical Report")
+    c.drawString(50, 750, "Rx Helper - Pharmacy Clinical Report")
+    
     y = 710
+    c.drawString(50, y, "Medicines Detected:")
+    y -= 20
     for m in data.get("medicines", []):
-        c.drawString(60, y, m)
+        c.drawString(70, y, f"- {m}")
         y -= 20
+        
     c.save()
     return FileResponse(file_name)
