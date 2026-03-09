@@ -68,6 +68,19 @@ if not classes_df.empty:
     for _,row in classes_df.iterrows():
         class_lookup[row["drug"].lower()] = row["class"]
 
+# ---------------- DOSAGE FORM WORDS ----------------
+
+FORM_WORDS = [
+    "tab","tablet","tabs",
+    "cap","capsule","caps",
+    "inj","injection",
+    "syp","syrup",
+    "susp","suspension",
+    "cream","ointment",
+    "drops","drop",
+    "inhaler"
+]
+
 # ---------------- TEXT CLEANING ----------------
 
 def expand_abbreviations(text):
@@ -78,13 +91,33 @@ def expand_abbreviations(text):
     return text
 
 
+# ---------------- CLEAN OCR TEXT ----------------
+
+def clean_text(text):
+
+    text = text.lower()
+
+    tokens = text.split()
+
+    filtered = []
+
+    for t in tokens:
+        if t in FORM_WORDS:
+            continue
+        filtered.append(t)
+
+    return " ".join(filtered)
+
+
 # ---------------- MEDICINE DETECTION ----------------
 
 def detect_medicines(text:str)->List[str]:
 
     detected=set()
 
-    tokens=text.lower().split()
+    text = clean_text(text)
+
+    tokens=text.split()
 
     for token in tokens:
 
@@ -109,7 +142,15 @@ def extract_doses(text):
     matches=re.findall(r"(\w+)\s*(\d+)\s*mg",text.lower())
 
     for drug,dose in matches:
-        doses[drug]=int(dose)
+
+        match=process.extractOne(
+            drug,
+            med_names,
+            scorer=fuzz.token_set_ratio
+        )
+
+        if match and match[1]>80:
+            doses[match[0]]=int(dose)
 
     return doses
 
@@ -157,6 +198,9 @@ def check_interactions(meds):
     if interactions_df.empty:
         return alerts
 
+    interactions_df["drug1"]=interactions_df["drug1"].str.lower()
+    interactions_df["drug2"]=interactions_df["drug2"].str.lower()
+
     for i in range(len(meds)):
         for j in range(i+1,len(meds)):
 
@@ -172,11 +216,13 @@ def check_interactions(meds):
 
                 row=result.iloc[0]
 
+                severity=row.get("severity","Moderate")
+
                 alerts.append({
                     "drug1":d1,
                     "drug2":d2,
-                    "severity":row.get("severity","Moderate"),
-                    "message":row.get("description","Interaction detected")
+                    "severity":severity,
+                    "message":row.get("message","Interaction detected")
                 })
 
     return alerts
@@ -199,7 +245,7 @@ async def upload_file(file:UploadFile=File(...)):
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
 
-    # Phase 3 shorthand expansion
+    # shorthand expansion
     text=expand_abbreviations(text)
 
     medicines=detect_medicines(text)
@@ -230,5 +276,3 @@ async def index(request:Request):
         "index.html",
         {"request":request}
     )
-   
- 
