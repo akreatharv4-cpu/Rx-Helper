@@ -1,4 +1,3 @@
-# ocr.py
 """
 Advanced OCR utilities for Rx-Helper
 
@@ -35,7 +34,8 @@ if _tesseract_path:
 else:
     logger.warning("Tesseract not found in PATH")
 
-DEFAULT_CONFIG = "--oem 3 --psm 6"
+# Improved OCR config
+DEFAULT_CONFIG = "--oem 3 --psm 6 -l eng"
 
 # ---------------- LOAD ABBREVIATIONS ----------------
 
@@ -49,18 +49,45 @@ except:
 
 def clean_ocr_errors(text: str) -> str:
     """
-    Fix common OCR mistakes seen in prescriptions.
+    Fix common OCR mistakes without breaking numeric doses.
     """
 
     replacements = {
-        "0": "o",
-        "1": "l",
-        "5": "s",
-        "|": "l"
+        "|": "l",
+        "§": "s",
+        "€": "e"
     }
 
     for k, v in replacements.items():
         text = text.replace(k, v)
+
+    return text
+
+
+# ---------------- PRESCRIPTION NORMALIZATION ----------------
+
+def normalize_prescription(text: str) -> str:
+    """
+    Normalize prescription prefixes.
+    """
+
+    replacements = {
+        r"\btab\b": "",
+        r"\btablet\b": "",
+        r"\bcap\b": "",
+        r"\bcapsule\b": "",
+        r"\binj\b": "",
+        r"\binjection\b": "",
+        r"\bsyp\b": "",
+        r"\bsyrup\b": "",
+        r"\bsusp\b": "",
+        r"\bsuspension\b": "",
+        r"\bdrop\b": "",
+        r"\bdrops\b": ""
+    }
+
+    for pattern, repl in replacements.items():
+        text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
 
     return text
 
@@ -147,8 +174,8 @@ def ocr_image_bytes(
         )
 
         text = clean_ocr_errors(text)
-
         text = expand_abbreviations(text)
+        text = normalize_prescription(text)
 
         return text.strip()
 
@@ -169,13 +196,9 @@ def ocr_pdf_bytes(
 ) -> str:
 
     try:
-
         from pdf2image import convert_from_bytes
-
     except Exception as e:
-
         logger.exception("pdf2image missing: %s", e)
-
         return ""
 
     try:
@@ -213,8 +236,8 @@ def ocr_pdf_bytes(
             )
 
             page_text = clean_ocr_errors(page_text)
-
             page_text = expand_abbreviations(page_text)
+            page_text = normalize_prescription(page_text)
 
             texts.append(page_text.strip())
 
