@@ -1,6 +1,14 @@
+# backend/models/prescription.py
+
 from sqlalchemy import Column, Integer, String, DateTime, Text, JSON
 from sqlalchemy.sql import func
-from .db import Base
+from typing import Any, Dict
+
+# IMPORTANT: import Base from your database module
+# If this model lives inside the same 'backend' package use the relative import:
+from ..database import Base
+# If you place this model at top-level and import directly, use:
+# from backend.database import Base
 
 
 class Prescription(Base):
@@ -14,24 +22,22 @@ class Prescription(Base):
         index=True
     )
 
+    # original uploaded filename (optional)
     source_filename = Column(String, nullable=True)
 
-    source_type = Column(
-        String,
-        nullable=False
-    )  # image / pdf / text
+    # 'image' | 'pdf' | 'text' -- keep not nullable so we always know the source type
+    source_type = Column(String, nullable=False)
 
-    raw_text = Column(
-        Text,
-        nullable=False
-    )
+    # full OCR/raw extracted text
+    raw_text = Column(Text, nullable=False)
 
-    extracted_json = Column(
-        JSON,
-        nullable=False
-    )
+    # structured extracted data (medicines, doses, etc.)
+    # Provide a Python-side default so SQLAlchemy sets {} for new rows
+    extracted_json = Column(JSON, nullable=False, default=dict)
 
-    flags_json = Column(
-        JSON,
-        nullable=False
-    )
+    # any flags / warnings detected (polypharmacy, red-flags)
+    flags_json = Column(JSON, nullable=False, default=dict)
+
+    def __repr__(self) -> str:
+        fname = self.source_filename or ""
+        return f"<Prescription id={self.id} source_type={self.source_type!r} filename={fname!r}>"
