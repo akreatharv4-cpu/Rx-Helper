@@ -1,137 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rx-Helper | Clinical Pharmacy Assistant</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --primary: #2c3e50; --secondary: #3498db; --danger: #e74c3c; --success: #27ae60; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
-        .container { max-width: 900px; margin: 0 auto; }
-        .header { text-align: center; padding: 40px 0; background: white; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .header h1 { margin: 0; color: var(--primary); font-size: 2.5rem; }
-        .header p { color: #7f8c8d; margin-top: 10px; }
-        
-        .upload-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; border: 2px dashed var(--secondary); transition: 0.3s; }
-        .upload-card:hover { border-color: var(--primary); background: #f0f8ff; }
-        
-        #fileInput { display: none; }
-        .upload-btn { background: var(--secondary); color: white; padding: 12px 30px; border-radius: 25px; cursor: pointer; display: inline-block; font-weight: bold; transition: 0.3s; margin-top: 20px; }
-        .upload-btn:hover { background: var(--primary); transform: translateY(-2px); }
-        
-        .results-section { display: none; margin-top: 30px; }
-        .result-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        .interaction-item { border-left: 5px solid var(--danger); background: #fdf2f2; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .medicine-tag { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 5px 15px; border-radius: 15px; margin: 5px; font-weight: 500; }
-        
-        .loading { display: none; text-align: center; margin: 20px 0; }
-        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--secondary); animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Rx-Helper Clinical Dashboard</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<style>
+
+:root{
+--primary:#2c3e50;
+--secondary:#3498db;
+--danger:#e74c3c;
+--warning:#f39c12;
+--minor:#f1c40f;
+--success:#27ae60;
+--bg:#f4f7f6;
+}
+
+body{
+font-family:"Segoe UI";
+background:var(--bg);
+margin:0;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:280px 1fr;
+min-height:100vh;
+}
+
+/* sidebar */
+
+.sidebar{
+background:white;
+padding:25px;
+box-shadow:2px 0 8px rgba(0,0,0,0.05);
+}
+
+.sidebar h2{
+margin-top:0;
+}
+
+.sidebar input,select{
+width:100%;
+padding:8px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+/* main area */
+
+.main{
+padding:30px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.upload-card{
+background:white;
+padding:30px;
+border-radius:10px;
+border:2px dashed var(--secondary);
+text-align:center;
+margin-top:20px;
+}
+
+.upload-card:hover{
+background:#eef6ff;
+}
+
+button{
+background:var(--secondary);
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* cards */
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-top:20px;
+box-shadow:0 4px 6px rgba(0,0,0,0.08);
+}
+
+/* medicine cards */
+
+.drug-card{
+display:inline-block;
+background:#eef7ff;
+padding:10px 15px;
+border-radius:10px;
+margin:6px;
+}
+
+.drug-card span{
+font-size:12px;
+color:#555;
+}
+
+/* interactions */
+
+.interaction{
+padding:10px;
+margin:10px 0;
+border-left:6px solid;
+background:#fafafa;
+}
+
+.high{border-color:var(--danger)}
+.moderate{border-color:var(--warning)}
+.minor{border-color:var(--minor)}
+
+.warning{
+background:#fff3cd;
+padding:10px;
+margin-top:10px;
+border-left:5px solid var(--warning);
+}
+
+.loading{
+display:none;
+text-align:center;
+margin-top:20px;
+}
+
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-file-medical"></i> Rx-Helper</h1>
-        <p>AI-Powered Prescription Analysis & Drug Interaction Checker</p>
-    </div>
+<div class="dashboard">
 
-    <div class="upload-card" id="dropZone">
-        <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--secondary);"></i>
-        <h3>Upload Prescription</h3>
-        <p>Supports Images (JPG, PNG) and PDF files</p>
-        <label for="fileInput" class="upload-btn">Choose File</label>
-        <input type="file" id="fileInput" accept="image/*,.pdf">
-    </div>
+<!-- Sidebar -->
 
-    <div class="loading" id="loader">
-        <div class="spinner"></div>
-        <p>Analyzing prescription... Please wait.</p>
-    </div>
+<div class="sidebar">
 
-    <div class="results-section" id="resultsArea">
-        <div class="result-card">
-            <h3><i class="fas fa-capsules"></i> Detected Medicines</h3>
-            <div id="medList"></div>
-        </div>
+<h2>Patient Profile</h2>
 
-        <div class="result-card">
-            <h3><i class="fas fa-exclamation-triangle"></i> Drug Interactions</h3>
-            <div id="interactionList"></div>
-        </div>
-        
-        <div class="result-card">
-            <h3><i class="fas fa-align-left"></i> Extracted Text (Raw)</h3>
-            <p id="rawText" style="font-size: 0.9rem; color: #666; white-space: pre-wrap;"></p>
-        </div>
-    </div>
+<label>Age</label>
+<input id="age" type="number">
+
+<label>Pregnancy</label>
+<select id="pregnancy">
+<option>No</option>
+<option>Yes</option>
+</select>
+
+<label>Kidney Function</label>
+<select id="renal">
+<option>Normal</option>
+<option>Impaired</option>
+</select>
+
+</div>
+
+<!-- Main -->
+
+<div class="main">
+
+<div class="header">
+<h1><i class="fas fa-file-medical"></i> Rx-Helper</h1>
+</div>
+
+<!-- Upload -->
+
+<div class="upload-card">
+
+<h3>Upload Prescription</h3>
+
+<input type="file" id="fileInput" accept="image/*,.pdf">
+
+<br><br>
+
+<button onclick="analyze()">Analyze Prescription</button>
+
+</div>
+
+<div class="loading" id="loader">
+<i class="fas fa-spinner fa-spin"></i>
+Scanning Prescription...
+</div>
+
+<!-- Medicines -->
+
+<div class="card">
+
+<h3><i class="fas fa-capsules"></i> Medicines</h3>
+
+<div id="medList"></div>
+
+</div>
+
+<!-- Dose warnings -->
+
+<div class="card">
+
+<h3><i class="fas fa-exclamation-circle"></i> Dose Warnings</h3>
+
+<div id="doseWarnings"></div>
+
+</div>
+
+<!-- Interactions -->
+
+<div class="card">
+
+<h3><i class="fas fa-exclamation-triangle"></i> Drug Interactions</h3>
+
+<div id="interactionList"></div>
+
+</div>
+
+<!-- Raw OCR -->
+
+<div class="card">
+
+<h3>Extracted Text</h3>
+
+<pre id="rawText"></pre>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-    const fileInput = document.getElementById('fileInput');
-    const resultsArea = document.getElementById('resultsArea');
-    const loader = document.getElementById('loader');
 
-    fileInput.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+async function analyze(){
 
-        // Reset and Show Loader
-        resultsArea.style.display = 'none';
-        loader.style.display = 'block';
+const file=document.getElementById("fileInput").files[0]
 
-        const formData = new FormData();
-        formData.append('file', file);
+if(!file){
+alert("Upload prescription first")
+return
+}
 
-        try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
+document.getElementById("loader").style.display="block"
 
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const data = await response.json();
-            displayResults(data);
-        } catch (err) {
-            alert('Error analyzing file. Please try again.');
-        } finally {
-            loader.style.display = 'none';
-        }
-    };
+const formData=new FormData()
 
-    function displayResults(data) {
-        resultsArea.style.display = 'block';
-        
-        // Display Medicines
-        const medContainer = document.getElementById('medList');
-        medContainer.innerHTML = data.medicines_detected.length > 0 
-            ? data.medicines_detected.map(m => `<span class="medicine-tag">${m.toUpperCase()}</span>`).join('')
-            : '<p>No recognized medicines found.</p>';
+formData.append("file",file)
 
-        // Display Interactions
-        const intContainer = document.getElementById('interactionList');
-        if (data.drug_interactions.length > 0) {
-            intContainer.innerHTML = data.drug_interactions.map(i => `
-                <div class="interaction-item">
-                    <strong>${i.drug1.toUpperCase()} + ${i.drug2.toUpperCase()}</strong><br>
-                    <span style="color: var(--danger)">Severity: ${i.severity}</span><br>
-                    <small>${i.message}</small>
-                </div>
-            `).join('');
-        } else {
-            intContainer.innerHTML = '<p style="color: var(--success)"><i class="fas fa-check-circle"></i> No clinical interactions detected between the identified drugs.</p>';
-        }
+const res=await fetch("/upload",{
+method:"POST",
+body:formData
+})
 
-        // Display Raw Text
-        document.getElementById('rawText').innerText = data.raw_text || "No text could be read.";
-    }
+const data=await res.json()
+
+document.getElementById("loader").style.display="none"
+
+displayResults(data)
+
+}
+
+function displayResults(data){
+
+/* medicines */
+
+const meds=data.medicines_detected || []
+
+const classes=data.drug_classes || {}
+
+let html=""
+
+meds.forEach(m=>{
+html+=`
+<div class="drug-card">
+<b>${m}</b><br>
+<span>${classes[m]||"Unknown class"}</span>
+</div>
+`
+})
+
+document.getElementById("medList").innerHTML=html
+
+/* dose warnings */
+
+const warnings=data.dose_warnings || []
+
+let warnHTML=""
+
+warnings.forEach(w=>{
+warnHTML+=`
+<div class="warning">
+${w.drug} dose ${w.dose}mg exceeds limit ${w.limit}mg
+</div>
+`
+})
+
+document.getElementById("doseWarnings").innerHTML=warnHTML || "No warnings"
+
+/* interactions */
+
+const interactions=data.drug_interactions || []
+
+let intHTML=""
+
+interactions.forEach(i=>{
+
+let cls="minor"
+
+if(i.severity==="High") cls="high"
+if(i.severity==="Moderate") cls="moderate"
+
+intHTML+=`
+<div class="interaction ${cls}">
+<b>${i.drug1} + ${i.drug2}</b><br>
+Severity: ${i.severity}<br>
+${i.message}
+</div>
+`
+
+})
+
+document.getElementById("interactionList").innerHTML=intHTML || "No interactions"
+
+/* raw */
+
+document.getElementById("rawText").innerText=data.raw_text
+
+}
+
 </script>
 
 </body>
 </html>
-
- 
