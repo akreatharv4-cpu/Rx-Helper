@@ -1,9 +1,10 @@
-/* ================= SIDEBAR ================= */
+/* ================= DASHBOARD LAYOUT ================= */
 
 .dashboard-layout{
 display:grid;
 grid-template-columns:260px 1fr;
 gap:20px;
+padding:20px;
 }
 
 .sidebar{
@@ -25,27 +26,43 @@ padding:8px;
 margin-bottom:12px;
 border:1px solid #ddd;
 border-radius:6px;
+font-size:14px;
+}
+
+/* ================= MAIN AREA ================= */
+
+.main{
+padding:10px;
 }
 
 /* ================= DRUG CARDS ================= */
+
+#medList{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
 
 .drug-card{
 display:inline-block;
 background:#eef7ff;
 border-radius:10px;
 padding:10px 14px;
-margin:6px;
+margin:4px;
 box-shadow:var(--shadow-sm);
 transition:all .15s ease;
+min-width:120px;
 }
 
 .drug-card:hover{
 transform:translateY(-2px);
+background:#e4f2ff;
 }
 
 .drug-card b{
 display:block;
 font-size:14px;
+margin-bottom:2px;
 }
 
 .drug-card span{
@@ -53,7 +70,11 @@ font-size:12px;
 color:#666;
 }
 
-/* ================= DOSE WARNING ================= */
+/* ================= DOSE WARNINGS ================= */
+
+#doseWarnings{
+margin-top:10px;
+}
 
 .warning{
 background:#fff3cd;
@@ -66,12 +87,17 @@ font-size:14px;
 
 /* ================= INTERACTION SEVERITY ================= */
 
+#interactionList{
+margin-top:10px;
+}
+
 .interaction{
 padding:12px;
 margin-top:10px;
 border-radius:8px;
 background:#fafafa;
 border-left:6px solid;
+font-size:14px;
 }
 
 .interaction.high{
@@ -96,26 +122,58 @@ display:none;
 text-align:center;
 margin-top:20px;
 font-size:16px;
+color:#444;
 }
 
 .loading i{
 margin-right:8px;
+font-size:18px;
 }
 
-/* ================= MEDICINE GRID ================= */
+/* ================= RESULT CARDS ================= */
 
-#medList{
-display:flex;
-flex-wrap:wrap;
+.card{
+background:white;
+padding:18px;
+margin-top:20px;
+border-radius:var(--radius);
+box-shadow:var(--shadow-sm);
 }
 
-/* ================= DOSE WARNING LIST ================= */
-
-#doseWarnings{
-margin-top:10px;
+.card h3{
+margin-top:0;
+margin-bottom:10px;
+font-size:16px;
 }
 
-/* ================= RESPONSIVE SIDEBAR ================= */
+/* ================= RAW TEXT ================= */
+
+#rawText{
+background:#f8f8f8;
+padding:10px;
+border-radius:6px;
+max-height:200px;
+overflow:auto;
+font-size:13px;
+}
+
+/* ================= BUTTONS ================= */
+
+button{
+background:var(--primary);
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:8px;
+cursor:pointer;
+transition:all .2s ease;
+}
+
+button:hover{
+background:var(--primary-dark);
+}
+
+/* ================= RESPONSIVE ================= */
 
 @media(max-width:900px){
 
