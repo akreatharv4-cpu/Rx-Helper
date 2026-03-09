@@ -2,21 +2,23 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install Tesseract and system libraries
+# Install system dependencies for OCR
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
-    libtesseract-dev \
+    tesseract-ocr-eng \
+    poppler-utils \
     libgl1 \
     libglib2.0-0 \
-    poppler-utils \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy requirements first (faster build)
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy project files
 COPY . .
 
-EXPOSE 10000
-
-# Respect Render's $PORT environment variable (fallback 10000)
+# Render uses PORT env variable
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
