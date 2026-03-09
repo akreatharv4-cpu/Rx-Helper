@@ -4,12 +4,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import pandas as pd
+import json
+import re
 from rapidfuzz import process, fuzz
 from typing import List
 
 from ocr import ocr_image_bytes, ocr_pdf_bytes
 
-app = FastAPI(title="Rx-Helper OCR API")
+app = FastAPI(title="Rx-Helper Clinical Assistant")
 
 # ---------------- CORS ----------------
 
@@ -25,123 +27,208 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# ---------------- LOAD MEDICINE DATABASE ----------------
+# ---------------- LOAD DATABASE FILES ----------------
 
-MEDICINES_CSV = "medicines.csv"
+def load_csv(path):
+    try:
+        return pd.read_csv(path)
+    except:
+        print(f"⚠ Missing file: {path}")
+        return pd.DataFrame()
 
+
+df_meds = load_csv("medicines.csv")
+interactions_df = load_csv("drug_interactions.csv")
+dosage_df = load_csv("dosage_reference.csv")
+classes_df = load_csv("drug_classes.csv")
+
+# shorthand dictionary
 try:
-    df_meds = pd.read_csv(MEDICINES_CSV)
-
-    if "name" in df_meds.columns:
-        med_names = df_meds["name"].dropna().astype(str).str.lower().tolist()
-
-    elif "medicine" in df_meds.columns:
-        med_names = df_meds["medicine"].dropna().astype(str).str.lower().tolist()
-
-    else:
-        med_names = df_meds.iloc[:, 0].dropna().astype(str).str.lower().tolist()
-
-except Exception:
-    med_names = []
-    print("⚠ medicines.csv not found")
-
-# ---------------- LOAD INTERACTION DATABASE ----------------
-
-try:
-    interactions_df = pd.read_csv("drug_interactions.csv")
+    with open("abbreviations.json") as f:
+        ABBR = json.load(f)
 except:
-    interactions_df = pd.DataFrame()
+    ABBR = {}
+
+# ---------------- PREPARE MEDICINE LIST ----------------
+
+if not df_meds.empty:
+    med_names = df_meds.iloc[:,0].dropna().astype(str).str.lower().tolist()
+else:
+    med_names = []
+
+# dosage lookup
+dosage_lookup = {}
+if not dosage_df.empty:
+    for _,row in dosage_df.iterrows():
+        dosage_lookup[row["drug"].lower()] = row["max_daily_mg"]
+
+# class lookup
+class_lookup = {}
+if not classes_df.empty:
+    for _,row in classes_df.iterrows():
+        class_lookup[row["drug"].lower()] = row["class"]
+
+# ---------------- TEXT CLEANING ----------------
+
+def expand_abbreviations(text):
+
+    for k,v in ABBR.items():
+        text = re.sub(rf"\b{k}\b", v, text, flags=re.IGNORECASE)
+
+    return text
+
 
 # ---------------- MEDICINE DETECTION ----------------
 
+def detect_medicines(text:str)->List[str]:
 
-def detect_medicines_from_text(text: str) -> List[str]:
+    detected=set()
 
-    detected = []
+    tokens=text.lower().split()
 
-    words = text.lower().split()
+    for token in tokens:
 
-    for word in words:
+        match=process.extractOne(
+            token,
+            med_names,
+            scorer=fuzz.token_set_ratio
+        )
 
-        match = process.extractOne(word, med_names, scorer=fuzz.WRatio)
+        if match and match[1]>85:
+            detected.add(match[0])
 
-        if match and match[1] > 85:
-            detected.append(match[0])
+    return list(detected)
 
-    return list(set(detected))
+
+# ---------------- DOSE EXTRACTION ----------------
+
+def extract_doses(text):
+
+    doses={}
+
+    matches=re.findall(r"(\w+)\s*(\d+)\s*mg",text.lower())
+
+    for drug,dose in matches:
+        doses[drug]=int(dose)
+
+    return doses
+
+
+# ---------------- DOSE VALIDATION ----------------
+
+def check_dosage(doses):
+
+    warnings=[]
+
+    for drug,dose in doses.items():
+
+        if drug in dosage_lookup:
+
+            if dose>dosage_lookup[drug]:
+
+                warnings.append({
+                    "drug":drug,
+                    "dose":dose,
+                    "limit":dosage_lookup[drug],
+                    "warning":"Dose exceeds recommended maximum"
+                })
+
+    return warnings
+
+
+# ---------------- DRUG CLASS ----------------
+
+def get_drug_classes(meds):
+
+    result={}
+
+    for m in meds:
+        result[m]=class_lookup.get(m,"Unknown")
+
+    return result
 
 
 # ---------------- INTERACTION CHECK ----------------
 
+def check_interactions(meds):
 
-def check_interactions(meds: List[str]):
-
-    alerts = []
+    alerts=[]
 
     if interactions_df.empty:
         return alerts
 
     for i in range(len(meds)):
-        for j in range(i + 1, len(meds)):
+        for j in range(i+1,len(meds)):
 
-            d1 = meds[i]
-            d2 = meds[j]
+            d1=meds[i]
+            d2=meds[j]
 
-            result = interactions_df[
-                ((interactions_df["drug1"] == d1) & (interactions_df["drug2"] == d2)) |
-                ((interactions_df["drug1"] == d2) & (interactions_df["drug2"] == d1))
+            result=interactions_df[
+                ((interactions_df["drug1"]==d1)&(interactions_df["drug2"]==d2))|
+                ((interactions_df["drug1"]==d2)&(interactions_df["drug2"]==d1))
             ]
 
             if not result.empty:
 
-                row = result.iloc[0]
+                row=result.iloc[0]
 
                 alerts.append({
-                    "drug1": d1,
-                    "drug2": d2,
-                    "severity": row.get("severity", "Unknown"),
-                    "message": row.get("description", "Interaction detected")
+                    "drug1":d1,
+                    "drug2":d2,
+                    "severity":row.get("severity","Moderate"),
+                    "message":row.get("description","Interaction detected")
                 })
 
     return alerts
 
 
-# ---------------- OCR UPLOAD API ----------------
-
+# ---------------- OCR API ----------------
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file:UploadFile=File(...)):
 
     try:
 
-        content = await file.read()
+        content=await file.read()
 
         if file.filename.lower().endswith(".pdf"):
-            text = ocr_pdf_bytes(content)
+            text=ocr_pdf_bytes(content)
         else:
-            text = ocr_image_bytes(content)
+            text=ocr_image_bytes(content)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OCR failed: {str(e)}")
+        raise HTTPException(status_code=500,detail=str(e))
 
-    medicines = detect_medicines_from_text(text)
+    # Phase 3 shorthand expansion
+    text=expand_abbreviations(text)
 
-    interactions = check_interactions(medicines)
+    medicines=detect_medicines(text)
 
-    return {
-        "medicines_detected": medicines,
-        "drug_interactions": interactions,
-        "raw_text": text
+    interactions=check_interactions(medicines)
+
+    doses=extract_doses(text)
+
+    dose_warnings=check_dosage(doses)
+
+    drug_classes=get_drug_classes(medicines)
+
+    return{
+        "medicines_detected":medicines,
+        "drug_classes":drug_classes,
+        "drug_interactions":interactions,
+        "dose_warnings":dose_warnings,
+        "raw_text":text
     }
 
 
 # ---------------- INDEX PAGE ----------------
 
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+@app.get("/",response_class=HTMLResponse)
+async def index(request:Request):
 
     return templates.TemplateResponse(
         "index.html",
-        {"request": request}
+        {"request":request}
     )
+   
+ 
