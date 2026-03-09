@@ -1,8 +1,7 @@
+# render.yaml
 services:
   - type: web
     name: rx-helper
-    env: python
+    env: docker
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -k uvicorn.workers.UvicornWorker app:app
-    runtime: python
+    dockerfilePath: Dockerfile
