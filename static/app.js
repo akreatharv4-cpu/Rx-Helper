@@ -1,206 +1,233 @@
-let uploadedFile = null
-let analysisData = null
+// app.js — improved and robust version
 
-const fileInput = document.getElementById("fileInput")
+let uploadedFile = null;
+let analysisData = null;
 
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const analyzeBtn = document.getElementById("analyzeButton");
+const downloadBtn = document.getElementById("downloadButton");
+const spinner = document.getElementById("spinner"); // optional spinner element
+
+// helper: escape text for safe insertion into HTML
+function escapeHtml(unsafe) {
+  if (unsafe === null || unsafe === undefined) return "";
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// --- Setup listeners ---
 if (fileInput) {
-
-fileInput.addEventListener("change", function () {
-
-uploadedFile = this.files[0]
-
-previewImage(uploadedFile)
-
-})
-
+  fileInput.addEventListener("change", function () {
+    uploadedFile = this.files && this.files[0] ? this.files[0] : null;
+    previewImage(uploadedFile);
+  });
 }
 
-// ---------------- IMAGE PREVIEW ----------------
+if (analyzeBtn) {
+  analyzeBtn.addEventListener("click", analyzePrescription);
+}
 
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", downloadReport);
+}
+
+// --- Preview ---
 function previewImage(file) {
+  if (!preview) return;
+  if (!file) {
+    preview.src = "";
+    preview.style.display = "none";
+    return;
+  }
 
-if (!file) return
-
-let reader = new FileReader()
-
-reader.onload = function (e) {
-
-let preview = document.getElementById("preview")
-
-if (preview) {
-preview.src = e.target.result
-preview.style.display = "block"
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    preview.src = e.target.result;
+    preview.style.display = "block";
+  };
+  reader.readAsDataURL(file);
 }
 
+// --- Small UI helpers ---
+function setBusy(isBusy) {
+  if (analyzeBtn) analyzeBtn.disabled = !!isBusy;
+  if (downloadBtn) downloadBtn.disabled = !!isBusy || !analysisData;
+  if (spinner) spinner.style.display = isBusy ? "inline-block" : "none";
 }
 
-reader.readAsDataURL(file)
-
+function showAlert(msg) {
+  // you can customize where to show alerts; fallback to window.alert
+  const alertsArea = document.getElementById("alerts");
+  if (alertsArea) {
+    alertsArea.innerHTML = `<div class="alert-info">${escapeHtml(msg)}</div>`;
+  } else {
+    alert(msg);
+  }
 }
 
-// ---------------- ANALYZE PRESCRIPTION ----------------
-
+// --- Analyze prescription ---
 async function analyzePrescription() {
+  if (!uploadedFile) {
+    showAlert("Upload a prescription image first.");
+    return;
+  }
 
-if (!uploadedFile) {
+  setBusy(true);
 
-alert("Upload prescription image first")
-return
+  try {
+    const formData = new FormData();
+    formData.append("file", uploadedFile);
 
+    const resp = await fetch("/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => "");
+      throw new Error(`Server returned ${resp.status}: ${txt}`);
+    }
+
+    const data = await resp.json();
+    analysisData = data;
+    displayResults(data);
+    setBusy(false);
+  } catch (error) {
+    console.error("Analysis failed:", error);
+    showAlert("Analysis failed. See console for details.");
+    setBusy(false);
+  }
 }
 
-let formData = new FormData()
-
-formData.append("file", uploadedFile)
-
-try {
-
-let response = await fetch("/upload", {
-
-method: "POST",
-body: formData
-
-})
-
-let data = await response.json()
-
-analysisData = data
-
-displayResults(data)
-
-} catch (error) {
-
-alert("Analysis failed")
-console.error(error)
-
-}
-
-}
-
-// ---------------- DISPLAY RESULTS ----------------
-
+// --- Display results ---
 function displayResults(data) {
+  // dashboard fields
+  const totalMedicinesEl = document.getElementById("totalMedicines");
+  const polypharmacyEl = document.getElementById("polypharmacy");
+  const antibioticEl = document.getElementById("antibioticCount");
+  const injectionEl = document.getElementById("injectionCount");
 
-document.getElementById("totalMedicines").innerText =
-data.dashboard?.total_medicines || 0
+  const dashboard = data.dashboard || {};
 
-document.getElementById("polypharmacy").innerText =
-data.dashboard?.polypharmacy ? "YES ⚠" : "No"
+  if (totalMedicinesEl) totalMedicinesEl.innerText = dashboard.total_medicines ?? 0;
+  if (polypharmacyEl) polypharmacyEl.innerText = dashboard.polypharmacy ? "YES ⚠" : "No";
+  if (antibioticEl) antibioticEl.innerText = dashboard.antibiotic_count ?? 0;
+  if (injectionEl) injectionEl.innerText = dashboard.injection_count ?? 0;
 
-// optional values
+  // medicines_detected may be a list of strings OR list of objects (e.g. {matched_name,...})
+  let meds = [];
+  if (Array.isArray(data.medicines_detected)) {
+    meds = data.medicines_detected.map(item => {
+      if (typeof item === "string") return item;
+      // common keys we might use
+      if (item.matched_name) return item.matched_name;
+      if (item.name) return item.name;
+      if (item.medicine) return item.medicine;
+      // fallback: stringify
+      return String(item);
+    });
+  }
 
-document.getElementById("antibioticCount").innerText =
-data.dashboard?.antibiotic_count || 0
+  // drug_classification might be a mapping { "paracetamol": "Analgesic" }
+  const classification = data.drug_classification || {};
 
-document.getElementById("injectionCount").innerText =
-data.dashboard?.injection_count || 0
+  const tbody = document.querySelector("#medicineTable tbody");
+  if (tbody) {
+    tbody.innerHTML = "";
+    if (!meds || meds.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='2'>No medicines detected</td></tr>";
+    } else {
+      meds.forEach(m => {
+        const cls = classification[m] || classification[m.toLowerCase()] || "Unknown";
+        const row = document.createElement("tr");
+        const cellName = document.createElement("td");
+        const cellClass = document.createElement("td");
+        cellName.innerHTML = escapeHtml(m);
+        cellClass.innerHTML = escapeHtml(cls);
+        row.appendChild(cellName);
+        row.appendChild(cellClass);
+        tbody.appendChild(row);
+      });
+    }
+  }
 
+  // interactions
+  const alertsContainer = document.getElementById("alerts");
+  if (alertsContainer) {
+    alertsContainer.innerHTML = "";
+    const interactions = Array.isArray(data.drug_interactions) ? data.drug_interactions : [];
 
-let table = document.querySelector("#medicineTable tbody")
+    if (interactions.length > 0) {
+      interactions.forEach(i => {
+        const sev = escapeHtml(i.severity ?? "Info");
+        const d1 = escapeHtml(i.drug1 ?? (i.drug_a ?? "Drug A"));
+        const d2 = escapeHtml(i.drug2 ?? (i.drug_b ?? "Drug B"));
+        const msg = escapeHtml(i.message ?? "");
+        const div = document.createElement("div");
+        div.className = "alert";
+        div.innerHTML = `<b>${sev} interaction</b><br>${d1} + ${d2}<br>${msg}`;
+        alertsContainer.appendChild(div);
+      });
+    } else {
+      alertsContainer.innerHTML = "<div>No interactions detected</div>";
+    }
+  }
 
-table.innerHTML = ""
-
-if (!data.medicines_detected || data.medicines_detected.length === 0) {
-
-table.innerHTML =
-"<tr><td colspan='2'>No medicines detected</td></tr>"
-
-} else {
-
-data.medicines_detected.forEach(m => {
-
-let cls = data.drug_classification ?
-(data.drug_classification[m] || "Unknown") : "Unknown"
-
-table.innerHTML += `
-<tr>
-<td>${m}</td>
-<td>${cls}</td>
-</tr>
-`
-
-})
-
+  // enable download button if report endpoint exists
+  if (downloadBtn) downloadBtn.disabled = false;
 }
 
-// ---------------- INTERACTION ALERTS ----------------
-
-let alerts = document.getElementById("alerts")
-
-alerts.innerHTML = ""
-
-if (data.drug_interactions && data.drug_interactions.length > 0) {
-
-data.drug_interactions.forEach(i => {
-
-alerts.innerHTML += `
-<div class="alert">
-<b>${i.severity} interaction</b><br>
-${i.drug1} + ${i.drug2}<br>
-${i.message}
-</div>
-`
-
-})
-
-} else {
-
-alerts.innerHTML =
-"<div>No interactions detected</div>"
-
-}
-
-}
-
-// ---------------- DOWNLOAD REPORT ----------------
-
+// --- Download PDF report ---
 async function downloadReport() {
+  if (!analysisData) {
+    showAlert("Analyze prescription before downloading the report.");
+    return;
+  }
 
-if (!analysisData) {
+  setBusy(true);
 
-alert("Analyze prescription first")
-return
+  try {
+    const payload = {
+      medicines: analysisData.medicines_detected ?? [],
+      interactions: analysisData.drug_interactions ?? []
+    };
 
+    const resp = await fetch("/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => "");
+      throw new Error(`Server returned ${resp.status}: ${txt}`);
+    }
+
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "clinical_report.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    setBusy(false);
+  } catch (error) {
+    console.error("Report download failed:", error);
+    showAlert("Report generation failed. See console for details.");
+    setBusy(false);
+  }
 }
 
-try {
-
-const response = await fetch("/report", {
-
-method: "POST",
-
-headers: {
-"Content-Type": "application/json"
-},
-
-body: JSON.stringify({
-
-medicines: analysisData.medicines_detected,
-interactions: analysisData.drug_interactions
-
-})
-
-})
-
-const blob = await response.blob()
-
-const url = window.URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-
-a.href = url
-a.download = "clinical_report.pdf"
-
-document.body.appendChild(a)
-a.click()
-
-a.remove()
-
-} catch (error) {
-
-alert("Report generation failed")
-console.error(error)
-
-}
-
-}
+// --- optional: initialize UI state on load ---
+document.addEventListener("DOMContentLoaded", () => {
+  setBusy(false);
+  if (preview) preview.style.display = preview.src ? "block" : "none";
+  if (downloadBtn) downloadBtn.disabled = true;
+});
