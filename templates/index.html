@@ -52,7 +52,7 @@ border:1px solid #ddd;
 border-radius:6px;
 }
 
-/* main area */
+/* main */
 
 .main{
 padding:30px;
@@ -63,6 +63,12 @@ display:flex;
 justify-content:space-between;
 align-items:center;
 }
+
+.export-btn{
+background:var(--success);
+}
+
+/* upload */
 
 .upload-card{
 background:white;
@@ -104,6 +110,7 @@ background:#eef7ff;
 padding:10px 15px;
 border-radius:10px;
 margin:6px;
+min-width:120px;
 }
 
 .drug-card span{
@@ -131,10 +138,17 @@ margin-top:10px;
 border-left:5px solid var(--warning);
 }
 
+.success{
+background:#e8f8f5;
+padding:10px;
+border-left:5px solid var(--success);
+}
+
 .loading{
 display:none;
 text-align:center;
 margin-top:20px;
+font-size:18px;
 }
 
 </style>
@@ -173,6 +187,11 @@ margin-top:20px;
 
 <div class="header">
 <h1><i class="fas fa-file-medical"></i> Rx-Helper</h1>
+
+<button class="export-btn" onclick="downloadPDF()">
+<i class="fas fa-file-pdf"></i> Export PDF
+</button>
+
 </div>
 
 <!-- Upload -->
@@ -240,6 +259,8 @@ Scanning Prescription...
 
 <script>
 
+let lastResult=null
+
 async function analyze(){
 
 const file=document.getElementById("fileInput").files[0]
@@ -262,6 +283,8 @@ body:formData
 
 const data=await res.json()
 
+lastResult=data
+
 document.getElementById("loader").style.display="none"
 
 displayResults(data)
@@ -278,6 +301,10 @@ const classes=data.drug_classes || {}
 
 let html=""
 
+if(meds.length===0){
+html="<div class='success'>No medicines detected</div>"
+}else{
+
 meds.forEach(m=>{
 html+=`
 <div class="drug-card">
@@ -286,6 +313,8 @@ html+=`
 </div>
 `
 })
+
+}
 
 document.getElementById("medList").innerHTML=html
 
@@ -303,13 +332,19 @@ ${w.drug} dose ${w.dose}mg exceeds limit ${w.limit}mg
 `
 })
 
-document.getElementById("doseWarnings").innerHTML=warnHTML || "No warnings"
+document.getElementById("doseWarnings").innerHTML=warnHTML || "<div class='success'>No dose warnings</div>"
 
 /* interactions */
 
 const interactions=data.drug_interactions || []
 
 let intHTML=""
+
+if(interactions.length===0){
+
+intHTML="<div class='success'>No drug interactions detected</div>"
+
+}else{
 
 interactions.forEach(i=>{
 
@@ -328,11 +363,44 @@ ${i.message}
 
 })
 
-document.getElementById("interactionList").innerHTML=intHTML || "No interactions"
+}
+
+document.getElementById("interactionList").innerHTML=intHTML
 
 /* raw */
 
 document.getElementById("rawText").innerText=data.raw_text
+
+}
+
+/* simple PDF export */
+
+function downloadPDF(){
+
+if(!lastResult){
+alert("Analyze prescription first")
+return
+}
+
+let text="Rx-Helper Clinical Report\n\n"
+
+text+="Detected Medicines:\n"
+lastResult.medicines_detected.forEach(m=>{
+text+=m+"\n"
+})
+
+text+="\nInteractions:\n"
+
+lastResult.drug_interactions.forEach(i=>{
+text+=`${i.drug1}+${i.drug2} (${i.severity})\n`
+})
+
+const blob=new Blob([text],{type:"text/plain"})
+
+const a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="rxhelper_report.txt"
+a.click()
 
 }
 
