@@ -1,27 +1,217 @@
-<div id="dropArea">Drag & Drop Prescription Here</div>
-<input type="file" id="fileInput">
-<img id="preview" style="display:none; width: 200px;">
+<!-- paste this where your app UI should be -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rx-Helper — OCR</title>
 
-<div class="stats">
-    Total: <span id="totalMedicines">0</span>
-    Antibiotics: <span id="antibioticCount">0</span>
-    Injections: <span id="injectionCount">0</span>
-    Polypharmacy: <span id="polypharmacy">No</span>
-</div>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; color:#111;}
+    .container{max-width:900px;margin:24px auto;padding:16px}
+    #dropArea{
+      border:2px dashed #9ca3af;
+      border-radius:8px;
+      padding:28px;
+      text-align:center;
+      color:#374151;
+      background:#fbfdff;
+      cursor:pointer;
+      user-select:none;
+    }
+    #dropArea.dragover{border-color:#2563eb;background:#f0f8ff}
+    #fileInput{display:none}
+    #preview{display:none; width:200px; margin-top:12px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.08)}
+    .controls{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+    button{background:#2563eb;color:#fff;border:0;padding:10px 14px;border-radius:6px;cursor:pointer}
+    button[disabled]{opacity:.5;cursor:not-allowed}
+    .stats{margin-top:18px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+    .stats span{font-weight:600;margin-left:6px}
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    th,td{padding:8px 10px;border-bottom:1px solid #e6e6e6;text-align:left}
+    #alerts{margin-top:12px}
+    .alert{background:#fff3cd;padding:10px;border-radius:6px;border:1px solid #ffeeba;margin-bottom:8px}
+    .alert-info{background:#eef2ff;padding:8px;border-radius:6px;border:1px solid #dbeafe}
+    #spinner{display:none;margin-left:8px}
+    @media (max-width:600px){
+      .stats{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Rx-Helper — Upload Prescription</h2>
 
-<table id="medicineTable">
-    <thead><tr><th>Name</th><th>Class</th></tr></thead>
-    <tbody></tbody>
-</table>
+    <!-- Drag & Drop area (click to open file picker) -->
+    <div id="dropArea" role="button" tabindex="0" aria-label="Drag and drop prescription here or click to upload">
+      Drag & Drop Prescription Here
+      <div style="font-size:0.9rem;color:#6b7280;margin-top:6px">or click to choose a file (image or PDF)</div>
+      <img id="preview" alt="Preview">
+    </div>
 
-<div id="alerts"></div>
-<canvas id="medicineChart"></canvas>
+    <!-- actual file input (hidden) -->
+    <input type="file" id="fileInput" accept="image/*,application/pdf" aria-label="Select prescription file">
 
-<button onclick="analyzePrescription()">Analyze</button>
-<button onclick="downloadReport()">Download PDF</button>
+    <div class="controls">
+      <button id="analyzeButton" type="button">Analyze</button>
+      <button id="downloadButton" type="button" disabled>Download PDF</button>
+      <div id="spinner" aria-hidden="true">🔄 Processing...</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div class="stats" aria-live="polite">
+      <div>Total: <span id="totalMedicines">0</span></div>
+      <div>Antibiotics: <span id="antibioticCount">0</span></div>
+      <div>Injections: <span id="injectionCount">0</span></div>
+      <div>Polypharmacy: <span id="polypharmacy">No</span></div>
+    </div>
 
+    <table id="medicineTable" aria-describedby="medicineTableCaption">
+      <caption id="medicineTableCaption" style="text-align:left;margin-bottom:8px;font-weight:600">Detected medicines</caption>
+      <thead><tr><th>Name</th><th>Class</th></tr></thead>
+      <tbody></tbody>
+    </table>
 
+    <div id="alerts" aria-live="polite"></div>
+
+    <div style="margin-top:18px">
+      <canvas id="medicineChart" width="600" height="200" aria-label="Medicine summary chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- If you already load app.js externally, keep that <script> tag after this helper script.
+       Example: <script src="/static/app.js"></script> -->
+  <!-- This small helper adds drag/drop handling and connects the chart to displayResults -->
+  <script>
+    (function () {
+      const dropArea = document.getElementById("dropArea");
+      const fileInput = document.getElementById("fileInput");
+      const preview = document.getElementById("preview");
+      const spinner = document.getElementById("spinner");
+      const analyzeBtn = document.getElementById("analyzeButton");
+
+      // Click on drop area opens file picker
+      if (dropArea && fileInput) {
+        dropArea.addEventListener("click", () => fileInput.click());
+        dropArea.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") fileInput.click(); });
+      }
+
+      // Drag & drop handlers
+      if (dropArea) {
+        dropArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          dropArea.classList.add("dragover");
+        });
+
+        dropArea.addEventListener("dragleave", (e) => {
+          dropArea.classList.remove("dragover");
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropArea.classList.remove("dragover");
+          const files = e.dataTransfer.files;
+          if (files && files.length) {
+            // set file input (so app.js change listener runs)
+            fileInput.files = files;
+            // dispatch change event to trigger preview + app.js logic
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      }
+
+      // Show preview for images (if app.js previewImage doesn't run yet)
+      if (fileInput) {
+        fileInput.addEventListener("change", function () {
+          const f = this.files && this.files[0];
+          if (!f) {
+            preview.style.display = "none";
+            preview.src = "";
+            return;
+          }
+          if (f.type && f.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              preview.src = ev.target.result;
+              preview.style.display = "block";
+            };
+            reader.readAsDataURL(f);
+          } else {
+            // non-image (pdf) - hide preview
+            preview.style.display = "none";
+            preview.src = "";
+          }
+        });
+      }
+
+      // Initialize Chart.js with empty data
+      const ctx = document.getElementById("medicineChart").getContext("2d");
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total', 'Antibiotics', 'Injections'],
+          datasets: [{
+            label: 'Counts',
+            data: [0, 0, 0],
+            backgroundColor: ['rgba(37,99,235,0.8)','rgba(16,185,129,0.8)','rgba(234,88,12,0.8)'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { precision:0 } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Wrap/augment displayResults (if present) so chart updates automatically.
+      // This avoids modifying app.js — we hook into its function at runtime.
+      if (window.displayResults && typeof window.displayResults === 'function') {
+        const orig = window.displayResults;
+        window.displayResults = function (data) {
+          try { orig(data); } catch (e) { console.warn("displayResults original threw:", e); }
+          updateChartFromData(data);
+        };
+      } else {
+        // If displayResults not defined yet, create a small wrapper to be used later
+        window._rxhelper_updateChart = updateChartFromData;
+      }
+
+      // Chart updater
+      function updateChartFromData(data) {
+        const dashboard = data?.dashboard || {};
+        const total = Number(dashboard.total_medicines || (Array.isArray(data.medicines_detected) ? data.medicines_detected.length : 0)) || 0;
+        const antibiotics = Number(dashboard.antibiotic_count || 0) || 0;
+        const injections = Number(dashboard.injection_count || 0) || 0;
+
+        chart.data.datasets[0].data = [total, antibiotics, injections];
+        chart.update();
+      }
+
+      // If app.js calls displayResults before this script runs, attempt to update chart with existing analysisData
+      if (window.analysisData) {
+        updateChartFromData(window.analysisData);
+      }
+
+      // Show/hide spinner based on global setBusy if present
+      // If setBusy (from app.js) manipulates spinner, this is a graceful no-op
+      // but we also toggle spinner if app.js doesn't provide setBusy
+      const originalSetBusy = window.setBusy;
+      if (!originalSetBusy) {
+        window.setBusy = function(isBusy){
+          if (spinner) spinner.style.display = isBusy ? "inline-block" : "none";
+          if (analyzeBtn) analyzeBtn.disabled = !!isBusy;
+        };
+      }
+    })();
+  </script>
+</body>
+</html>
 
 
