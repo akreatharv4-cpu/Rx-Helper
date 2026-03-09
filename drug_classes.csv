@@ -1,0 +1,209 @@
+drug,class
+paracetamol,Analgesic (Antipyretic)
+ibuprofen,NSAID
+amoxicillin,Penicillin Antibiotic
+metformin,Biguanide
+aspirin,NSAID (Salicylate)
+naproxen,NSAID
+celecoxib,COX-2 Inhibitor
+diclofenac,NSAID
+tramadol,Opioid Analgesic
+gabapentin,Anticonvulsant (Gabapentinoid)
+pregabalin,Anticonvulsant (Gabapentinoid)
+atorvastatin,Statin (HMG-CoA Reductase Inhibitor)
+rosuvastatin,Statin (HMG-CoA Reductase Inhibitor)
+simvastatin,Statin (HMG-CoA Reductase Inhibitor)
+amlodipine,Calcium Channel Blocker (Dihydropyridine)
+lisinopril,ACE Inhibitor
+losartan,Angiotensin II Receptor Blocker (ARB)
+valsartan,Angiotensin II Receptor Blocker (ARB)
+metoprolol,Beta Blocker (Cardioselective)
+atenolol,Beta Blocker (Cardioselective)
+carvedilol,Beta Blocker (Non-selective)
+furosemide,Loop Diuretic
+spironolactone,Potassium-Sparing Diuretic
+hydrochlorothiazide,Thiazide Diuretic
+digoxin,Cardiac Glycoside
+warfarin,Anticoagulant (Vitamin K Antagonist)
+clopidogrel,Antiplatelet (P2Y12 Inhibitor)
+rivaroxaban,Anticoagulant (Direct Factor Xa Inhibitor)
+apixaban,Anticoagulant (Direct Factor Xa Inhibitor)
+levothyroxine,Thyroid Hormone (T4)
+glimepiride,Sulfonylurea
+glipizide,Sulfonylurea
+sitagliptin,DPP-4 Inhibitor
+pioglitazone,Thiazolidinedione (TZD)
+empagliflozin,SGLT2 Inhibitor
+dapagliflozin,SGLT2 Inhibitor
+omeprazole,Proton Pump Inhibitor (PPI)
+pantoprazole,Proton Pump Inhibitor (PPI)
+famotidine,H2 Receptor Antagonist
+ranitidine,H2 Receptor Antagonist
+metoclopramide,Dopamine Antagonist (Prokinetic)
+ondansetron,5-HT3 Receptor Antagonist (Antiemetic)
+prednisolone,Corticosteroid
+dexamethasone,Corticosteroid
+montelukast,Leukotriene Receptor Antagonist
+salbutamol,Beta-2 Agonist (SABA)
+theophylline,Xanthine Derivative
+azithromycin,Macrolide Antibiotic
+ciprofloxacin,Fluoroquinolone Antibiotic
+levofloxacin,Fluoroquinolone Antibiotic
+clarithromycin,Macrolide Antibiotic
+doxycycline,Tetracycline Antibiotic
+cephalexin,First-Generation Cephalosporin
+cefdinir,Third-Generation Cephalosporin
+metronidazole,Nitroimidazole Antibiotic
+fluconazole,Azole Antifungal
+acyclovir,Antiviral (Herpes)
+sertraline,SSRI
+fluoxetine,SSRI
+escitalopram,SSRI
+amitriptyline,Tricyclic Antidepressant (TCA)
+alprazolam,Benzodiazepine
+diazepam,Benzodiazepine
+lorazepam,Benzodiazepine
+quetiapine,Atypical Antipsychotic
+olanzapine,Atypical Antipsychotic
+risperidone,Atypical Antipsychotic
+haloperidol,Typical Antipsychotic
+phenytoin,Anticonvulsant (Hydantoin)
+valproate,Anticonvulsant
+levetiracetam,Anticonvulsant
+carbamazepine,Anticonvulsant (Iminostilbene)
+sumatriptan,Triptan (5-HT1 Receptor Agonist)
+allopurinol,Xanthine Oxidase Inhibitor
+colchicine,Antigout Agent
+tamsulosin,Alpha-1 Blocker
+finasteride,5-Alpha Reductase Inhibitor
+sildenafil,PDE5 Inhibitor
+tadalafil,PDE5 Inhibitor
+oxybutynin,Antimuscarinic
+solifenacin,Antimuscarinic
+baclofen,Skeletal Muscle Relaxant (GABA-B Agonist)
+cyclobenzaprine,Skeletal Muscle Relaxant
+methocarbamol,Skeletal Muscle Relaxant
+clonidine,Alpha-2 Agonist (Centrally Acting)
+hydralazine,Vasodilator
+isosorbide_mononitrate,Nitrate (Vasodilator)
+nitroglycerin,Nitrate (Vasodilator)
+verapamil,Calcium Channel Blocker (Non-dihydropyridine)
+diltiazem,Calcium Channel Blocker (Non-dihydropyridine)
+telmisartan,Angiotensin II Receptor Blocker (ARB)
+enalapril,ACE Inhibitor
+ramipril,ACE Inhibitor
+bisoprolol,Beta Blocker (Cardioselective)
+propranolol,Beta Blocker (Non-selective)
+labetalol,Mixed Alpha/Beta Blocker
+indomethacin,NSAID
+ketorolac,NSAID
+meloxicam,NSAID
+nabumetone,NSAID
+etodolac,NSAID
+methylprednisolone,Corticosteroid
+budesonide,Corticosteroid (Inhaled)
+moxifloxacin,Fluoroquinolone Antibiotic
+nitrofurantoin,Nitrofuran Antibiotic
+trimethoprim,Folate Antagonist
+sulfamethoxazole,Sulfonamide Antibiotic
+clindamycin,Lincosamide Antibiotic
+linezolid,Oxazolidinone Antibiotic
+vancomycin,Glycopeptide Antibiotic
+terbinafine,Allylamine Antifungal
+itraconazole,Azole Antifungal
+voriconazole,Azole Antifungal
+valacyclovir,Antiviral (Herpes)
+mirtazapine,NaSSA Antidepressant
+venlafaxine,SNRI
+duloxetine,SNRI
+bupropion,NDRI Antidepressant
+trazodone,SARI Antidepressant
+nortriptyline,Tricyclic Antidepressant (TCA)
+paroxetine,SSRI
+citalopram,SSRI
+aripiprazole,Atypical Antipsychotic
+clozapine,Atypical Antipsychotic
+ziprasidone,Atypical Antipsychotic
+lithium,Mood Stabilizer
+lamotrigine,Anticonvulsant
+topiramate,Anticonvulsant
+zonisamide,Anticonvulsant
+oxcarbazepine,Anticonvulsant
+ethosuximide,Anticonvulsant (Succinimide)
+donepezil,Cholinesterase Inhibitor
+memantine,NMDA Receptor Antagonist
+rivastigmine,Cholinesterase Inhibitor
+galantamine,Cholinesterase Inhibitor
+carbidopa,DOPA Decarboxylase Inhibitor
+levodopa,Dopamine Precursor
+pramipexole,Dopamine Agonist
+ropinirole,Dopamine Agonist
+selegiline,MAO-B Inhibitor
+entacapone,COMT Inhibitor
+benztropine,Anticholinergic
+trihexyphenidyl,Anticholinergic
+methotrexate,Antimetabolite (DHFR Inhibitor)
+azathioprine,Immunosuppressant (Purine Analog)
+cyclosporine,Calcineurin Inhibitor
+mycophenolate,IMPDH Inhibitor
+tacrolimus,Calcineurin Inhibitor
+hydroxychloroquine,Aminoquinoline
+sulfasalazine,5-ASA Derivative
+leflunomide,Pyrimidine Synthesis Inhibitor
+teriparatide,Parathyroid Hormone Analog
+alendronate,Bisphosphonate
+risedronate,Bisphosphonate
+ibandronate,Bisphosphonate
+raloxifene,SERM
+tamoxifen,SERM
+anastrozole,Aromatase Inhibitor
+letrozole,Aromatase Inhibitor
+exemestane,Aromatase Inhibitor
+dutasteride,5-Alpha Reductase Inhibitor
+alfuzosin,Alpha-1 Blocker
+doxazosin,Alpha-1 Blocker
+terazosin,Alpha-1 Blocker
+mirabegron,Beta-3 Agonist
+tolterodine,Antimuscarinic
+trospium,Antimuscarinic
+darifenacin,Antimuscarinic
+fesoterodine,Antimuscarinic
+tizanidine,Alpha-2 Agonist (Muscle Relaxant)
+carisoprodol,Skeletal Muscle Relaxant
+metaxalone,Skeletal Muscle Relaxant
+chlorzoxazone,Skeletal Muscle Relaxant
+orphenadrine,Anticholinergic/Muscle Relaxant
+dantrolene,Direct-Acting Muscle Relaxant
+modafinil,Eugeroic
+armodafinil,Eugeroic
+methylphenidate,CNS Stimulant
+dexmethylphenidate,CNS Stimulant
+atomoxetine,Selective Norepinephrine Reuptake Inhibitor
+guanfacine,Alpha-2 Agonist
+lisdexamfetamine,CNS Stimulant
+phentermine,Sympathomimetic Amine (Anorexiant)
+lorcaserin,Serotonin 2C Receptor Agonist
+naltrexone,Opioid Antagonist
+varenicline,Nicotinic Receptor Partial Agonist
+disulfiram,Aldehyde Dehydrogenase Inhibitor
+acamprosate,NMDA Modulator
+methadone,Opioid Agonist
+buprenorphine,Partial Opioid Agonist
+fentanyl,Opioid Agonist
+hydromorphone,Opioid Agonist
+morphine,Opioid Agonist
+oxycodone,Opioid Agonist
+oxymorphone,Opioid Agonist
+codeine,Opioid Agonist
+hydrocodone,Opioid Agonist
+meperidine,Opioid Agonist
+pentazocine,Mixed Opioid Agonist-Antagonist
+butorphanol,Mixed Opioid Agonist-Antagonist
+nalbuphine,Mixed Opioid Agonist-Antagonist
+ketamine,NMDA Receptor Antagonist
+propofol,General Anesthetic
+etomidate,General Anesthetic
+midazolam,Benzodiazepine
+pancuronium,Neuromuscular Blocker (Nondepolarizing)
+rocuronium,Neuromuscular Blocker (Nondepolarizing)
+succinylcholine,Neuromuscular Blocker (Depolarizing)
