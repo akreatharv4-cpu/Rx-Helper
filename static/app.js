@@ -3,6 +3,8 @@ const loader = document.getElementById("loader");
 
 fileInput.addEventListener("change", handleUpload);
 
+/* ---------------- Upload Handler ---------------- */
+
 async function handleUpload(e){
 
     const file = e.target.files[0];
@@ -45,6 +47,8 @@ async function handleUpload(e){
 
 }
 
+/* ---------------- Display Results ---------------- */
+
 function displayResults(data){
 
     const medicines = data.medicines_detected || [];
@@ -78,7 +82,7 @@ function displayResults(data){
 
     if(warnings.length===0){
 
-        warnContainer.innerHTML="No dose warnings";
+        warnContainer.innerHTML="<p>No dose warnings</p>";
 
     }else{
 
@@ -90,7 +94,7 @@ function displayResults(data){
 
     }
 
-    /* ---------------- Interactions ---------------- */
+    /* ---------------- Drug Interactions ---------------- */
 
     const intContainer=document.getElementById("interactionList");
 
@@ -114,7 +118,7 @@ function displayResults(data){
 
             return `
             <div class="interaction ${severityClass}">
-                <strong>${i.drug1?.toUpperCase()} + ${i.drug2?.toUpperCase()}</strong><br>
+                <strong>${(i.drug1 || "").toUpperCase()} + ${(i.drug2 || "").toUpperCase()}</strong><br>
                 Severity: ${i.severity}<br>
                 ${i.message}
             </div>
@@ -124,12 +128,15 @@ function displayResults(data){
 
     }
 
-    /* ---------------- OCR TEXT ---------------- */
+    /* ---------------- OCR Text ---------------- */
 
-    document.getElementById("rawText").innerText = rawText;
+    const rawContainer=document.getElementById("rawText");
+
+    if(rawContainer){
+        rawContainer.innerText = rawText;
+    }
 
 }
-
 
 /* ---------------- Drag & Drop Upload ---------------- */
 
@@ -152,6 +159,8 @@ dropZone.addEventListener("drop",(e)=>{
 
     const file=e.dataTransfer.files[0];
 
+    if(!file) return;
+
     fileInput.files=e.dataTransfer.files;
 
     handleUpload({target:{files:[file]}});
@@ -159,4 +168,3 @@ dropZone.addEventListener("drop",(e)=>{
 });
 
 }
- 
