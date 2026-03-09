@@ -1,8 +1,5 @@
-<script>
-
-const fileInput = document.getElementById('fileInput');
-const resultsArea = document.getElementById('resultsArea');
-const loader = document.getElementById('loader');
+const fileInput = document.getElementById("fileInput");
+const loader = document.getElementById("loader");
 
 fileInput.addEventListener("change", handleUpload);
 
@@ -15,8 +12,7 @@ async function handleUpload(e){
         return;
     }
 
-    resultsArea.style.display = "none";
-    loader.style.display = "block";
+    loader.style.display="block";
 
     const formData = new FormData();
     formData.append("file", file);
@@ -43,7 +39,7 @@ async function handleUpload(e){
 
     }finally{
 
-        loader.style.display = "none";
+        loader.style.display="none";
 
     }
 
@@ -51,30 +47,57 @@ async function handleUpload(e){
 
 function displayResults(data){
 
-    resultsArea.style.display = "block";
-
     const medicines = data.medicines_detected || [];
+    const classes = data.drug_classes || {};
     const interactions = data.drug_interactions || [];
+    const warnings = data.dose_warnings || [];
     const rawText = data.raw_text || "";
 
-    // Medicines
-    const medContainer = document.getElementById("medList");
+    /* ---------------- Medicines ---------------- */
 
-    if(medicines.length === 0){
-        medContainer.innerHTML = "<p>No medicines detected</p>";
+    const medContainer=document.getElementById("medList");
+
+    if(medicines.length===0){
+
+        medContainer.innerHTML="<p>No medicines detected</p>";
+
     }else{
-        medContainer.innerHTML = medicines
-        .map(m => `<span class="medicine-tag">${m.toUpperCase()}</span>`)
-        .join("");
+
+        medContainer.innerHTML = medicines.map(m => `
+            <div class="drug-card">
+                <b>${m.toUpperCase()}</b><br>
+                <span>${classes[m] || "Unknown class"}</span>
+            </div>
+        `).join("");
+
     }
 
-    // Interactions
-    const intContainer = document.getElementById("interactionList");
+    /* ---------------- Dose Warnings ---------------- */
 
-    if(interactions.length === 0){
+    const warnContainer=document.getElementById("doseWarnings");
 
-        intContainer.innerHTML = `
-        <p style="color: var(--success)">
+    if(warnings.length===0){
+
+        warnContainer.innerHTML="No dose warnings";
+
+    }else{
+
+        warnContainer.innerHTML = warnings.map(w => `
+            <div class="warning">
+                ⚠ ${w.drug} dose ${w.dose}mg exceeds limit ${w.limit}mg
+            </div>
+        `).join("");
+
+    }
+
+    /* ---------------- Interactions ---------------- */
+
+    const intContainer=document.getElementById("interactionList");
+
+    if(interactions.length===0){
+
+        intContainer.innerHTML=`
+        <p style="color:var(--success)">
         <i class="fas fa-check-circle"></i>
         No interactions detected
         </p>
@@ -82,36 +105,58 @@ function displayResults(data){
 
     }else{
 
-        intContainer.innerHTML = interactions.map(i => `
-            <div class="interaction-item">
+        intContainer.innerHTML = interactions.map(i=>{
+
+            let severityClass="minor";
+
+            if(i.severity==="High") severityClass="high";
+            if(i.severity==="Moderate") severityClass="moderate";
+
+            return `
+            <div class="interaction ${severityClass}">
                 <strong>${i.drug1?.toUpperCase()} + ${i.drug2?.toUpperCase()}</strong><br>
-                <span style="color: var(--danger)">Severity: ${i.severity}</span><br>
-                <small>${i.message}</small>
+                Severity: ${i.severity}<br>
+                ${i.message}
             </div>
-        `).join("");
+            `;
+
+        }).join("");
 
     }
 
-    // Raw OCR text
+    /* ---------------- OCR TEXT ---------------- */
+
     document.getElementById("rawText").innerText = rawText;
 
 }
 
-</script>
-const dropZone = document.getElementById("dropZone");
 
-dropZone.addEventListener("dragover", (e)=>{
+/* ---------------- Drag & Drop Upload ---------------- */
+
+const dropZone=document.getElementById("dropZone");
+
+if(dropZone){
+
+dropZone.addEventListener("dragover",(e)=>{
     e.preventDefault();
-    dropZone.style.background = "#eef7ff";
+    dropZone.style.background="#eef7ff";
 });
 
-dropZone.addEventListener("dragleave", ()=>{
-    dropZone.style.background = "";
+dropZone.addEventListener("dragleave",()=>{
+    dropZone.style.background="";
 });
 
-dropZone.addEventListener("drop", (e)=>{
+dropZone.addEventListener("drop",(e)=>{
+
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    fileInput.files = e.dataTransfer.files;
+
+    const file=e.dataTransfer.files[0];
+
+    fileInput.files=e.dataTransfer.files;
+
     handleUpload({target:{files:[file]}});
+
 });
+
+}
+ 
