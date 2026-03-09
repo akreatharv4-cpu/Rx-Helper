@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-easyocr
+pytesseract
 python-multipart
 Pillow
 pandas
