@@ -1,0 +1,194 @@
+drug_name,class,is_antibiotic,is_injection,is_edl,is_generic
+amoxicillin,Penicillin,1,0,1,1
+ceftriaxone,Cephalosporin,1,1,1,1
+metformin,Biguanide,0,0,1,1
+insulin,Hormone,0,1,1,0
+diclofenac,NSAID,0,0,1,1
+pantoprazole,PPI,0,0,1,1
+gentamicin,Aminoglycoside,1,1,1,1
+paracetamol,Analgesic,0,0,1,1
+ibuprofen,NSAID,0,0,1,1
+aspirin,Antiplatelet,0,0,1,1
+atorvastatin,Statin,0,0,1,1
+amlodipine,Calcium Channel Blocker,0,0,1,1
+losartan,ARB,0,0,1,1
+atenolol,Beta Blocker,0,0,1,1
+azithromycin,Macrolide,1,0,1,1
+ciprofloxacin,Fluoroquinolone,1,0,1,1
+furosemide,Diuretic,0,1,1,1
+omeprazole,PPI,0,0,1,1
+ranitidine,H2 Blocker,0,0,1,1
+metoprolol,Beta Blocker,0,0,1,1
+salbutamol,Bronchodilator,0,0,1,1
+levothyroxine,Hormone,0,0,1,1
+glimepiride,Sulfonylurea,0,0,1,1
+clopidogrel,Antiplatelet,0,0,1,1
+prednisolone,Corticosteroid,0,0,1,1
+dexamethasone,Corticosteroid,0,1,1,1
+montelukast,Leukotriene Antagonist,0,0,1,1
+levofloxacin,Fluoroquinolone,1,0,1,1
+clarithromycin,Macrolide,1,0,0,1
+doxycycline,Tetracycline,1,0,1,1
+cefixime,Cephalosporin,1,0,1,1
+cefotaxime,Cephalosporin,1,1,1,1
+amoxicillin-clavulanic_acid,Penicillin,1,0,1,1
+metronidazole,Antiprotozoal,1,1,1,1
+fluconazole,Antifungal,0,0,1,1
+acyclovir,Antiviral,0,0,1,1
+artemether,Antimalarial,0,1,1,1
+chloroquine,Antimalarial,0,0,1,1
+albendazole,Anthelmintic,0,0,1,1
+rifampicin,Antitubercular,1,0,1,1
+isoniazid,Antitubercular,1,0,1,1
+ethambutol,Antitubercular,1,0,1,1
+pyrazinamide,Antitubercular,1,0,1,1
+enoxaparin,Anticoagulant,0,1,1,1
+heparin,Anticoagulant,0,1,1,1
+warfarin,Anticoagulant,0,0,1,1
+digoxin,Cardiac Glycoside,0,0,1,1
+spironolactone,Diuretic,0,0,1,1
+hydrochlorothiazide,Diuretic,0,0,1,1
+enalapril,ACE Inhibitor,0,0,1,1
+ramipril,ACE Inhibitor,0,0,1,1
+telmisartan,ARB,0,0,1,1
+valsartan,ARB,0,0,0,1
+verapamil,Calcium Channel Blocker,0,0,1,1
+diltiazem,Calcium Channel Blocker,0,0,1,1
+nitroglycerin,Nitrate,0,1,1,1
+isosorbide_dinitrate,Nitrate,0,0,1,1
+hydralazine,Vasodilator,0,1,1,1
+methyldopa,Antihypertensive,0,0,1,1
+phenytoin,Anticonvulsant,0,1,1,1
+carbamazepine,Anticonvulsant,0,0,1,1
+valproate,Anticonvulsant,0,1,1,1
+levetiracetam,Anticonvulsant,0,0,1,1
+diazepam,Benzodiazepine,0,1,1,1
+lorazepam,Benzodiazepine,0,1,1,1
+alprazolam,Benzodiazepine,0,0,0,1
+haloperidol,Antipsychotic,0,1,1,1
+risperidone,Antipsychotic,0,0,1,1
+olanzapine,Antipsychotic,0,0,1,1
+amitriptyline,Antidepressant,0,0,1,1
+fluoxetine,SSRI,0,0,1,1
+sertraline,SSRI,0,0,1,1
+lithium,Mood Stabilizer,0,0,1,1
+morphine,Opioid,0,1,1,1
+tramadol,Opioid,0,1,1,1
+fentanyl,Opioid,0,1,1,1
+naloxone,Antidote,0,1,1,1
+atropine,Anticholinergic,0,1,1,1
+adrenaline,Adrenergic,0,1,1,1
+noradrenaline,Adrenergic,0,1,1,1
+dopamine,Inotrope,0,1,1,1
+dobutamine,Inotrope,0,1,1,1
+hydrocortisone,Corticosteroid,0,1,1,1
+betamethasone,Corticosteroid,0,1,1,1
+ondansetron,Antiemetic,0,1,1,1
+domperidone,Antiemetic,0,0,1,1
+metoclopramide,Antiemetic,0,1,1,1
+hyoscine,Antispasmodic,0,1,1,1
+loperamide,Antidiarrheal,0,0,1,1
+bisacodyl,Laxative,0,0,1,1
+lactulose,Laxative,0,0,1,1
+aluminum_hydroxide,Antacid,0,0,1,1
+magnesium_hydroxide,Antacid,0,0,1,1
+sitagliptin,DPP-4 Inhibitor,0,0,0,0
+pioglitazone,TZD,0,0,1,1
+glipizide,Sulfonylurea,0,0,1,1
+vildagliptin,DPP-4 Inhibitor,0,0,0,0
+dapagliflozin,SGLT2 Inhibitor,0,0,0,0
+allopurinol,Antigout,0,0,1,1
+colchicine,Antigout,0,0,1,1
+methotrexate,Antimetabolite,0,0,1,1
+azathioprine,Immunosuppressant,0,0,1,1
+cyclosporine,Immunosuppressant,0,0,1,1
+levodopa,Antiparkinson,0,0,1,1
+carbidopa,Antiparkinson,0,0,1,1
+trihexyphenidyl,Anticholinergic,0,0,1,1
+neostigmine,Cholinergic,0,1,1,1
+pyridostigmine,Cholinergic,0,0,1,1
+tamsulosin,Alpha Blocker,0,0,1,1
+finasteride,5-Alpha Reductase Inhibitor,0,0,0,1
+sildenafil,PDE5 Inhibitor,0,0,0,1
+oxybutynin,Antimuscarinic,0,0,1,1
+ferrous_sulfate,Hematinic,0,0,1,1
+folic_acid,Vitamin,0,0,1,1
+cyanocobalamin,Vitamin,0,1,1,1
+calcium_carbonate,Mineral,0,0,1,1
+vitamin_d3,Vitamin,0,0,1,1
+ascorbic_acid,Vitamin,0,0,1,1
+pyridoxine,Vitamin,0,0,1,1
+thiamine,Vitamin,0,0,1,1
+vitamin_k,Vitamin,0,1,1,1
+potassium_chloride,Electrolyte,0,1,1,1
+sodium_bicarbonate,Electrolyte,0,1,1,1
+calcium_gluconate,Electrolyte,0,1,1,1
+magnesium_sulfate,Electrolyte,0,1,1,1
+mannitol,Diuretic,0,1,1,1
+acetazolamide,Diuretic,0,0,1,1
+timolol,Beta Blocker (Ophthalmic),0,0,1,1
+latanoprost,PG Analog (Ophthalmic),0,0,1,1
+homatropine,Mydriatic,0,0,1,1
+lidocaine,Local Anesthetic,0,1,1,1
+bupivacaine,Local Anesthetic,0,1,1,1
+propofol,General Anesthetic,0,1,1,1
+ketamine,General Anesthetic,0,1,1,1
+thiopental,General Anesthetic,0,1,1,1
+pancuronium,Muscle Relaxant,0,1,1,1
+succinylcholine,Muscle Relaxant,0,1,1,1
+baclofen,Muscle Relaxant,0,0,1,1
+tizanidine,Muscle Relaxant,0,0,1,1
+oxytocin,Uterotonic,0,1,1,1
+misoprostol,PG Analog,0,0,1,1
+mifepristone,Antiprogestogen,0,0,1,1
+ethinylestradiol,Estrogen,0,0,1,1
+levonorgestrel,Progestin,0,0,1,1
+terbutaline,Bronchodilator,0,1,1,1
+theophylline,Xanthine,0,0,1,1
+ipratropium,Anticholinergic,0,0,1,1
+budesonide,Corticosteroid (Inhaled),0,0,1,1
+cetirizine,Antihistamine,0,0,1,1
+chlorpheniramine,Antihistamine,0,1,1,1
+loratadine,Antihistamine,0,0,1,1
+promethazine,Antihistamine,0,1,1,1
+activated_charcoal,Antidote,0,0,1,1
+penicillamine,Antidote,0,0,1,1
+desferrioxamine,Antidote,0,1,1,1
+amphotericin_b,Antifungal,0,1,1,1
+griseofulvin,Antifungal,0,0,1,1
+nystatin,Antifungal,0,0,1,1
+terbinafine,Antifungal,0,0,1,1
+vancomycin,Antibiotic,1,1,1,1
+linezolid,Antibiotic,1,1,1,1
+meropenem,Antibiotic,1,1,1,1
+piperacillin-tazobactam,Antibiotic,1,1,1,1
+imipenem,Antibiotic,1,1,0,1
+clindamycin,Antibiotic,1,1,1,1
+nitrofurantoin,Antibiotic,1,0,1,1
+trimethoprim-sulfamethoxazole,Antibiotic,1,0,1,1
+norfloxacin,Antibiotic,1,0,1,1
+tetracycline,Antibiotic,1,0,1,1
+streptomycin,Antibiotic,1,1,1,1
+amikacin,Antibiotic,1,1,1,1
+tobramycin,Antibiotic,1,0,1,1
+erythromycin,Antibiotic,1,0,1,1
+cefalexin,Antibiotic,1,0,1,1
+cefdinir,Antibiotic,1,0,0,1
+cefuroxime,Antibiotic,1,0,1,1
+valacyclovir,Antiviral,0,0,0,1
+oseltamivir,Antiviral,0,0,1,1
+lamivudine,Antiviral (HIV),0,0,1,1
+tenofovir,Antiviral (HIV),0,0,1,1
+efavirenz,Antiviral (HIV),0,0,1,1
+ritonavir,Antiviral (HIV),0,0,1,1
+daclatasvir,Antiviral (HCV),0,0,1,1
+sofosbuvir,Antiviral (HCV),0,0,1,1
+clofazimine,Antileprotic,0,0,1,1
+dapsone,Antileprotic,0,0,1,1
+praziquantel,Anthelmintic,0,0,1,1
+ivermectin,Anthelmintic,0,0,1,1
+permethrin,Scabicide,0,0,1,1
+mupirocin,Antibiotic (Topical),1,0,1,1
+povidone-iodine,Antiseptic,0,0,1,1
+chlorhexidine,Antiseptic,0,0,1,1
+silver_sulfadiazine,Antibiotic (Topical),1,0,1,1
