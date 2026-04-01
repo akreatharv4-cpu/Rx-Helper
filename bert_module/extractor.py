@@ -1,39 +1,28 @@
-from bert_module.biobert import extract_medical_entities
+from functools import lru_cache
+from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+
+MODEL_NAME = "dmis-lab/biobert-base-cased-v1.1"
 
 
-def extract_clean_drugs(text):
-    entities = extract_medical_entities(text)
+@lru_cache(maxsize=1)
+def get_ner_pipeline():
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME)
+    return pipeline(
+        "ner",
+        model=model,
+        tokenizer=tokenizer,
+        aggregation_strategy="simple"
+    )
 
-    words = []
-    current = ""
 
-    for e in entities:
-        word = str(e.get("word", "")).strip()
-        if not word:
-            continue
+def extract_medical_entities(text):
+    if not text:
+        return []
 
-        # Merge word pieces like "para" + "##cetamol"
-        if word.startswith("##"):
-            current += word[2:]
-        else:
-            if current:
-                words.append(current)
-            current = word
-
-    if current:
-        words.append(current)
-
-    cleaned = []
-    seen = set()
-
-    for w in words:
-        w = w.strip(" ,.;:()[]{}")
-        if len(w) < 3:
-            continue
-
-        key = w.lower()
-        if key not in seen:
-            seen.add(key)
-            cleaned.append(w)
-
-    return cleaned
+    try:
+        ner_pipeline = get_ner_pipeline()
+        return ner_pipeline(text)
+    except Exception as e:
+        print(f"BioBERT error: {e}")
+        return []
