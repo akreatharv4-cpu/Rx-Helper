@@ -78,9 +78,9 @@ def detect_medicines(text):
         return []
 
 # ---------------- ROUTES ----------------
-@app.get("/")
-async def index():
-    return FileResponse(str(BASE_DIR / "templates" / "index.html"))
+@app.get("/test")
+async def test():
+    return {"status": "working"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
