@@ -1,9 +1,9 @@
-app = FastAPI()
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+app = FastAPI()
 # OCR imports
 try:
     from ocr import ocr_image_bytes, ocr_pdf_bytes
