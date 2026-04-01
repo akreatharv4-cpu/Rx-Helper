@@ -1,27 +1,33 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-
-import pandas as pd
+from pathlib import Path
+from typing import List
 import json
 import re
+
+import pandas as pd
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
 from rapidfuzz import process, fuzz
-from typing import List
 
-from ocr import ocr_image_bytes, ocr_pdf_bytes
+# OCR imports
+try:
+    from ocr import ocr_image_bytes, ocr_pdf_bytes
+except Exception as e:
+    print(f"⚠ OCR import failed: {e}")
+    ocr_image_bytes = None
+    ocr_pdf_bytes = None
 
-# BioBERT extractor (if available)
+# BioBERT extractor
 try:
     from bert_module.extractor import extract_clean_drugs
 except Exception as e:
     print(f"⚠ BioBERT import failed: {e}")
     extract_clean_drugs = None
 
-app = FastAPI(title="Rx-Helper Clinical Assistant")
+BASE_DIR = Path(__file__).resolve().parent
 
-# ---------------- CORS ----------------
+app = FastAPI(title="Rx-Helper Clinical Assistant")
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,14 +36,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- STATIC + TEMPLATES ----------------
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# Mount static folder only if it exists
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # ---------------- LOAD DATABASE FILES ----------------
 
-def load_csv(path):
+def load_csv(filename: str) -> pd.DataFrame:
+    path = BASE_DIR / filename
     try:
         return pd.read_csv(path)
     except Exception:
@@ -50,9 +57,8 @@ interactions_df = load_csv("drug_interactions.csv")
 dosage_df = load_csv("dosage_reference.csv")
 classes_df = load_csv("drug_classes.csv")
 
-# shorthand dictionary
 try:
-    with open("abbreviations.json", "r", encoding="utf-8") as f:
+    with open(BASE_DIR / "abbreviations.json", "r", encoding="utf-8") as f:
         ABBR = json.load(f)
 except Exception:
     ABBR = {}
@@ -118,18 +124,18 @@ def clean_text(text: str) -> str:
 # ---------------- BIOBERT + MEDICINE DETECTION ----------------
 
 def detect_medicines(text: str) -> List[str]:
-    detected = set()
+    detected = []
 
     # 1) BioBERT first
-    if extract_clean_drugs is not None:
+    if extract_clean_drugs is not None and med_names:
         try:
             biobert_drugs = extract_clean_drugs(text)
+
             for drug in biobert_drugs:
                 drug = str(drug).strip().lower()
                 if not drug:
                     continue
 
-                # Match BioBERT result with medicine database
                 match = process.extractOne(
                     drug,
                     med_names,
@@ -137,14 +143,16 @@ def detect_medicines(text: str) -> List[str]:
                 )
 
                 if match and match[1] > 85:
-                    detected.add(match[0])
+                    if match[0] not in detected:
+                        detected.append(match[0])
                 elif drug in med_names:
-                    detected.add(drug)
+                    if drug not in detected:
+                        detected.append(drug)
         except Exception as e:
             print(f"⚠ BioBERT detection failed, using fallback: {e}")
 
     # 2) Fallback fuzzy matching on cleaned text
-    if not detected:
+    if not detected and med_names:
         text_clean = clean_text(text)
         tokens = text_clean.split()
 
@@ -156,18 +164,19 @@ def detect_medicines(text: str) -> List[str]:
             )
 
             if match and match[1] > 85:
-                detected.add(match[0])
+                if match[0] not in detected:
+                    detected.append(match[0])
 
-    return list(detected)
+    return detected
 
 # ---------------- DOSE EXTRACTION ----------------
 
-def extract_doses(text):
+def extract_doses(text: str):
     doses = {}
     text = text.lower()
 
     # matches like "paracetamol 500 mg"
-    matches = re.findall(r"([\w\-]+)\s*(\d+)\s*mg", text)
+    matches = re.findall(r"([a-zA-Z][a-zA-Z0-9\-]*)\s*(\d+(?:\.\d+)?)\s*mg", text)
 
     for drug, dose in matches:
         match = process.extractOne(
@@ -177,7 +186,7 @@ def extract_doses(text):
         )
 
         if match and match[1] > 80:
-            doses[match[0]] = int(dose)
+            doses[match[0]] = float(dose)
 
     return doses
 
@@ -187,14 +196,13 @@ def check_dosage(doses):
     warnings = []
 
     for drug, dose in doses.items():
-        if drug in dosage_lookup:
-            if dose > dosage_lookup[drug]:
-                warnings.append({
-                    "drug": drug,
-                    "dose": dose,
-                    "limit": dosage_lookup[drug],
-                    "warning": "Dose exceeds recommended maximum"
-                })
+        if drug in dosage_lookup and dose > dosage_lookup[drug]:
+            warnings.append({
+                "drug": drug,
+                "dose": dose,
+                "limit": dosage_lookup[drug],
+                "warning": "Dose exceeds recommended maximum"
+            })
 
     return warnings
 
@@ -250,6 +258,9 @@ def check_interactions(meds):
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    if ocr_image_bytes is None or ocr_pdf_bytes is None:
+        raise HTTPException(status_code=500, detail="OCR module is not available")
+
     try:
         content = await file.read()
 
@@ -261,7 +272,6 @@ async def upload_file(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # shorthand expansion
     text = expand_abbreviations(text)
 
     medicines = detect_medicines(text)
@@ -281,8 +291,8 @@ async def upload_file(file: UploadFile = File(...)):
 # ---------------- INDEX PAGE ----------------
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+async def index():
+    index_path = BASE_DIR / "templates" / "index.html"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="index.html not found")
+    return FileResponse(index_path)
