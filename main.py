@@ -103,3 +103,6 @@ async def upload(file: UploadFile = File(...)):
         "dose_warnings": [],
         "raw_text": text
     }
+@app.get("/test")
+async def test():
+    return {"status": "working"}
