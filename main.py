@@ -1,7 +1,9 @@
+```python
 from pathlib import Path
 from typing import List
 import json
 import re
+import os
 
 import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
@@ -26,7 +28,8 @@ except Exception as e:
     print(f"⚠ BioBERT import failed: {e}")
     extract_clean_drugs = None
 
-BASE_DIR = Path(__file__).resolve().parent
+# ---------------- BASE DIR FIX ----------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI(title="Rx-Helper Clinical Assistant")
 
@@ -37,25 +40,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static + templates
-static_dir = BASE_DIR / "static"
-templates_dir = BASE_DIR / "templates"
+# ---------------- STATIC + TEMPLATES ----------------
+static_dir = os.path.join(BASE_DIR, "static")
+templates_dir = os.path.join(BASE_DIR, "templates")
 
-if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-templates = Jinja2Templates(directory=str(templates_dir))
+templates = Jinja2Templates(directory=templates_dir)
 
 # ---------------- LOAD DATABASE FILES ----------------
 
 def load_csv(filename: str) -> pd.DataFrame:
-    path = BASE_DIR / filename
+    path = os.path.join(BASE_DIR, filename)
     try:
         return pd.read_csv(path)
     except Exception:
         print(f"⚠ Missing file: {path}")
         return pd.DataFrame()
-
 
 df_meds = load_csv("medicines.csv")
 interactions_df = load_csv("drug_interactions.csv")
@@ -63,7 +65,7 @@ dosage_df = load_csv("dosage_reference.csv")
 classes_df = load_csv("drug_classes.csv")
 
 try:
-    with open(BASE_DIR / "abbreviations.json", "r", encoding="utf-8") as f:
+    with open(os.path.join(BASE_DIR, "abbreviations.json"), "r", encoding="utf-8") as f:
         ABBR = json.load(f)
 except Exception:
     ABBR = {}
@@ -294,4 +296,8 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
+```
