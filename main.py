@@ -1,14 +1,9 @@
-from pathlib import Path
-from typing import List
-import json
-import re
-
-import pandas as pd
+app = FastAPI()
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from rapidfuzz import process, fuzz
-
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 # OCR imports
 try:
     from ocr import ocr_image_bytes, ocr_pdf_bytes
