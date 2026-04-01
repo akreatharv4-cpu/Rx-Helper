@@ -11,3 +11,6 @@ rapidfuzz
 pdf2image
 reportlab
 jinja2
+transformers
+torch
+scikit-learn
