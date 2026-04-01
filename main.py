@@ -290,12 +290,8 @@ async def upload_file(file: UploadFile = File(...)):
 
 # ---------------- INDEX PAGE ----------------
 
+from fastapi.responses import FileResponse
+
 @app.get("/")
-async def index(request: Request):
-    try:
-        return templates.TemplateResponse("index.html", {"request": request})
-    except Exception as e:
-        return {
-            "status": "working",
-            "template_error": str(e)
-        }
+async def index():
+    return FileResponse("templates/index.html")
