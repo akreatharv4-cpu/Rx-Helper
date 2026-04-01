@@ -293,11 +293,7 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 # ---------------- INDEX PAGE ----------------
+@app.get("/")
+async def test():
+    return {"status": "working"}
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
-```
