@@ -18,8 +18,8 @@ try:
     from bert_module.extractor import extract_clean_drugs
 except Exception as e:
     print(f"⚠ BioBERT import failed: {e}")
-    extract_clean_drugs = None
-
+    def extract_clean_drugs(text):
+    return []
 BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title="Rx-Helper Clinical Assistant")
