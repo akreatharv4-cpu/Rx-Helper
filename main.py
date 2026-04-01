@@ -1,12 +1,12 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from pathlib import Path
 import pandas as pd
 import json
-import re
 
 from rapidfuzz import process, fuzz
 
@@ -14,6 +14,9 @@ from rapidfuzz import process, fuzz
 app = FastAPI(title="Rx-Helper Clinical Assistant")
 
 BASE_DIR = Path(__file__).resolve().parent
+
+# ---------------- TEMPLATES ----------------
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # ---------------- OCR ----------------
 try:
@@ -41,8 +44,6 @@ app.add_middleware(
 
 # ---------------- STATIC ----------------
 static_dir = BASE_DIR / "static"
-templates_dir = BASE_DIR / "templates"
-
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
@@ -56,19 +57,6 @@ def load_csv(filename: str):
         return pd.DataFrame()
 
 df_meds = load_csv("medicines.csv")
-interactions_df = load_csv("drug_interactions.csv")
-dosage_df = load_csv("dosage_reference.csv")
-classes_df = load_csv("drug_classes.csv")
-
-try:
-    with open(BASE_DIR / "abbreviations.json") as f:
-        ABBR = json.load(f)
-except:
-    ABBR = {}
-
-med_names = []
-if not df_meds.empty:
-    med_names = df_meds.iloc[:, 0].dropna().astype(str).str.lower().tolist()
 
 # ---------------- FUNCTIONS ----------------
 def detect_medicines(text):
@@ -78,10 +66,18 @@ def detect_medicines(text):
         return []
 
 # ---------------- ROUTES ----------------
+
+# ✅ MAIN PAGE (FIXED)
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+# ✅ TEST ROUTE
 @app.get("/test")
 async def test():
     return {"status": "working"}
 
+# ✅ UPLOAD
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     if ocr_image_bytes is None:
@@ -98,11 +94,5 @@ async def upload(file: UploadFile = File(...)):
 
     return {
         "medicines_detected": meds,
-        "drug_classes": {},
-        "drug_interactions": [],
-        "dose_warnings": [],
         "raw_text": text
     }
-@app.get("/test")
-async def test():
-    return {"status": "working"}
