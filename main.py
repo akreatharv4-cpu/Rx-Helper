@@ -4,10 +4,11 @@ import json
 import re
 
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from rapidfuzz import process, fuzz
 
 # OCR imports
@@ -36,10 +37,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static folder only if it exists
+# Static + templates
 static_dir = BASE_DIR / "static"
+templates_dir = BASE_DIR / "templates"
+
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+templates = Jinja2Templates(directory=str(templates_dir))
 
 # ---------------- LOAD DATABASE FILES ----------------
 
@@ -126,7 +131,6 @@ def clean_text(text: str) -> str:
 def detect_medicines(text: str) -> List[str]:
     detected = []
 
-    # 1) BioBERT first
     if extract_clean_drugs is not None and med_names:
         try:
             biobert_drugs = extract_clean_drugs(text)
@@ -151,7 +155,6 @@ def detect_medicines(text: str) -> List[str]:
         except Exception as e:
             print(f"⚠ BioBERT detection failed, using fallback: {e}")
 
-    # 2) Fallback fuzzy matching on cleaned text
     if not detected and med_names:
         text_clean = clean_text(text)
         tokens = text_clean.split()
@@ -175,7 +178,6 @@ def extract_doses(text: str):
     doses = {}
     text = text.lower()
 
-    # matches like "paracetamol 500 mg"
     matches = re.findall(r"([a-zA-Z][a-zA-Z0-9\-]*)\s*(\d+(?:\.\d+)?)\s*mg", text)
 
     for drug, dose in matches:
@@ -291,8 +293,5 @@ async def upload_file(file: UploadFile = File(...)):
 # ---------------- INDEX PAGE ----------------
 
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    index_path = BASE_DIR / "templates" / "index.html"
-    if not index_path.exists():
-        raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(index_path)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
