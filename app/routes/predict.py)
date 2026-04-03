@@ -1,1 +1,26 @@
+from fastapi import APIRouter, UploadFile, File
+import pytesseract
+from PIL import Image
+import io
 
+from app.services.pipeline import process_prescription
+
+router = APIRouter()
+
+@router.post("/analyze")
+async def analyze_prescription(file: UploadFile = File(...)):
+    
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents))
+    
+    # OCR
+    extracted_text = pytesseract.image_to_string(image)
+    
+    # Process
+    result = process_prescription(extracted_text)
+    
+    return {
+        "raw_text": extracted_text,
+        "cleaned_text": result["cleaned_text"],
+        "detected_drugs": result["detected_drugs"]
+    }
