@@ -1,19 +1,22 @@
+from pathlib import Path
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from pathlib import Path
-import pandas as pd
-import json
-
-from rapidfuzz import process, fuzz
+from database import Base, engine
+from models import Prescription
+from bert_module.extractor import extract_clean_drugs
+from utils.interaction_checker import check_interactions
 
 # ---------------- APP ----------------
 app = FastAPI(title="Rx-Helper Clinical Assistant")
-
 BASE_DIR = Path(__file__).resolve().parent
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 # ---------------- TEMPLATES ----------------
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
@@ -25,14 +28,6 @@ except Exception as e:
     print(f"⚠ OCR import failed: {e}")
     ocr_image_bytes = None
     ocr_pdf_bytes = None
-
-# ---------------- BIOBERT ----------------
-try:
-    from bert_module.extractor import extract_clean_drugs
-except Exception as e:
-    print(f"⚠ BioBERT import failed: {e}")
-    def extract_clean_drugs(text):
-        return []
 
 # ---------------- CORS ----------------
 app.add_middleware(
@@ -47,52 +42,51 @@ static_dir = BASE_DIR / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-# ---------------- LOAD FILES ----------------
-def load_csv(filename: str):
-    path = BASE_DIR / filename
-    try:
-        return pd.read_csv(path)
-    except:
-        print(f"Missing: {filename}")
-        return pd.DataFrame()
 
-df_meds = load_csv("medicines.csv")
-
-# ---------------- FUNCTIONS ----------------
 def detect_medicines(text):
     try:
-        return extract_clean_drugs(text)
-    except:
+        meds = extract_clean_drugs(text or "")
+        return list(dict.fromkeys([m.upper().strip() for m in meds if m and str(m).strip()]))
+    except Exception as e:
+        print(f"Medicine detection error: {e}")
         return []
 
-# ---------------- ROUTES ----------------
 
-# ✅ MAIN PAGE (FIXED)
+# ---------------- ROUTES ----------------
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# ✅ TEST ROUTE
+
 @app.get("/test")
 async def test():
     return {"status": "working"}
 
-# ✅ UPLOAD
+
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    if ocr_image_bytes is None:
-        raise HTTPException(500, "OCR not working")
+    if ocr_image_bytes is None or ocr_pdf_bytes is None:
+        raise HTTPException(status_code=500, detail="OCR not working")
 
     content = await file.read()
+    filename = (file.filename or "").lower()
 
-    if file.filename.endswith(".pdf"):
-        text = ocr_pdf_bytes(content)
-    else:
-        text = ocr_image_bytes(content)
+    try:
+        if filename.endswith(".pdf"):
+            text = ocr_pdf_bytes(content)
+            source_type = "pdf"
+        else:
+            text = ocr_image_bytes(content)
+            source_type = "image"
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OCR failed: {e}")
 
     meds = detect_medicines(text)
+    interactions = check_interactions(meds)
 
     return {
+        "source_type": source_type,
         "medicines_detected": meds,
-        "raw_text": text
+        "interactions": interactions,
+        "raw_text": text,
     }

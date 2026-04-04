@@ -1,70 +1,93 @@
+from pathlib import Path
 import pandas as pd
 
-# ---------------- LOAD INTERACTION DATABASE ----------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+CSV_PATH = BASE_DIR / "drug_interactions.csv"
+
 
 def load_interactions():
-
     try:
+        df = pd.read_csv(CSV_PATH)
 
-        df = pd.read_csv("drug_interactions.csv")
+        if "drug1" not in df.columns or "drug2" not in df.columns:
+            raise ValueError("drug_interactions.csv must contain drug1 and drug2 columns")
 
-        # normalize drug names
         df["drug1"] = df["drug1"].astype(str).str.lower().str.strip()
         df["drug2"] = df["drug2"].astype(str).str.lower().str.strip()
 
-        # normalize severity labels
+        severity_map = {
+            "high": "Severe",
+            "major": "Severe",
+            "severe": "Severe",
+            "moderate": "Moderate",
+            "medium": "Moderate",
+            "low": "Mild",
+            "mild": "Mild",
+        }
+
         if "severity" in df.columns:
-            df["severity"] = df["severity"].astype(str).str.title()
+            df["severity"] = (
+                df["severity"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .map(severity_map)
+                .fillna("Moderate")
+            )
         else:
             df["severity"] = "Moderate"
 
-        # ensure message column exists
         if "message" not in df.columns:
-
             if "description" in df.columns:
-                df["message"] = df["description"]
+                df["message"] = df["description"].astype(str)
             else:
                 df["message"] = "Drug interaction detected"
 
-        return df
+        return df[["drug1", "drug2", "severity", "message"]]
 
     except Exception as e:
-
         print("⚠ Interaction database error:", e)
-
-        return pd.DataFrame(columns=["drug1","drug2","severity","message"])
+        return pd.DataFrame(columns=["drug1", "drug2", "severity", "message"])
 
 
 interactions_df = load_interactions()
 
-# ---------------- INTERACTION CHECK ----------------
+
+def severity_icon(severity):
+    return {
+        "Severe": "🔴",
+        "Moderate": "🟠",
+        "Mild": "🟡"
+    }.get(severity, "⚪")
+
 
 def check_interactions(medicine_list):
-
     alerts = []
 
-    if interactions_df.empty:
+    if interactions_df.empty or not medicine_list:
         return alerts
 
-    # normalize medicines
-    meds = list(set([m.lower().strip() for m in medicine_list]))
+    meds = []
+    seen_meds = set()
+    for m in medicine_list:
+        if not m:
+            continue
+        cleaned = str(m).lower().strip()
+        if cleaned and cleaned not in seen_meds:
+            seen_meds.add(cleaned)
+            meds.append(cleaned)
 
-    seen = set()
+    seen_pairs = set()
 
     for i in range(len(meds)):
-
         for j in range(i + 1, len(meds)):
-
             drug1 = meds[i]
             drug2 = meds[j]
-
-            # prevent duplicate checks
             key = tuple(sorted([drug1, drug2]))
 
-            if key in seen:
+            if key in seen_pairs:
                 continue
-
-            seen.add(key)
+            seen_pairs.add(key)
 
             result = interactions_df[
                 ((interactions_df["drug1"] == drug1) & (interactions_df["drug2"] == drug2)) |
@@ -72,14 +95,11 @@ def check_interactions(medicine_list):
             ]
 
             if not result.empty:
-
                 row = result.iloc[0]
-
                 alerts.append({
-                    "drug1": drug1,
-                    "drug2": drug2,
-                    "severity": row["severity"],
-                    "message": row["message"]
+                    "pair": f"{drug1.upper()} + {drug2.upper()}",
+                    "severity": f"{severity_icon(row['severity'])} {row['severity']}",
+                    "warning": row["message"]
                 })
 
     return alerts

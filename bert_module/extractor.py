@@ -1,40 +1,35 @@
 from bert_module.biobert import extract_medical_entities
 
 
+ALLOWED_LABELS = {"chemical", "drug", "medication"}
+
+
 def extract_clean_drugs(text):
     entities = extract_medical_entities(text)
-
-    words = []
-    current = ""
-
-    for e in entities:
-        word = str(e.get("word", "")).strip()
-        if not word:
-            continue
-
-        word = word.strip(" ,.;:()[]{}")
-
-        if word.startswith("##"):
-            current += word[2:]
-        else:
-            if current:
-                words.append(current)
-            current = word
-
-    if current:
-        words.append(current)
 
     cleaned = []
     seen = set()
 
-    for w in words:
-        w = w.strip(" ,.;:()[]{}")
-        if len(w) < 3:
+    for e in entities:
+        label = str(e.get("entity_group", "")).lower().strip()
+        if label not in ALLOWED_LABELS:
             continue
 
-        key = w.lower()
-        if key not in seen:
-            seen.add(key)
-            cleaned.append(w)
+        word = str(e.get("word", "")).strip()
+        if not word:
+            continue
+
+        word = word.replace("##", "")
+        word = word.strip(" ,.;:()[]{}<>\"'")
+
+        if len(word) < 3:
+            continue
+
+        key = word.lower()
+        if key in seen:
+            continue
+
+        seen.add(key)
+        cleaned.append(word.upper())
 
     return cleaned
