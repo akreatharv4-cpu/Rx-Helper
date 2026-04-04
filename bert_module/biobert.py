@@ -1,23 +1,20 @@
 from functools import lru_cache
-from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+from transformers import pipeline
 
-MODEL_NAME = "dmis-lab/biobert-base-cased-v1.1"
+MODEL_NAME = "d4data/biomedical-ner-all"
 
 
 @lru_cache(maxsize=1)
 def get_ner_pipeline():
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME)
     return pipeline(
         "ner",
-        model=model,
-        tokenizer=tokenizer,
+        model=MODEL_NAME,
         aggregation_strategy="simple"
     )
 
 
 def extract_medical_entities(text):
-    if not text:
+    if not text or not str(text).strip():
         return []
 
     try:
