@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+import re  
 from ocr import ocr_image_bytes, ocr_pdf_bytes, extract_clean_drugs
 from pathlib import Path
 import pandas as pd
