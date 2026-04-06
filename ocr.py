@@ -1,6 +1,6 @@
 """
-OCR utilities for Rx-Helper
-Improved: Fast + Accurate + Stable EasyOCR pipeline
+Optimized OCR utilities for Rx-Helper
+High accuracy + noise filtering + prescription focus
 """
 
 from PIL import Image
@@ -25,7 +25,7 @@ def get_reader():
     global reader
     if reader is None:
         import easyocr
-        logger.info("Loading EasyOCR model...")
+        logger.info("🔄 Loading EasyOCR model...")
         reader = easyocr.Reader(['en'], gpu=False)
     return reader
 
@@ -59,11 +59,12 @@ def _pil_to_cv2(img: Image.Image) -> np.ndarray:
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 
-def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarray:
+def preprocess_image(img: Image.Image, resize_min_width: int = 1200) -> np.ndarray:
     img_cv = _pil_to_cv2(img)
+
     h, w = img_cv.shape[:2]
 
-    # Resize (important for small images)
+    # Resize for better OCR
     if w < resize_min_width and w > 0:
         scale = resize_min_width / float(w)
         img_cv = cv2.resize(
@@ -74,26 +75,50 @@ def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarr
 
     gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
 
-    # Contrast improvement
-    gray = cv2.convertScaleAbs(gray, alpha=1.8, beta=25)
+    # Contrast boost
+    gray = cv2.convertScaleAbs(gray, alpha=2.0, beta=30)
 
-    # Sharpening (NEW 🔥)
+    # Sharpen
     kernel = np.array([[0, -1, 0],
                        [-1, 5,-1],
                        [0, -1, 0]])
     gray = cv2.filter2D(gray, -1, kernel)
 
-    # Adaptive threshold (BETTER than fixed)
+    # Adaptive threshold
     thresh = cv2.adaptiveThreshold(
         gray,
         255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.ADAPTIVE_THRESH_MEAN_C,
         cv2.THRESH_BINARY,
-        11,
-        2
+        15,
+        3
     )
 
     return thresh
+
+
+# ---------------- TEXT FILTER ----------------
+def filter_prescription_text(text: str) -> str:
+    """
+    Keep only medically relevant lines
+    """
+    lines = text.split("\n")
+
+    filtered = []
+
+    for line in lines:
+        line = line.strip()
+
+        # Skip empty or very short lines
+        if len(line) < 3:
+            continue
+
+        # Keep lines that contain:
+        # letters + numbers (like 500 mg)
+        if re.search(r"[a-zA-Z]{3,}", line):
+            filtered.append(line)
+
+    return " ".join(filtered)
 
 
 # ---------------- OCR IMAGE ----------------
@@ -105,9 +130,10 @@ def ocr_image_bytes(image_bytes: bytes) -> str:
         reader = get_reader()
         result = reader.readtext(processed, detail=0)
 
-        text = " ".join(result)
+        raw_text = "\n".join(result)
 
-        text = clean_ocr_errors(text)
+        text = clean_ocr_errors(raw_text)
+        text = filter_prescription_text(text)
 
         return text.strip()
 
@@ -141,8 +167,10 @@ def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = N
             reader = get_reader()
             result = reader.readtext(processed, detail=0)
 
-            page_text = " ".join(result)
-            page_text = clean_ocr_errors(page_text)
+            raw_text = "\n".join(result)
+
+            page_text = clean_ocr_errors(raw_text)
+            page_text = filter_prescription_text(page_text)
 
             if page_text.strip():
                 texts.append(page_text.strip())
@@ -153,7 +181,9 @@ def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = N
     return "\n\n".join(texts)
 
 
-# ---------------- TEMP DRUG EXTRACT ----------------
+# ---------------- OPTIONAL ----------------
 def extract_clean_drugs(text: str):
-    words = re.findall(r"[A-Za-z]{4,}", text)
-    return list(set([w.lower() for w in words]))
+    """
+    Not used anymore (kept for compatibility)
+    """
+    return []
