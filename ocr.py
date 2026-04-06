@@ -29,7 +29,7 @@ if _tesseract_path:
 else:
     logger.warning("Tesseract not found in PATH")
 
-DEFAULT_CONFIG = "--oem 3 --psm 6 -l eng"
+DEFAULT_CONFIG = "--oem 3 --psm 4 -l eng"
 
 # ---------------- LOAD ABBREVIATIONS ----------------
 try:

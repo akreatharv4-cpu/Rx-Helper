@@ -6,6 +6,7 @@ from ocr import ocr_image_bytes, ocr_pdf_bytes, extract_clean_drugs
 from pathlib import Path
 import pandas as pd
 from thefuzz import process
+import re
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -39,19 +40,34 @@ def load_interactions():
 interactions_df = load_interactions()
 
 
+# ---------------- TEXT CLEANING ---------------- #
+
+def clean_text(text: str):
+    """
+    Clean noisy OCR text
+    """
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)  # remove symbols
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
 # ---------------- MEDICINE DETECTION ---------------- #
 
 def detect_medicines(text: str):
-    """
-    Clean extraction using OCR + BioBERT output
-    """
     if not text:
         return []
 
+    # Clean OCR noise
+    text = clean_text(text)
+
+    # Extract drugs (BioBERT / OCR logic)
     meds = extract_clean_drugs(text)
 
-    # normalize
+    # Normalize
     meds = list(set([m.lower().strip() for m in meds if len(m) > 2]))
+
+    print("💊 DETECTED MEDS:", meds)
 
     return meds
 
@@ -69,12 +85,13 @@ def check_interactions(medicine_list):
         interactions_df["drug2"].tolist()
     ))
 
-    # fuzzy match OCR errors
     matched = []
 
     for m in medicine_list:
         match = process.extractOne(m, all_known_drugs)
-        if match and match[1] > 85:
+
+        # safer threshold
+        if match and match[1] > 80:
             matched.append(match[0])
 
     matched = list(set(matched))
@@ -103,6 +120,8 @@ def check_interactions(medicine_list):
                     "message": row["message"]
                 })
 
+    print("⚠ INTERACTIONS:", alerts)
+
     return alerts
 
 
@@ -119,8 +138,14 @@ async def upload(file: UploadFile = File(...)):
         content = await file.read()
         filename = (file.filename or "").lower()
 
+        print(f"\n📁 FILE: {filename}")
+
         # OCR
         text = ocr_pdf_bytes(content) if filename.endswith(".pdf") else ocr_image_bytes(content)
+
+        print("\n===== RAW OCR TEXT =====\n")
+        print(text[:1000])   # limit output
+        print("\n========================\n")
 
         if not text:
             raise Exception("OCR returned empty text")
