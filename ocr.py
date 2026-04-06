@@ -1,6 +1,6 @@
 """
 OCR utilities for Rx-Helper
-Upgraded: EasyOCR (AI-based) instead of Tesseract
+Improved: Fast + Accurate + Stable EasyOCR pipeline
 """
 
 from PIL import Image
@@ -11,7 +11,6 @@ import numpy as np
 import re
 from typing import Optional
 from pathlib import Path
-import easyocr
 
 # ---------------- LOGGING ----------------
 logging.basicConfig(level=logging.INFO)
@@ -19,8 +18,16 @@ logger = logging.getLogger("ocr")
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# ---------------- EASYOCR INIT ----------------
-reader = easyocr.Reader(['en'], gpu=False)
+# ---------------- SAFE EASYOCR INIT ----------------
+reader = None
+
+def get_reader():
+    global reader
+    if reader is None:
+        import easyocr
+        logger.info("Loading EasyOCR model...")
+        reader = easyocr.Reader(['en'], gpu=False)
+    return reader
 
 
 # ---------------- OCR CLEANING ----------------
@@ -56,7 +63,7 @@ def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarr
     img_cv = _pil_to_cv2(img)
     h, w = img_cv.shape[:2]
 
-    # Resize
+    # Resize (important for small images)
     if w < resize_min_width and w > 0:
         scale = resize_min_width / float(w)
         img_cv = cv2.resize(
@@ -67,30 +74,38 @@ def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarr
 
     gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
 
-    # Improve contrast
-    gray = cv2.convertScaleAbs(gray, alpha=2, beta=20)
+    # Contrast improvement
+    gray = cv2.convertScaleAbs(gray, alpha=1.8, beta=25)
 
-    # Noise removal
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Sharpening (NEW 🔥)
+    kernel = np.array([[0, -1, 0],
+                       [-1, 5,-1],
+                       [0, -1, 0]])
+    gray = cv2.filter2D(gray, -1, kernel)
 
-    # Threshold
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+    # Adaptive threshold (BETTER than fixed)
+    thresh = cv2.adaptiveThreshold(
+        gray,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11,
+        2
+    )
 
     return thresh
 
 
 # ---------------- OCR IMAGE ----------------
 def ocr_image_bytes(image_bytes: bytes) -> str:
-    """
-    AI OCR using EasyOCR
-    """
     try:
         img = Image.open(io.BytesIO(image_bytes))
         processed = preprocess_image(img)
 
-        result = reader.readtext(processed)
+        reader = get_reader()
+        result = reader.readtext(processed, detail=0)
 
-        text = " ".join([r[1] for r in result])
+        text = " ".join(result)
 
         text = clean_ocr_errors(text)
 
@@ -103,21 +118,15 @@ def ocr_image_bytes(image_bytes: bytes) -> str:
 
 # ---------------- OCR PDF ----------------
 def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = None) -> str:
-    """
-    AI OCR for PDF
-    """
     try:
         from pdf2image import convert_from_bytes
 
-        if max_pages:
-            pages = convert_from_bytes(
-                pdf_bytes,
-                dpi=dpi,
-                first_page=1,
-                last_page=max_pages
-            )
-        else:
-            pages = convert_from_bytes(pdf_bytes, dpi=dpi)
+        pages = convert_from_bytes(
+            pdf_bytes,
+            dpi=dpi,
+            first_page=1,
+            last_page=max_pages if max_pages else None
+        )
 
     except Exception as e:
         logger.exception("PDF conversion error: %s", e)
@@ -129,9 +138,10 @@ def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = N
         try:
             processed = preprocess_image(page)
 
-            result = reader.readtext(processed)
-            page_text = " ".join([r[1] for r in result])
+            reader = get_reader()
+            result = reader.readtext(processed, detail=0)
 
+            page_text = " ".join(result)
             page_text = clean_ocr_errors(page_text)
 
             if page_text.strip():
@@ -143,9 +153,7 @@ def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = N
     return "\n\n".join(texts)
 
 
-# ---------------- OPTIONAL FALLBACK ----------------
+# ---------------- TEMP DRUG EXTRACT ----------------
 def extract_clean_drugs(text: str):
-    """
-    Temporary fallback to avoid import errors
-    """
-    return []
+    words = re.findall(r"[A-Za-z]{4,}", text)
+    return list(set([w.lower() for w in words]))

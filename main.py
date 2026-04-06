@@ -2,24 +2,35 @@ from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from ocr import ocr_image_bytes, ocr_pdf_bytes, extract_clean_drugs
+from ocr import ocr_image_bytes, ocr_pdf_bytes
 from pathlib import Path
 import pandas as pd
-from thefuzz import process
+from rapidfuzz import process, fuzz
 import re
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 BASE_DIR = Path(__file__).resolve().parent
-CSV_PATH = BASE_DIR / "drug_interactions.csv"
 
+INTERACTION_PATH = BASE_DIR / "drug_interactions.csv"
+MEDICINE_PATH = BASE_DIR / "medicines.csv"
 
-# ---------------- LOAD INTERACTIONS ---------------- #
+# ---------------- LOAD DATA ---------------- #
+
+def load_medicines():
+    try:
+        df = pd.read_csv(MEDICINE_PATH, header=None)
+        df.columns = ["name", "class", "form", "dose", "frequency"]
+        df["name"] = df["name"].str.lower().str.strip()
+        return df
+    except Exception as e:
+        print("⚠ Medicine load error:", e)
+        return pd.DataFrame()
 
 def load_interactions():
     try:
-        df = pd.read_csv(CSV_PATH)
+        df = pd.read_csv(INTERACTION_PATH)
 
         df["drug1"] = df["drug1"].astype(str).str.lower().str.strip()
         df["drug2"] = df["drug2"].astype(str).str.lower().str.strip()
@@ -31,23 +42,20 @@ def load_interactions():
             df["message"] = "Drug interaction detected"
 
         return df
-
     except Exception as e:
         print("⚠ Interaction load error:", e)
         return pd.DataFrame()
 
-
+medicine_df = load_medicines()
+medicine_list = medicine_df["name"].tolist()
 interactions_df = load_interactions()
 
 
-# ---------------- TEXT CLEANING ---------------- #
+# ---------------- TEXT CLEAN ---------------- #
 
 def clean_text(text: str):
-    """
-    Clean noisy OCR text
-    """
     text = text.lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)  # remove symbols
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
@@ -58,18 +66,51 @@ def detect_medicines(text: str):
     if not text:
         return []
 
-    # Clean OCR noise
     text = clean_text(text)
+    words = re.findall(r"[a-z]{3,}", text)
 
-    # Extract drugs (BioBERT / OCR logic)
-    meds = extract_clean_drugs(text)
+    detected = set()
 
-    # Normalize
-    meds = list(set([m.lower().strip() for m in meds if len(m) > 2]))
+    for word in words:
+        match = process.extractOne(
+            word,
+            medicine_list,
+            scorer=fuzz.ratio   # 🔥 better matching
+        )
 
-    print("💊 DETECTED MEDS:", meds)
+        if match:
+            name, score, _ = match
+
+            if score >= 85:
+                detected.add(name)
+
+    meds = list(detected)
+    print("💊 CLEAN MEDS:", meds)
 
     return meds
+
+
+# ---------------- DRUG CLASS ---------------- #
+
+def get_drug_classes(meds):
+    classes = {}
+
+    for m in meds:
+        row = medicine_df[medicine_df["name"] == m]
+
+        if not row.empty:
+            classes[m] = row.iloc[0]["class"]
+        else:
+            classes[m] = "Unknown"
+
+    return classes
+
+
+# ---------------- DOSE EXTRACTION ---------------- #
+
+def extract_doses(text):
+    doses = re.findall(r"\b\d+\s?(mg|mcg|g|ml)\b", text.lower())
+    return list(set(doses))
 
 
 # ---------------- INTERACTION CHECK ---------------- #
@@ -80,31 +121,11 @@ def check_interactions(medicine_list):
     if interactions_df.empty or not medicine_list:
         return alerts
 
-    all_known_drugs = list(set(
-        interactions_df["drug1"].tolist() +
-        interactions_df["drug2"].tolist()
-    ))
+    meds = list(set([m.lower().strip() for m in medicine_list]))
 
-    matched = []
-
-    for m in medicine_list:
-        match = process.extractOne(m, all_known_drugs)
-
-        # safer threshold
-        if match and match[1] > 80:
-            matched.append(match[0])
-
-    matched = list(set(matched))
-    seen = set()
-
-    for i in range(len(matched)):
-        for j in range(i + 1, len(matched)):
-            d1, d2 = matched[i], matched[j]
-            key = tuple(sorted([d1, d2]))
-
-            if key in seen:
-                continue
-            seen.add(key)
+    for i in range(len(meds)):
+        for j in range(i + 1, len(meds)):
+            d1, d2 = meds[i], meds[j]
 
             res = interactions_df[
                 ((interactions_df["drug1"] == d1) & (interactions_df["drug2"] == d2)) |
@@ -143,25 +164,29 @@ async def upload(file: UploadFile = File(...)):
         # OCR
         text = ocr_pdf_bytes(content) if filename.endswith(".pdf") else ocr_image_bytes(content)
 
-        print("\n===== RAW OCR TEXT =====\n")
-        print(text[:1000])   # limit output
-        print("\n========================\n")
+        print("\n===== OCR TEXT =====\n", text[:500])
 
         if not text:
             raise Exception("OCR returned empty text")
 
-        # detect medicines
+        # medicines
         meds = detect_medicines(text)
+
+        # classes
+        classes = get_drug_classes(meds)
 
         # interactions
         interactions = check_interactions(meds)
 
+        # dose extraction
+        doses = extract_doses(text)
+
         return {
             "success": True,
             "medicines_detected": meds,
+            "drug_classes": classes,
             "drug_interactions": interactions,
-            "dose_warnings": [],
-            "drug_classes": {},
+            "dose_warnings": doses,
             "raw_text": text,
         }
 
