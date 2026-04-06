@@ -1,18 +1,17 @@
 """
 OCR utilities for Rx-Helper
-ONLY handles text extraction (NO AI / NER here)
+Upgraded: EasyOCR (AI-based) instead of Tesseract
 """
 
 from PIL import Image
 import io
-import shutil
 import logging
-import pytesseract
 import cv2
 import numpy as np
 import re
 from typing import Optional
 from pathlib import Path
+import easyocr
 
 # ---------------- LOGGING ----------------
 logging.basicConfig(level=logging.INFO)
@@ -20,17 +19,8 @@ logger = logging.getLogger("ocr")
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# ---------------- TESSERACT DETECTION ----------------
-_tesseract_path = shutil.which("tesseract")
-
-if _tesseract_path:
-    pytesseract.pytesseract.tesseract_cmd = _tesseract_path
-    logger.info(f"Tesseract found at {_tesseract_path}")
-else:
-    logger.warning("Tesseract not found in PATH")
-
-# Better config for prescriptions
-DEFAULT_CONFIG = "--oem 3 --psm 4 -l eng"
+# ---------------- EASYOCR INIT ----------------
+reader = easyocr.Reader(['en'], gpu=False)
 
 
 # ---------------- OCR CLEANING ----------------
@@ -66,7 +56,7 @@ def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarr
     img_cv = _pil_to_cv2(img)
     h, w = img_cv.shape[:2]
 
-    # Resize for better OCR
+    # Resize
     if w < resize_min_width and w > 0:
         scale = resize_min_width / float(w)
         img_cv = cv2.resize(
@@ -77,44 +67,30 @@ def preprocess_image(img: Image.Image, resize_min_width: int = 1000) -> np.ndarr
 
     gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
 
-    # Noise reduction
-    gray = cv2.medianBlur(gray, 3)
+    # Improve contrast
+    gray = cv2.convertScaleAbs(gray, alpha=2, beta=20)
 
-    # Contrast enhancement
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    gray = clahe.apply(gray)
+    # Noise removal
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    # Adaptive threshold (best for prescriptions)
-    thresh = cv2.adaptiveThreshold(
-        gray,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        15,
-        3
-    )
+    # Threshold
+    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
 
     return thresh
 
 
 # ---------------- OCR IMAGE ----------------
-def ocr_image_bytes(
-    image_bytes: bytes,
-    lang: str = "eng",
-    config: str = DEFAULT_CONFIG
-) -> str:
+def ocr_image_bytes(image_bytes: bytes) -> str:
     """
-    Returns CLEAN TEXT (not drugs)
+    AI OCR using EasyOCR
     """
     try:
         img = Image.open(io.BytesIO(image_bytes))
         processed = preprocess_image(img)
 
-        text = pytesseract.image_to_string(
-            processed,
-            lang=lang,
-            config=config
-        )
+        result = reader.readtext(processed)
+
+        text = " ".join([r[1] for r in result])
 
         text = clean_ocr_errors(text)
 
@@ -126,14 +102,9 @@ def ocr_image_bytes(
 
 
 # ---------------- OCR PDF ----------------
-def ocr_pdf_bytes(
-    pdf_bytes: bytes,
-    dpi: int = 300,
-    max_pages: Optional[int] = None,
-    lang: str = "eng"
-) -> str:
+def ocr_pdf_bytes(pdf_bytes: bytes, dpi: int = 300, max_pages: Optional[int] = None) -> str:
     """
-    Returns CLEAN TEXT from PDF
+    AI OCR for PDF
     """
     try:
         from pdf2image import convert_from_bytes
@@ -158,10 +129,8 @@ def ocr_pdf_bytes(
         try:
             processed = preprocess_image(page)
 
-            page_text = pytesseract.image_to_string(
-                processed,
-                lang=lang
-            )
+            result = reader.readtext(processed)
+            page_text = " ".join([r[1] for r in result])
 
             page_text = clean_ocr_errors(page_text)
 
@@ -172,3 +141,11 @@ def ocr_pdf_bytes(
             logger.exception("Page OCR error: %s", e)
 
     return "\n\n".join(texts)
+
+
+# ---------------- OPTIONAL FALLBACK ----------------
+def extract_clean_drugs(text: str):
+    """
+    Temporary fallback to avoid import errors
+    """
+    return []
