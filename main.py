@@ -71,9 +71,23 @@ def severity_icon(severity):
 
 def detect_medicines(text: str):
     """
-    Wrapper so main.py can use the medicine extractor already available in ocr.py
+    Splits the cleaned OCR text into a list of individual medicines.
+    Assumes medicines are separated by newlines, commas, or bullets.
     """
-    return extract_clean_drugs(text)
+    if not text:
+        return []
+        
+    # 1. Get the cleaned text from your ocr.py utility
+    cleaned_text = extract_clean_drugs(text)
+    
+    # 2. Split by common delimiters (newline, comma, semicolon)
+    # This turns "Aspirin, Panadol" into ["Aspirin", "Panadol"]
+    raw_list = re.split(r'[\n,;•]', cleaned_text)
+    
+    # 3. Clean up each item and remove empty strings
+    med_list = [m.strip() for m in raw_list if m.strip()]
+    
+    return med_list
 
 
 def check_interactions(medicine_list):
