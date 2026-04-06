@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
-import re  
+import re
+import spacy
+from thefuzz import process  # For fuzzy matching OCR typos
 from ocr import ocr_image_bytes, ocr_pdf_bytes, extract_clean_drugs
 from pathlib import Path
 import pandas as pd
@@ -10,14 +11,19 @@ import pandas as pd
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+# Load the SpaCy model you successfully installed
+try:
+    nlp = spacy.load("en_core_web_md")
+except:
+    # Fallback if model loading fails
+    nlp = None
+
 BASE_DIR = Path(__file__).resolve().parent
 CSV_PATH = BASE_DIR / "drug_interactions.csv"
-
 
 def load_interactions():
     try:
         df = pd.read_csv(CSV_PATH)
-
         if "drug1" not in df.columns or "drug2" not in df.columns:
             raise ValueError("drug_interactions.csv must contain drug1 and drug2 columns")
 
@@ -25,165 +31,117 @@ def load_interactions():
         df["drug2"] = df["drug2"].astype(str).str.lower().str.strip()
 
         severity_map = {
-            "high": "Severe",
-            "major": "Severe",
-            "severe": "Severe",
-            "moderate": "Moderate",
-            "medium": "Moderate",
-            "low": "Mild",
-            "mild": "Mild",
+            "high": "Severe", "major": "Severe", "severe": "Severe",
+            "moderate": "Moderate", "medium": "Moderate",
+            "low": "Mild", "mild": "Mild",
         }
 
         if "severity" in df.columns:
-            df["severity"] = (
-                df["severity"]
-                .astype(str)
-                .str.strip()
-                .str.lower()
-                .map(severity_map)
-                .fillna("Moderate")
-            )
+            df["severity"] = df["severity"].astype(str).str.strip().str.lower().map(severity_map).fillna("Moderate")
         else:
             df["severity"] = "Moderate"
 
         if "message" not in df.columns:
-            if "description" in df.columns:
-                df["message"] = df["description"].astype(str)
-            else:
-                df["message"] = "Drug interaction detected"
+            df["message"] = df["description"].astype(str) if "description" in df.columns else "Drug interaction detected"
 
         return df[["drug1", "drug2", "severity", "message"]]
-
     except Exception as e:
         print("⚠ Interaction database error:", e)
         return pd.DataFrame(columns=["drug1", "drug2", "severity", "message"])
 
-
 interactions_df = load_interactions()
 
-
 def severity_icon(severity):
-    return {
-        "Severe": "🔴",
-        "Moderate": "🟠",
-        "Mild": "🟡"
-    }.get(severity, "⚪")
-
+    return {"Severe": "🔴", "Moderate": "🟠", "Mild": "🟡"}.get(severity, "⚪")
 
 def detect_medicines(text: str):
     """
-    Splits the cleaned OCR text into a list of individual medicines.
-    Assumes medicines are separated by newlines, commas, or bullets.
+    Uses SpaCy NER to find drug names and cleans up OCR garble.
     """
-    if not text:
+    if not text or not nlp:
         return []
-        
-    # 1. Get the cleaned text from your ocr.py utility
+    
+    # Run NER model
+    doc = nlp(text)
+    
+    # Filter for entities that look like drugs (ORGs or Products in the general model)
+    # Also keep the re.split logic as a fallback for simple lists
+    ner_meds =]
+    
     cleaned_text = extract_clean_drugs(text)
+    split_meds = [m.strip() for m in re.split(r'[\n,;•]', cleaned_text) if len(m.strip()) > 3]
     
-    # 2. Split by common delimiters (newline, comma, semicolon)
-    # This turns "Aspirin, Panadol" into ["Aspirin", "Panadol"]
-    raw_list = re.split(r'[\n,;•]', cleaned_text)
-    
-    # 3. Clean up each item and remove empty strings
-    med_list = [m.strip() for m in raw_list if m.strip()]
-    
-    return med_list
-
+    # Combine results and title-case them
+    combined = list(set(ner_meds + split_meds))
+    return [m.title() for m in combined if len(m) > 2]
 
 def check_interactions(medicine_list):
+    """
+    Uses Fuzzy Matching to find interactions even with OCR typos.
+    """
     alerts = []
-
     if interactions_df.empty or not medicine_list:
         return alerts
 
-    meds = []
-    seen_meds = set()
-
+    # Get a unique list of all drugs known in our CSV
+    all_known_drugs = list(set(interactions_df["drug1"].tolist() + interactions_df["drug2"].tolist()))
+    
+    # 1. Map messy OCR names to the closest real drug name in our CSV
+    matched_meds = []
     for m in medicine_list:
-        if not m:
-            continue
-        cleaned = str(m).lower().strip()
-        if cleaned and cleaned not in seen_meds:
-            seen_meds.add(cleaned)
-            meds.append(cleaned)
+        # If match is > 85% similar, use the CSV's correct spelling
+        match, score = process.extractOne(m.lower(), all_known_drugs)
+        if score > 85:
+            matched_meds.append(match)
 
+    matched_meds = list(set(matched_meds))
     seen_pairs = set()
 
-    for i in range(len(meds)):
-        for j in range(i + 1, len(meds)):
-            drug1 = meds[i]
-            drug2 = meds[j]
-            key = tuple(sorted([drug1, drug2]))
+    # 2. Check pairs of matched drugs
+    for i in range(len(matched_meds)):
+        for j in range(i + 1, len(matched_meds)):
+            d1, d2 = matched_meds[i], matched_meds[j]
+            key = tuple(sorted([d1, d2]))
 
-            if key in seen_pairs:
-                continue
+            if key in seen_pairs: continue
             seen_pairs.add(key)
 
-            result = interactions_df[
-                ((interactions_df["drug1"] == drug1) & (interactions_df["drug2"] == drug2)) |
-                ((interactions_df["drug1"] == drug2) & (interactions_df["drug2"] == drug1))
+            res = interactions_df[
+                ((interactions_df["drug1"] == d1) & (interactions_df["drug2"] == d2)) |
+                ((interactions_df["drug1"] == d2) & (interactions_df["drug2"] == d1))
             ]
 
-            if not result.empty:
-                row = result.iloc[0]
+            if not res.empty:
+                row = res.iloc[0]
                 alerts.append({
-                    "drug1": drug1.upper(),
-                    "drug2": drug2.upper(),
-                    "severity": row["severity"],
-                    "message": row["message"],
+                    "drug1": d1.upper(), "drug2": d2.upper(),
+                    "severity": row["severity"], "message": row["message"],
                     "icon": severity_icon(row["severity"])
                 })
-
     return alerts
-
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/test")
-async def test():
-    return {"status": "working"}
-
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     try:
         content = await file.read()
         filename = (file.filename or "").lower()
-
-        print("📁 FILE RECEIVED:", filename)
-
-        if filename.endswith(".pdf"):
-            text = ocr_pdf_bytes(content)
-            source_type = "pdf"
-        else:
-            text = ocr_image_bytes(content)
-            source_type = "image"
-
-        if not text or len(text.strip()) == 0:
-            raise Exception("OCR returned empty text")
-
-        print("🧾 OCR TEXT:", text[:200])
+        
+        text = ocr_pdf_bytes(content) if filename.endswith(".pdf") else ocr_image_bytes(content)
+        if not text: raise Exception("OCR returned empty text")
 
         meds = detect_medicines(text)
-        print("💊 MEDS:", meds)
-
         interactions = check_interactions(meds)
-        print("⚠ INTERACTIONS:", interactions)
 
         return {
             "success": True,
-            "source_type": source_type,
             "medicines_detected": meds,
             "drug_interactions": interactions,
-            "dose_warnings": [],
-            "drug_classes": {},
             "raw_text": text,
         }
-
     except Exception as e:
         print("❌ ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
