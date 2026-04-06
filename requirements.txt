@@ -21,3 +21,6 @@ transformers==4.41.2
 torch==2.3.0
 
 SQLAlchemy==2.0.30
+spacy==3.7.4
+thefuzz==0.22.1
+scispacy==0.5.4
