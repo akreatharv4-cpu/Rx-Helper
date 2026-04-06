@@ -64,14 +64,14 @@ def detect_medicines(text: str):
     # Run NER model
     doc = nlp(text)
     
-    # Filter for entities that look like drugs (ORGs or Products in the general model)
-    # Also keep the re.split logic as a fallback for simple lists
+    # NER Extraction: Filter for entities that look like drug products/brands
     ner_meds =]
     
+    # Fallback/Manual Extraction: Use regex to split cleaned text
     cleaned_text = extract_clean_drugs(text)
     split_meds = [m.strip() for m in re.split(r'[\n,;•]', cleaned_text) if len(m.strip()) > 3]
     
-    # Combine results and title-case them
+    # Combine results, remove duplicates, and title-case them
     combined = list(set(ner_meds + split_meds))
     return [m.title() for m in combined if len(m) > 2]
 
@@ -90,9 +90,9 @@ def check_interactions(medicine_list):
     matched_meds = []
     for m in medicine_list:
         # If match is > 85% similar, use the CSV's correct spelling
-        match, score = process.extractOne(m.lower(), all_known_drugs)
-        if score > 85:
-            matched_meds.append(match)
+        match_tuple = process.extractOne(m.lower(), all_known_drugs)
+        if match_tuple and match_tuple[1] > 85:
+            matched_meds.append(match_tuple[0])
 
     matched_meds = list(set(matched_meds))
     seen_pairs = set()
