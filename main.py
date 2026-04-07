@@ -24,7 +24,7 @@ def load_medicines():
     try:
         # Loading CSV: name, class, form, is_generic, is_antibiotic
         df = pd.read_csv(MEDICINE_PATH) 
-        df["name"] = df["name"].str.lower().str.strip()
+        df["drug_name"] = df["drug_name"].str.lower().str.strip()
         return df
     except Exception as e:
         print("⚠ Medicine load error:", e)
