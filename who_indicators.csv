@@ -1,27 +1,37 @@
 WHO_INDICATORS = [
     {
+        "id": "avg_drugs",
         "indicator": "Average number of drugs per encounter",
-        "reference": "1.6 - 1.8",
-        "formula": "Total drugs / Total encounters"
+        "target": "1.6 - 1.8",
+        "formula": "Total drugs / Total encounters",
+        "unit": "count"
     },
     {
+        "id": "pct_generic",
         "indicator": "Percentage of drugs prescribed by generic name",
-        "reference": "100%",
-        "formula": "(Generic drugs / Total drugs) * 100"
+        "target": "100%",
+        "formula": "(Generic drugs / Total drugs) * 100",
+        "unit": "%"
     },
     {
+        "id": "pct_antibiotic",
         "indicator": "Encounters with an antibiotic prescribed",
-        "reference": "20 - 26.8%",
-        "formula": "(Encounters with >=1 antibiotic / Total encounters) * 100"
+        "target": "20.0% - 26.8%",
+        "formula": "(Encounters with >=1 antibiotic / Total encounters) * 100",
+        "unit": "%"
     },
     {
+        "id": "pct_injection",
         "indicator": "Encounters with an injection prescribed",
-        "reference": "13.4 - 24.1%",
-        "formula": "(Encounters with >=1 injection / Total encounters) * 100"
+        "target": "13.4% - 24.1%",
+        "formula": "(Encounters with >=1 injection / Total encounters) * 100",
+        "unit": "%"
     },
     {
-        "indicator": "Drugs prescribed from Essential Drug List",
-        "reference": "100%",
-        "formula": "(Drugs from EML / Total drugs) * 100"
+        "id": "pct_eml",
+        "indicator": "Percentage of drugs prescribed from Essential Drug List (EDL)",
+        "target": "100%",
+        "formula": "(Drugs from EDL / Total drugs) * 100",
+        "unit": "%"
     }
 ]
