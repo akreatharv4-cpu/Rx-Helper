@@ -3,391 +3,263 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rx-Helper Clinical Dashboard</title>
+  <title>Rx-Helper | WHO Clinical Dashboard</title>
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
-      --primary:#2c3e50;
-      --secondary:#3498db;
-      --danger:#e74c3c;
-      --warning:#f39c12;
-      --minor:#f1c40f;
-      --success:#27ae60;
-      --bg:#f4f7f6;
-      --card:#ffffff;
-      --text:#1f2937;
-      --muted:#6b7280;
+      --primary:#1e293b; --secondary:#3b82f6; --danger:#ef4444;
+      --warning:#f59e0b; --success:#10b981; --bg:#f8fafc;
+      --card:#ffffff; --text:#0f172a; --muted:#64748b;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; transition: all 0.2s ease; }
+    body{ font-family:"Inter", "Segoe UI", sans-serif; background:var(--bg); margin:0; color:var(--text); }
 
-    body{
-      font-family:"Segoe UI", sans-serif;
-      background:var(--bg);
-      margin:0;
-      color:var(--text);
-    }
+    .dashboard{ display:grid; grid-template-columns:300px 1fr; min-height:100vh; }
 
-    .dashboard{
-      display:grid;
-      grid-template-columns:280px 1fr;
-      min-height:100vh;
-    }
+    /* Sidebar Styling */
+    .sidebar{ background:var(--card); padding:25px; border-right:1px solid #e2e8f0; }
+    .sidebar h2{ font-size:1.2rem; color:var(--primary); display:flex; align-items:center; gap:10px; }
+    .sidebar label{ display:block; margin-top:15px; font-weight:600; font-size:0.85rem; color:var(--muted); }
+    .sidebar input, .sidebar select{ width:100%; padding:10px; margin-top:5px; border:1px solid #cbd5e1; border-radius:8px; outline:none; }
 
-    .sidebar{
-      background:white;
-      padding:25px;
-      box-shadow:2px 0 8px rgba(0,0,0,0.05);
-    }
+    .main{ padding:40px; max-width:1200px; margin:0 auto; width:100%; }
 
-    .sidebar h2{
-      margin-top:0;
-      margin-bottom:16px;
-    }
+    /* Header & Action Buttons */
+    .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+    .header h1{ margin:0; font-size:1.8rem; font-weight:800; }
+    .btn-group { display:flex; gap:10px; }
+    button{ cursor:pointer; font-weight:600; border:none; border-radius:8px; padding:10px 20px; display:flex; align-items:center; gap:8px; }
+    .btn-primary{ background:var(--secondary); color:white; }
+    .btn-success{ background:var(--success); color:white; }
+    .btn-outline{ background:transparent; border:1px solid #cbd5e1; }
 
-    .sidebar input,
-    .sidebar select{
-      width:100%;
-      padding:8px;
-      margin-bottom:12px;
-      border:1px solid #ddd;
-      border-radius:6px;
-      outline:none;
-    }
+    /* WHO Indicator Grid */
+    .indicator-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:30px; }
+    .indicator-card{ background:white; padding:20px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; }
+    .indicator-card h4{ margin:0; color:var(--muted); font-size:0.8rem; text-transform:uppercase; }
+    .indicator-card .value{ font-size:1.8rem; font-weight:800; margin:10px 0; color:var(--secondary); }
 
-    .main{
-      padding:30px;
-    }
+    /* Input Sections */
+    .input-section{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:30px; }
+    .upload-card, .manual-card{ background:white; padding:25px; border-radius:12px; border:2px dashed #cbd5e1; }
+    .manual-card{ border-style:solid; }
+    textarea{ width:100%; height:100px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; resize:none; margin-top:10px; }
 
-    .header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      flex-wrap:wrap;
-    }
+    /* Clinical Cards */
+    .card{ background:white; padding:25px; border-radius:12px; margin-top:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border:1px solid #e2e8f0; }
+    .drug-badge{ display:inline-flex; align-items:center; background:#eff6ff; color:#1e40af; padding:8px 16px; border-radius:20px; margin:5px; font-weight:600; border:1px solid #bfdbfe; }
+    .interaction-item{ padding:15px; margin:10px 0; border-radius:8px; border-left:5px solid; background:#f8fafc; }
+    .high{ border-color:var(--danger); background:#fef2f2; }
+    .moderate{ border-color:var(--warning); background:#fffbeb; }
 
-    .header h1{
-      margin:0;
-    }
+    /* AI Chat Bubble */
+    #ai-chat{ position:fixed; bottom:20px; right:20px; width:350px; background:white; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.2); overflow:hidden; display:none; flex-direction:column; }
+    .chat-header{ background:var(--secondary); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between; }
+    #chat-box{ height:300px; overflow-y:auto; padding:15px; font-size:0.9rem; }
+    .chat-input{ display:flex; border-top:1px solid #eee; }
+    .chat-input input{ flex:1; border:none; padding:15px; outline:none; }
 
-    .export-btn{
-      background:var(--success);
-    }
-
-    .upload-card{
-      background:var(--card);
-      padding:30px;
-      border-radius:10px;
-      border:2px dashed var(--secondary);
-      text-align:center;
-      margin-top:20px;
-    }
-
-    .upload-card:hover{
-      background:#eef6ff;
-    }
-
-    button{
-      background:var(--secondary);
-      color:white;
-      border:none;
-      padding:10px 20px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:14px;
-    }
-
-    button:hover{
-      opacity:0.95;
-    }
-
-    .card{
-      background:var(--card);
-      padding:20px;
-      border-radius:10px;
-      margin-top:20px;
-      box-shadow:0 4px 6px rgba(0,0,0,0.08);
-    }
-
-    .drug-card{
-      display:inline-block;
-      background:#eef7ff;
-      padding:10px 15px;
-      border-radius:10px;
-      margin:6px;
-      min-width:120px;
-      vertical-align:top;
-    }
-
-    .drug-card span{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .interaction{
-      padding:10px;
-      margin:10px 0;
-      border-left:6px solid;
-      background:#fafafa;
-      border-radius:6px;
-    }
-
-    .high{border-color:var(--danger)}
-    .moderate{border-color:var(--warning)}
-    .minor{border-color:var(--minor)}
-
-    .warning{
-      background:#fff3cd;
-      padding:10px;
-      margin-top:10px;
-      border-left:5px solid var(--warning);
-      border-radius:6px;
-    }
-
-    .success{
-      background:#e8f8f5;
-      padding:10px;
-      border-left:5px solid var(--success);
-      border-radius:6px;
-    }
-
-    .loading{
-      display:none;
-      text-align:center;
-      margin-top:20px;
-      font-size:18px;
-    }
-
-    .error{
-      background:#fee2e2;
-      color:#991b1b;
-      padding:10px;
-      border-left:5px solid var(--danger);
-      border-radius:6px;
-      margin-top:12px;
-      display:none;
-    }
-
-    .muted{
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    pre{
-      white-space:pre-wrap;
-      word-wrap:break-word;
-      margin:0;
-      font-family:inherit;
-    }
+    .loader { display:none; color:var(--secondary); font-weight:bold; }
   </style>
 </head>
 
 <body>
   <div class="dashboard">
     <div class="sidebar">
-      <h2>Patient Profile</h2>
-
+      <h2><i class="fas fa-user-circle"></i> Patient Info</h2>
       <label>Age</label>
-      <input id="age" type="number" placeholder="Enter age">
-
+      <input id="age" type="number" placeholder="25">
       <label>Pregnancy</label>
-      <select id="pregnancy">
-        <option>No</option>
-        <option>Yes</option>
-      </select>
-
-      <label>Kidney Function</label>
-      <select id="renal">
-        <option>Normal</option>
-        <option>Impaired</option>
-      </select>
-
-      <p class="muted">These fields are ready for future risk logic.</p>
+      <select id="pregnancy"><option>No</option><option>Yes</option></select>
+      <label>Kidney Function (CrCl)</label>
+      <select id="renal"><option>Normal (>60)</option><option>Mild (30-60)</option><option>Severe (<30)</option></select>
+      
+      <hr style="margin:25px 0; border:0; border-top:1px solid #eee;">
+      <p style="font-size:0.8rem; color:var(--muted)">WHO Indicators help monitor rational drug use in clinical settings.</p>
     </div>
 
     <div class="main">
       <div class="header">
-        <h1><i class="fas fa-file-medical"></i> Rx-Helper</h1>
-
-        <button class="export-btn" onclick="downloadPDF()">
-          <i class="fas fa-file-pdf"></i> Export PDF
-        </button>
+        <h1>Rx-Helper <span style="font-weight:300; color:var(--muted)">v2.0</span></h1>
+        <div class="btn-group">
+          <button class="btn-outline" onclick="location.reload()"><i class="fas fa-redo"></i> Reset</button>
+          <button class="btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Export Clinical Report</button>
+        </div>
       </div>
 
-      <div class="upload-card">
-        <h3>Upload Prescription</h3>
-        <input type="file" id="fileInput" accept="image/*,.pdf">
-        <br><br>
-        <button type="button" onclick="analyze()">Analyze Prescription</button>
-        <div class="error" id="errorBox"></div>
+      <div class="indicator-grid" id="indicatorGrid">
+        <div class="indicator-card">
+          <h4>Avg. Drugs / Encounter</h4>
+          <div class="value" id="val-count">0</div>
+          <div style="font-size:0.7rem; color:var(--muted)">WHO Norm: 1.6-1.8</div>
+        </div>
+        <div class="indicator-card">
+          <h4>% Generic Name</h4>
+          <div class="value" id="val-generic">0%</div>
+          <div style="font-size:0.7rem; color:var(--muted)">WHO Norm: 100%</div>
+        </div>
+        <div class="indicator-card">
+          <h4>% Antibiotics</h4>
+          <div class="value" id="val-abx">0%</div>
+          <div style="font-size:0.7rem; color:var(--muted)">WHO Norm: < 30%</div>
+        </div>
+        <div class="indicator-card">
+          <h4>% Injections</h4>
+          <div class="value" id="val-inj">0%</div>
+          <div style="font-size:0.7rem; color:var(--muted)">WHO Norm: < 20%</div>
+        </div>
       </div>
 
-      <div class="loading" id="loader">
-        <i class="fas fa-spinner fa-spin"></i>
-        Scanning Prescription...
+      <div class="input-section">
+        <div class="upload-card">
+          <h3><i class="fas fa-camera"></i> Image / PDF Upload</h3>
+          <input type="file" id="fileInput" accept="image/*,.pdf" style="font-size:0.8rem;">
+          <button class="btn-primary" onclick="analyze('upload')" style="margin-top:15px; width:100%;">
+            <i class="fas fa-search"></i> Run AI Scan
+          </button>
+        </div>
+        <div class="manual-card">
+          <h3><i class="fas fa-keyboard"></i> Manual Entry</h3>
+          <textarea id="manualText" placeholder="Paste prescription text here (e.g. Tab Metformin 500mg...)"></textarea>
+          <button class="btn-outline" onclick="analyze('manual')" style="margin-top:15px; width:100%;">
+             Analyze Text
+          </button>
+        </div>
       </div>
+
+      <div id="loader" class="loader"><i class="fas fa-spinner fa-spin"></i> Processing medical data...</div>
 
       <div class="card">
-        <h3><i class="fas fa-capsules"></i> Medicines</h3>
+        <h3><i class="fas fa-capsules" style="color:var(--secondary)"></i> Detected Medications (BioBERT Extraction)</h3>
         <div id="medList"></div>
       </div>
 
       <div class="card">
-        <h3><i class="fas fa-exclamation-circle"></i> Dose Warnings</h3>
-        <div id="doseWarnings"></div>
-      </div>
-
-      <div class="card">
-        <h3><i class="fas fa-exclamation-triangle"></i> Drug Interactions</h3>
+        <h3><i class="fas fa-shield-virus" style="color:var(--danger)"></i> Clinical Interaction Alerts</h3>
         <div id="interactionList"></div>
       </div>
 
       <div class="card">
-        <h3>Extracted Text</h3>
-        <pre id="rawText"></pre>
+        <h3 onclick="toggleRaw()" style="cursor:pointer">Raw OCR Output <i class="fas fa-chevron-down" style="font-size:0.8rem"></i></h3>
+        <pre id="rawText" style="display:none; font-size:0.85rem; color:var(--muted); background:#f1f5f9; padding:15px; border-radius:8px;"></pre>
       </div>
+    </div>
+  </div>
+
+  <button onclick="toggleChat()" style="position:fixed; bottom:20px; right:20px; border-radius:50%; width:60px; height:60px; background:var(--secondary); color:white; box-shadow:0 4px 12px rgba(0,0,0,0.2); justify-content:center;">
+    <i class="fas fa-comment-medical" style="font-size:1.5rem; margin:0"></i>
+  </button>
+
+  <div id="ai-chat">
+    <div class="chat-header">
+      <span>Rx-Helper AI Assistant</span>
+      <i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
+    </div>
+    <div id="chat-box">
+      <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-bottom:10px;">
+        Hello! I can help you understand the detected indicators or suggest generic alternatives. Ask me anything.
+      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ask about a drug or dose...">
+      <button onclick="sendChat()" style="border-radius:0; padding:10px;"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 
   <script>
     let lastResult = null;
 
-    function showError(msg) {
-      const box = document.getElementById("errorBox");
-      box.style.display = "block";
-      box.innerText = msg;
-    }
+    async function analyze(mode) {
+      const loader = document.getElementById("loader");
+      loader.style.display = "block";
+      
+      let endpoint = "/upload";
+      let body = null;
 
-    function hideError() {
-      const box = document.getElementById("errorBox");
-      box.style.display = "none";
-      box.innerText = "";
-    }
-
-    async function analyze() {
-      const file = document.getElementById("fileInput").files[0];
-
-      if (!file) {
-        showError("Upload prescription first.");
-        return;
+      if(mode === 'manual') {
+        endpoint = "/analyze-text";
+        body = JSON.stringify({ text: document.getElementById("manualText").value });
+      } else {
+        const file = document.getElementById("fileInput").files[0];
+        if (!file) { alert("Select a file"); loader.style.display="none"; return; }
+        body = new FormData();
+        body.append("file", file);
       }
-
-      hideError();
-      document.getElementById("loader").style.display = "block";
 
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const res = await fetch("/upload", {
-          method: "POST",
-          body: formData
+        const res = await fetch(endpoint, { 
+          method: "POST", 
+          headers: mode === 'manual' ? {'Content-Type': 'application/json'} : {},
+          body: body 
         });
-
-        const text = await res.text();
-
-        if (!res.ok) {
-          throw new Error(text);
-        }
-
-        const data = JSON.parse(text);
+        const data = await res.json();
         lastResult = data;
-        displayResults(data);
-      } catch (err) {
-        showError("Error: " + err.message);
+        renderResults(data);
+      } catch (e) {
+        alert("Server Error. Check VS Code Terminal.");
       } finally {
-        document.getElementById("loader").style.display = "none";
+        loader.style.display = "none";
       }
     }
 
-    function displayResults(data) {
-      const meds = data.medicines_detected || [];
-      const classes = data.drug_classes || {};
+    function renderResults(data) {
+      // 1. Update WHO Indicator Cards
+      const who = data.who_indicators || { drugs_per_encounter: 0, pc_generic: 0, pc_antibiotic: 0, pc_injection: 0 };
+      document.getElementById("val-count").innerText = who.drugs_per_encounter;
+      document.getElementById("val-generic").innerText = who.pc_generic + "%";
+      document.getElementById("val-abx").innerText = who.pc_antibiotic + "%";
+      document.getElementById("val-inj").innerText = who.pc_injection + "%";
 
-      let html = "";
-      if (meds.length === 0) {
-        html = "<div class='success'>No medicines detected</div>";
-      } else {
-        meds.forEach(m => {
-          html += `
-            <div class="drug-card">
-              <b>${m}</b><br>
-              <span>${classes[m] || "Unknown class"}</span>
-            </div>
-          `;
-        });
-      }
-      document.getElementById("medList").innerHTML = html;
+      // 2. Render Meds
+      const meds = data.medicines || [];
+      document.getElementById("medList").innerHTML = meds.map(m => `<div class="drug-badge">${m}</div>`).join('') || "No drugs found.";
 
-      const warnings = data.dose_warnings || [];
-      let warnHTML = "";
+      // 3. Render Interactions
+      const ints = data.interactions || [];
+      document.getElementById("interactionList").innerHTML = ints.map(i => `
+        <div class="interaction-item ${i.severity.toLowerCase()}">
+          <strong>${i.drug1} ↔ ${i.drug2}</strong> (${i.severity})<br>
+          <small>${i.message}</small>
+        </div>
+      `).join('') || "<div style='color:var(--success)'>No major interactions detected.</div>";
 
-      if (warnings.length === 0) {
-        warnHTML = "<div class='success'>No dose warnings</div>";
-      } else {
-        warnings.forEach(w => {
-          warnHTML += `
-            <div class="warning">
-              <b>${w.drug}</b> dose ${w.dose}mg exceeds limit ${w.limit}mg
-            </div>
-          `;
-        });
-      }
+      document.getElementById("rawText").innerText = data.raw_text;
+    }
 
-      document.getElementById("doseWarnings").innerHTML = warnHTML;
+    function toggleChat() {
+      const chat = document.getElementById("ai-chat");
+      chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+    }
 
-      const interactions = data.drug_interactions || [];
-      let intHTML = "";
+    function toggleRaw() {
+      const pre = document.getElementById("rawText");
+      pre.style.display = pre.style.display === "none" ? "block" : "none";
+    }
 
-      if (interactions.length === 0) {
-        intHTML = "<div class='success'>No drug interactions detected</div>";
-      } else {
-        interactions.forEach(i => {
-          let cls = "minor";
-          const sev = String(i.severity || "").toLowerCase();
-          if (sev === "high") cls = "high";
-          if (sev === "moderate") cls = "moderate";
-
-          intHTML += `
-            <div class="interaction ${cls}">
-              <b>${i.drug1} + ${i.drug2}</b><br>
-              Severity: ${i.severity || "Unknown"}<br>
-              ${i.message || "Interaction detected"}
-            </div>
-          `;
-        });
-      }
-
-      document.getElementById("interactionList").innerHTML = intHTML;
-      document.getElementById("rawText").innerText = data.raw_text || "";
+    async function sendChat() {
+      const input = document.getElementById("chatInput");
+      if(!input.value) return;
+      const box = document.getElementById("chat-box");
+      box.innerHTML += `<div style="text-align:right; margin:10px 0;"><b>You:</b> ${input.value}</div>`;
+      
+      // Call your /chat endpoint here
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: input.value })
+      });
+      const data = await res.json();
+      box.innerHTML += `<div style="background:#eef2ff; padding:10px; border-radius:10px; margin:10px 0;"><b>AI:</b> ${data.reply}</div>`;
+      input.value = "";
+      box.scrollTop = box.scrollHeight;
     }
 
     function downloadPDF() {
-      if (!lastResult) {
-        showError("Analyze prescription first.");
-        return;
-      }
-
-      let text = "Rx-Helper Clinical Report\\n\\n";
-
-      text += "Detected Medicines:\\n";
-      (lastResult.medicines_detected || []).forEach(m => {
-        text += m + "\\n";
-      });
-
-      text += "\\nInteractions:\\n";
-      (lastResult.drug_interactions || []).forEach(i => {
-        text += `${i.drug1} + ${i.drug2} (${i.severity})\\n`;
-      });
-
-      const blob = new Blob([text], {type: "text/plain"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "rxhelper_report.txt";
-      a.click();
+      window.print(); // Simple way to generate clinical report from current view
     }
   </script>
 </body>

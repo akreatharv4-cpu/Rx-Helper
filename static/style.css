@@ -1,188 +1,240 @@
+/* ================= VARIABLES & RESET ================= */
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --secondary: #64748b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --bg-main: #f8fafc;
+    --glass: rgba(255, 255, 255, 0.9);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --radius: 12px;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: #1e293b;
+    line-height: 1.6;
+}
+
 /* ================= DASHBOARD LAYOUT ================= */
-
-.dashboard-layout{
-display:grid;
-grid-template-columns:260px 1fr;
-gap:20px;
-padding:20px;
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
-.sidebar{
-background:white;
-padding:20px;
-border-radius:var(--radius);
-box-shadow:var(--shadow-sm);
+/* ================= SIDEBAR (Patient Context) ================= */
+.sidebar {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    padding: 24px;
+    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-md);
+    height: fit-content;
+    position: sticky;
+    top: 24px;
 }
 
-.sidebar h2{
-margin-top:0;
-font-size:18px;
+.sidebar h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.sidebar input,
-.sidebar select{
-width:100%;
-padding:8px;
-margin-bottom:12px;
-border:1px solid #ddd;
-border-radius:6px;
-font-size:14px;
+.sidebar label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* ================= MAIN AREA ================= */
-
-.main{
-padding:10px;
+.sidebar input, .sidebar select {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    transition: border-color 0.2s;
 }
 
-/* ================= DRUG CARDS ================= */
-
-#medList{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
+.sidebar input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.drug-card{
-display:inline-block;
-background:#eef7ff;
-border-radius:10px;
-padding:10px 14px;
-margin:4px;
-box-shadow:var(--shadow-sm);
-transition:all .15s ease;
-min-width:120px;
+/* ================= WHO INDICATOR CARDS ================= */
+.indicator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.drug-card:hover{
-transform:translateY(-2px);
-background:#e4f2ff;
+.indicator-card {
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.drug-card b{
-display:block;
-font-size:14px;
-margin-bottom:2px;
+.indicator-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
-.drug-card span{
-font-size:12px;
-color:#666;
+.indicator-card h4 {
+    font-size: 12px;
+    color: var(--secondary);
+    margin: 0;
+    text-transform: uppercase;
 }
 
-/* ================= DOSE WARNINGS ================= */
-
-#doseWarnings{
-margin-top:10px;
+.indicator-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 8px 0;
 }
 
-.warning{
-background:#fff3cd;
-border-left:5px solid var(--warning);
-padding:10px;
-margin-top:8px;
-border-radius:6px;
-font-size:14px;
+/* ================= DRUG BADGES (BioBERT Style) ================= */
+#medList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-/* ================= INTERACTION SEVERITY ================= */
-
-#interactionList{
-margin-top:10px;
+.drug-badge {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 10px 18px;
+    border-radius: 50px;
+    font-weight: 600;
+    border: 1px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease;
 }
 
-.interaction{
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-background:#fafafa;
-border-left:6px solid;
-font-size:14px;
+.drug-badge i { font-size: 14px; color: var(--primary); }
+
+/* ================= INTERACTION ALERTS ================= */
+.interaction-item {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: #fff;
+    border-left: 6px solid #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-.interaction.high{
-border-color:var(--danger);
-background:#fdeaea;
+.interaction-item.high { 
+    border-left-color: var(--danger); 
+    background: #fef2f2; 
 }
 
-.interaction.moderate{
-border-color:#f39c12;
-background:#fff4e6;
+.interaction-item.moderate { 
+    border-left-color: var(--warning); 
+    background: #fffbeb; 
 }
 
-.interaction.minor{
-border-color:#f1c40f;
-background:#fffbe6;
+/* ================= AI CHAT INTERFACE ================= */
+#ai-chat-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 380px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ================= SCAN LOADER ================= */
-
-.loading{
-display:none;
-text-align:center;
-margin-top:20px;
-font-size:16px;
-color:#444;
+.chat-header {
+    background: var(--primary);
+    color: white;
+    padding: 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
 }
 
-.loading i{
-margin-right:8px;
-font-size:18px;
+#chat-box {
+    height: 350px;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fcfcfc;
 }
 
-/* ================= RESULT CARDS ================= */
-
-.card{
-background:white;
-padding:18px;
-margin-top:20px;
-border-radius:var(--radius);
-box-shadow:var(--shadow-sm);
+.chat-bubble {
+    padding: 10px 14px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    max-width: 85%;
+    font-size: 14px;
 }
 
-.card h3{
-margin-top:0;
-margin-bottom:10px;
-font-size:16px;
+.chat-bubble.ai { background: #f1f5f9; border-bottom-left-radius: 2px; }
+.chat-bubble.user { background: var(--primary); color: white; margin-left: auto; border-bottom-right-radius: 2px; }
+
+/* ================= BUTTONS (Advanced) ================= */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-/* ================= RAW TEXT ================= */
-
-#rawText{
-background:#f8f8f8;
-padding:10px;
-border-radius:6px;
-max-height:200px;
-overflow:auto;
-font-size:13px;
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
 }
 
-/* ================= BUTTONS ================= */
-
-button{
-background:var(--primary);
-color:white;
-border:none;
-padding:10px 18px;
-border-radius:8px;
-cursor:pointer;
-transition:all .2s ease;
+/* ================= ANIMATIONS ================= */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-button:hover{
-background:var(--primary-dark);
+/* ================= PRINT STYLES ================= */
+@media print {
+    .sidebar, .btn-primary, #ai-chat-container, .upload-section {
+        display: none !important;
+    }
+    .main { width: 100%; padding: 0; }
+    .card { box-shadow: none; border: 1px solid #eee; }
 }
 
 /* ================= RESPONSIVE ================= */
-
-@media(max-width:900px){
-
-.dashboard-layout{
-grid-template-columns:1fr;
-}
-
-.sidebar{
-order:2;
-}
-
+@media (max-width: 1024px) {
+    .dashboard-layout { grid-template-columns: 1fr; }
+    .sidebar { position: relative; top: 0; width: 100%; }
 }
