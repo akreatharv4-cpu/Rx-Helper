@@ -1,4 +1,4 @@
-drug1,drug2,severity,message
+drug name1,drug name2,severity,message
 warfarin,aspirin,high,High risk of bleeding
 warfarin,ibuprofen,high,Increased bleeding risk
 warfarin,diclofenac,high,Severe bleeding risk
