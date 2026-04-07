@@ -1,4 +1,4 @@
-drug_name,class,is_antibiotic,is_injection,is_edl,is_generic
+name,class,is_antibiotic,is_injection,is_edl,is_generic
 amoxicillin,Penicillin,1,0,1,1
 ceftriaxone,Cephalosporin,1,1,1,1
 metformin,Biguanide,0,0,1,1
