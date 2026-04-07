@@ -47,8 +47,7 @@ def calculate_who_indicators(detected_meds):
     antibiotics_count = subset[subset["is_antibiotic"] == 1].shape[0]
     
     # Check for 'inj' in the form column
-    injections_count = subset[subset["form"].str.contains("inj", case=False, na=False)].shape[0]
-
+    injections_count = subset[subset["is_injection"] == 1].shape[0]
     return {
         "drugs_per_encounter": total_drugs,
         "pc_generic": round((generics_count / total_drugs) * 100, 1),
