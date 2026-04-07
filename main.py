@@ -16,7 +16,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 BASE_DIR = Path(__file__).resolve().parent
-MEDICINE_PATH = BASE_DIR / "medicines.csv"
+MEDICINE_PATH = BASE_DIR / "medicines_master.csv"
 
 # ---------------- DATA LOADING ---------------- #
 
