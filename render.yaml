@@ -1,0 +1,7 @@
+# render.yaml
+services:
+  - type: web
+    name: rx-helper
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile

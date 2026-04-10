@@ -1,0 +1,516 @@
+paracetamol,analgesic antipyretic,tablet,500 mg,3-4 times daily
+acetaminophen,analgesic antipyretic,tablet,500 mg,3-4 times daily
+aspirin,nsaid antiplatelet,tablet,75-325 mg,once daily
+ibuprofen,nsaid,tablet,400 mg,3 times daily
+diclofenac,nsaid,tablet,50 mg,2-3 times daily
+aceclofenac,nsaid,tablet,100 mg,2 times daily
+ketorolac,nsaid,tablet/injection,10 mg,4 times daily
+naproxen,nsaid,tablet,250-500 mg,2 times daily
+indomethacin,nsaid,tablet,25 mg,2-3 times daily
+celecoxib,cox2 inhibitor nsaid,capsule,200 mg,once daily
+etoricoxib,cox2 inhibitor nsaid,tablet,60-90 mg,once daily
+tramadol,opioid analgesic,tablet/capsule,50 mg,2-3 times daily
+codeine,opioid analgesic,tablet,30 mg,2-3 times daily
+morphine,opioid analgesic,injection/tablet,10 mg,as prescribed
+fentanyl,opioid analgesic,injection/patch,50 mcg,as prescribed
+buprenorphine,opioid analgesic,tablet/injection,0.2 mg,as prescribed
+amoxicillin,penicillin antibiotic,capsule,500 mg,3 times daily
+amoxicillin clavulanate,penicillin antibiotic,capsule/tablet,625 mg,2-3 times daily
+ampicillin,penicillin antibiotic,capsule/injection,500 mg,4 times daily
+ampicillin sulbactam,penicillin antibiotic,injection,1.5 g,3-4 times daily
+azithromycin,macrolide antibiotic,tablet,500 mg,once daily
+clarithromycin,macrolide antibiotic,tablet,500 mg,2 times daily
+erythromycin,macrolide antibiotic,tablet,500 mg,4 times daily
+roxithromycin,macrolide antibiotic,tablet,150 mg,2 times daily
+ceftriaxone,cephalosporin antibiotic,injection,1 g,once daily
+cefotaxime,cephalosporin antibiotic,injection,1 g,2-3 times daily
+cefixime,cephalosporin antibiotic,tablet,200 mg,2 times daily
+cefuroxime,cephalosporin antibiotic,tablet/injection,500 mg,2 times daily
+cefepime,cephalosporin antibiotic,injection,1 g,2 times daily
+cephalexin,cephalosporin antibiotic,capsule,500 mg,4 times daily
+cefadroxil,cephalosporin antibiotic,tablet,500 mg,2 times daily
+cefoperazone,cephalosporin antibiotic,injection,1 g,2 times daily
+cefoperazone sulbactam,cephalosporin antibiotic,injection,1.5 g,2 times daily
+piperacillin,penicillin antibiotic,injection,4 g,3-4 times daily
+piperacillin tazobactam,penicillin antibiotic,injection,4.5 g,3-4 times daily
+imipenem,carbapenem antibiotic,injection,500 mg,4 times daily
+meropenem,carbapenem antibiotic,injection,1 g,3 times daily
+ertapenem,carbapenem antibiotic,injection,1 g,once daily
+ciprofloxacin,fluoroquinolone antibiotic,tablet,500 mg,2 times daily
+levofloxacin,fluoroquinolone antibiotic,tablet,500 mg,once daily
+ofloxacin,fluoroquinolone antibiotic,tablet,200 mg,2 times daily
+moxifloxacin,fluoroquinolone antibiotic,tablet,400 mg,once daily
+norfloxacin,fluoroquinolone antibiotic,tablet,400 mg,2 times daily
+doxycycline,tetracycline antibiotic,capsule,100 mg,2 times daily
+tetracycline,tetracycline antibiotic,capsule,250 mg,4 times daily
+minocycline,tetracycline antibiotic,capsule,100 mg,2 times daily
+clindamycin,lincosamide antibiotic,capsule,300 mg,3-4 times daily
+linezolid,oxazolidinone antibiotic,tablet/injection,600 mg,2 times daily
+vancomycin,glycopeptide antibiotic,injection,1 g,2 times daily
+teicoplanin,glycopeptide antibiotic,injection,400 mg,once daily
+metronidazole,nitroimidazole antibiotic,tablet,400 mg,3 times daily
+tinidazole,nitroimidazole antibiotic,tablet,500 mg,2 times daily
+ornidazole,nitroimidazole antibiotic,tablet,500 mg,2 times daily
+rifampicin,antitubercular antibiotic,capsule,600 mg,once daily
+isoniazid,antitubercular drug,tablet,300 mg,once daily
+ethambutol,antitubercular drug,tablet,800 mg,once daily
+pyrazinamide,antitubercular drug,tablet,1500 mg,once daily
+pantoprazole,proton pump inhibitor,tablet,40 mg,once daily
+omeprazole,proton pump inhibitor,capsule,20 mg,once daily
+rabeprazole,proton pump inhibitor,tablet,20 mg,once daily
+lansoprazole,proton pump inhibitor,capsule,30 mg,once daily
+esomeprazole,proton pump inhibitor,tablet,40 mg,once daily
+dexlansoprazole,proton pump inhibitor,capsule,30 mg,once daily
+ranitidine,h2 blocker,tablet,150 mg,2 times daily
+famotidine,h2 blocker,tablet,20 mg,2 times daily
+cimetidine,h2 blocker,tablet,400 mg,2 times daily
+domperidone,prokinetic antiemetic,tablet,10 mg,3 times daily
+ondansetron,antiemetic 5ht3 antagonist,tablet/injection,4 mg,2 times daily
+granisetron,antiemetic 5ht3 antagonist,tablet/injection,1 mg,2 times daily
+metoclopramide,prokinetic antiemetic,tablet/injection,10 mg,3 times daily
+itopride,prokinetic,tablet,50 mg,3 times daily
+dicyclomine,antispasmodic,tablet,20 mg,3 times daily
+hyoscine butylbromide,antispasmodic,tablet/injection,10 mg,3 times daily
+metformin,biguanide antidiabetic,tablet,500 mg,2 times daily
+glimepiride,sulfonylurea antidiabetic,tablet,1 mg,once daily
+gliclazide,sulfonylurea antidiabetic,tablet,80 mg,2 times daily
+glibenclamide,sulfonylurea antidiabetic,tablet,5 mg,once daily
+pioglitazone,thiazolidinedione antidiabetic,tablet,15 mg,once daily
+sitagliptin,dpp4 inhibitor antidiabetic,tablet,100 mg,once daily
+vildagliptin,dpp4 inhibitor antidiabetic,tablet,50 mg,2 times daily
+linagliptin,dpp4 inhibitor antidiabetic,tablet,5 mg,once daily
+teneligliptin,dpp4 inhibitor antidiabetic,tablet,20 mg,once daily
+saxagliptin,dpp4 inhibitor antidiabetic,tablet,5 mg,once daily
+dapagliflozin,sglt2 inhibitor antidiabetic,tablet,10 mg,once daily
+empagliflozin,sglt2 inhibitor antidiabetic,tablet,10 mg,once daily
+canagliflozin,sglt2 inhibitor antidiabetic,tablet,100 mg,once daily
+insulin,antidiabetic hormone,injection,variable,as prescribed
+insulin glargine,long acting insulin,injection,10 units,once daily
+insulin lispro,rapid acting insulin,injection,variable,before meals
+insulin aspart,rapid acting insulin,injection,variable,before meals
+insulin detemir,long acting insulin,injection,variable,once daily
+amlodipine,calcium channel blocker,tablet,5 mg,once daily
+nifedipine,calcium channel blocker,tablet,10 mg,2 times daily
+diltiazem,calcium channel blocker,tablet,60 mg,3 times daily
+verapamil,calcium channel blocker,tablet,80 mg,3 times daily
+atenolol,beta blocker,tablet,50 mg,once daily
+metoprolol,beta blocker,tablet,50 mg,2 times daily
+bisoprolol,beta blocker,tablet,5 mg,once daily
+nebivolol,beta blocker,tablet,5 mg,once daily
+propranolol,beta blocker,tablet,40 mg,2 times daily
+carvedilol,beta blocker,tablet,12.5 mg,2 times daily
+losartan,arb antihypertensive,tablet,50 mg,once daily
+telmisartan,arb antihypertensive,tablet,40 mg,once daily
+valsartan,arb antihypertensive,tablet,80 mg,once daily
+olmesartan,arb antihypertensive,tablet,20 mg,once daily
+irbesartan,arb antihypertensive,tablet,150 mg,once daily
+enalapril,ace inhibitor,tablet,5 mg,2 times daily
+ramipril,ace inhibitor,tablet,5 mg,once daily
+lisinopril,ace inhibitor,tablet,10 mg,once daily
+perindopril,ace inhibitor,tablet,4 mg,once daily
+hydrochlorothiazide,thiazide diuretic,tablet,25 mg,once daily
+chlorthalidone,thiazide diuretic,tablet,25 mg,once daily
+indapamide,thiazide like diuretic,tablet,1.5 mg,once daily
+furosemide,loop diuretic,tablet/injection,40 mg,once daily
+torsemide,loop diuretic,tablet,10 mg,once daily
+spironolactone,potassium sparing diuretic,tablet,25 mg,once daily
+eplerenone,potassium sparing diuretic,tablet,25 mg,once daily
+atorvastatin,statin lipid lowering,tablet,10 mg,once daily
+rosuvastatin,statin lipid lowering,tablet,10 mg,once daily
+simvastatin,statin lipid lowering,tablet,20 mg,once daily
+pravastatin,statin lipid lowering,tablet,20 mg,once daily
+fluvastatin,statin lipid lowering,tablet,40 mg,once daily
+fenofibrate,fibrate lipid lowering,tablet,160 mg,once daily
+gemfibrozil,fibrate lipid lowering,tablet,600 mg,2 times daily
+clopidogrel,antiplatelet,tablet,75 mg,once daily
+prasugrel,antiplatelet,tablet,10 mg,once daily
+ticagrelor,antiplatelet,tablet,90 mg,2 times daily
+warfarin,vitamin k antagonist anticoagulant,tablet,5 mg,once daily
+heparin,anticoagulant,injection,5000 units,2-3 times daily
+enoxaparin,low molecular weight heparin,injection,40 mg,once daily
+dabigatran,direct thrombin inhibitor,tablet,150 mg,2 times daily
+rivaroxaban,factor xa inhibitor,tablet,20 mg,once daily
+apixaban,factor xa inhibitor,tablet,5 mg,2 times daily
+salbutamol,short acting bronchodilator,inhaler,100 mcg,as needed
+terbutaline,bronchodilator,tablet/inhaler,5 mg,3 times daily
+formoterol,long acting bronchodilator,inhaler,12 mcg,2 times daily
+salmeterol,long acting bronchodilator,inhaler,50 mcg,2 times daily
+budesonide,inhaled corticosteroid,inhaler,200 mcg,2 times daily
+beclomethasone,inhaled corticosteroid,inhaler,200 mcg,2 times daily
+fluticasone,inhaled corticosteroid,inhaler,100 mcg,2 times daily
+montelukast,leukotriene antagonist,tablet,10 mg,once daily
+zafirlukast,leukotriene antagonist,tablet,20 mg,2 times daily
+theophylline,xanthine bronchodilator,tablet,200 mg,2 times daily
+aminophylline,xanthine bronchodilator,injection/tablet,250 mg,2 times daily
+cetirizine,antihistamine,tablet,10 mg,once daily
+levocetirizine,antihistamine,tablet,5 mg,once daily
+loratadine,antihistamine,tablet,10 mg,once daily
+desloratadine,antihistamine,tablet,5 mg,once daily
+fexofenadine,antihistamine,tablet,120 mg,once daily
+chlorpheniramine,antihistamine,tablet/syrup,4 mg,3-4 times daily
+diphenhydramine,antihistamine,tablet/capsule,25 mg,3-4 times daily
+hydroxyzine,antihistamine anxiolytic,tablet,25 mg,2-3 times daily
+prednisolone,corticosteroid,tablet,10-40 mg,once daily
+prednisone,corticosteroid,tablet,10-40 mg,once daily
+dexamethasone,corticosteroid,tablet/injection,4 mg,once daily
+methylprednisolone,corticosteroid,tablet/injection,16 mg,once daily
+hydrocortisone,corticosteroid,tablet/injection,20 mg,2-3 times daily
+fluoxetine,ssri antidepressant,capsule,20 mg,once daily
+sertraline,ssri antidepressant,tablet,50 mg,once daily
+paroxetine,ssri antidepressant,tablet,20 mg,once daily
+escitalopram,ssri antidepressant,tablet,10 mg,once daily
+citalopram,ssri antidepressant,tablet,20 mg,once daily
+amitriptyline,tricyclic antidepressant,tablet,25 mg,once daily
+imipramine,tricyclic antidepressant,tablet,25 mg,2-3 times daily
+nortriptyline,tricyclic antidepressant,tablet,25 mg,2 times daily
+venlafaxine,snri antidepressant,tablet,75 mg,once daily
+duloxetine,snri antidepressant,capsule,60 mg,once daily
+alprazolam,benzodiazepine anxiolytic,tablet,0.5 mg,2-3 times daily
+diazepam,benzodiazepine anxiolytic,tablet/injection,5 mg,2-3 times daily
+lorazepam,benzodiazepine anxiolytic,tablet,1 mg,2-3 times daily
+clonazepam,benzodiazepine anticonvulsant,tablet,0.5 mg,2 times daily
+zolpidem,sedative hypnotic,tablet,10 mg,once at night
+zopiclone,sedative hypnotic,tablet,7.5 mg,once at night
+haloperidol,typical antipsychotic,tablet/injection,5 mg,2 times daily
+risperidone,atypical antipsychotic,tablet,2 mg,once daily
+olanzapine,atypical antipsychotic,tablet,10 mg,once daily
+quetiapine,atypical antipsychotic,tablet,50 mg,2 times daily
+aripiprazole,atypical antipsychotic,tablet,10 mg,once daily
+clozapine,atypical antipsychotic,tablet,25 mg,2 times daily
+levothyroxine,thyroid hormone,tablet,50 mcg,once daily
+carbimazole,antithyroid drug,tablet,10 mg,2-3 times daily
+propylthiouracil,antithyroid drug,tablet,100 mg,3 times daily
+allopurinol,xanthine oxidase inhibitor,tablet,300 mg,once daily
+colchicine,antigout drug,tablet,0.5 mg,2 times daily
+methotrexate,antimetabolite immunosuppressant,tablet/injection,7.5 mg,once weekly
+cyclophosphamide,alkylating agent,injection/tablet,50 mg,once daily
+azathioprine,immunosuppressant,tablet,50 mg,once daily
+cyclosporine,calcineurin inhibitor,capsule,100 mg,2 times daily
+tacrolimus,calcineurin inhibitor,capsule,1 mg,2 times daily
+mycophenolate mofetil,immunosuppressant,tablet,500 mg,2 times daily
+acyclovir,antiviral,tablet,400 mg,3-5 times daily
+valacyclovir,antiviral,tablet,500 mg,2 times daily
+ganciclovir,antiviral,injection/tablet,5 mg/kg,2 times daily
+oseltamivir,antiviral,tablet,75 mg,2 times daily
+remdesivir,antiviral,injection,200 mg,once daily
+fluconazole,antifungal,tablet,150 mg,once daily
+itraconazole,antifungal,capsule,200 mg,once daily
+ketoconazole,antifungal,tablet,200 mg,once daily
+amphotericin b,antifungal,injection,0.7 mg/kg,once daily
+voriconazole,antifungal,tablet/injection,200 mg,2 times daily
+posaconazole,antifungal,tablet,300 mg,once daily
+albendazole,anthelmintic,tablet,400 mg,once daily
+mebendazole,anthelmintic,tablet,100 mg,2 times daily
+ivermectin,anthelmintic,tablet,12 mg,once daily
+praziquantel,anthelmintic,tablet,600 mg,3 times daily
+diethylcarbamazine,anthelmintic,tablet,100 mg,3 times daily
+vitamin c,vitamin supplement,tablet,500 mg,once daily
+vitamin d,vitamin supplement,tablet,1000 IU,once daily
+vitamin b12,vitamin supplement,tablet/injection,500 mcg,once daily
+folic acid,vitamin supplement,tablet,5 mg,once daily
+iron sucrose,iron supplement,injection,100 mg,weekly
+ferrous sulfate,iron supplement,tablet,325 mg,2 times daily
+calcium carbonate,calcium supplement,tablet,500 mg,2 times daily
+calcium gluconate,calcium supplement,injection,1 g,once daily
+magnesium sulfate,electrolyte,injection,1 g,as prescribed
+zinc sulfate,zinc supplement,tablet,50 mg,once daily
+lidocaine,local anesthetic,injection/topical,2%,as needed
+bupivacaine,local anesthetic,injection,0.25%,as needed
+ropivacaine,local anesthetic,injection,0.2%,as needed
+nitroglycerin,nitrate vasodilator,tablet/spray,0.4 mg,as needed
+isosorbide mononitrate,nitrate vasodilator,tablet,30 mg,once daily
+isosorbide dinitrate,nitrate vasodilator,tablet,10 mg,2-3 times daily
+digoxin,cardiac glycoside,tablet,0.25 mg,once daily
+amiodarone,class iii antiarrhythmic,tablet,200 mg,once daily
+adenosine,antiarrhythmic,injection,6 mg,as needed
+atropine,anticholinergic,injection,0.5 mg,as needed
+epinephrine,adrenergic agonist,injection,1 mg,as needed
+norepinephrine,vasopressor,injection,4 mg infusion,as prescribed
+dopamine,inotrope,injection,5 mcg/kg/min,as prescribed
+dobutamine,inotrope,injection,5 mcg/kg/min,as prescribed
+oxytocin,uterotonic,injection,10 units,as prescribed
+misoprostol,prostaglandin analog,tablet,200 mcg,as prescribed
+methylergometrine,uterotonic,injection/tablet,0.2 mg,2-3 times daily
+lactulose,osmotic laxative,syrup,15 ml,2 times daily
+bisacodyl,stimulant laxative,tablet,10 mg,once daily
+senna,stimulant laxative,tablet,15 mg,once daily
+polyethylene glycol,osmotic laxative,powder,17 g,once daily
+tamsulosin,alpha1 blocker,capsule,0.4 mg,once daily
+finasteride,5 alpha reductase inhibitor,tablet,5 mg,once daily
+dutasteride,5 alpha reductase inhibitor,capsule,0.5 mg,once daily
+sildenafil,pde5 inhibitor,tablet,50 mg,as needed
+tadalafil,pde5 inhibitor,tablet,10 mg,once daily
+timolol,beta blocker ophthalmic,eye drops,0.5%,2 times daily
+latanoprost,prostaglandin analog ophthalmic,eye drops,0.005%,once daily
+brimonidine,alpha2 agonist ophthalmic,eye drops,0.2%,2 times daily
+primaquine,antimalarial,tablet,15 mg,once daily
+tafenoquine,antimalarial,tablet,300 mg,single dose
+pyrimethamine,antimalarial antiprotozoal,tablet,25 mg,once daily
+sulfadiazine,sulfonamide antibiotic,tablet,1 g,4 times daily
+sulfamethoxazole,sulfonamide antibiotic,tablet,800 mg,2 times daily
+trimethoprim,folate inhibitor antibiotic,tablet,100 mg,2 times daily
+cotrimoxazole,combined antibiotic (sulfamethoxazole trimethoprim),tablet,960 mg,2 times daily
+nitrofurantoin,urinary antibiotic,capsule,100 mg,2 times daily
+fosfomycin,urinary antibiotic,powder sachet,3 g,single dose
+fidaxomicin,macrolide antibiotic,tablet,200 mg,2 times daily
+rifaximin,rifamycin antibiotic,tablet,550 mg,2 times daily
+delamanid,antitubercular drug,tablet,100 mg,2 times daily
+bedaquiline,antitubercular drug,tablet,400 mg,once daily
+pretomanid,antitubercular drug,tablet,200 mg,once daily
+capreomycin,aminoglycoside antibiotic,injection,1 g,once daily
+kanamycin,aminoglycoside antibiotic,injection,1 g,once daily
+amikacin,aminoglycoside antibiotic,injection,500 mg,2 times daily
+gentamicin,aminoglycoside antibiotic,injection,80 mg,2-3 times daily
+tobramycin,aminoglycoside antibiotic,injection,80 mg,2-3 times daily
+neomycin,aminoglycoside antibiotic,tablet/topical,500 mg,4 times daily
+streptomycin,aminoglycoside antibiotic,injection,1 g,once daily
+colistin,polymyxin antibiotic,injection,2.5 mg/kg,2 times daily
+polymyxin b,polymyxin antibiotic,injection,500000 units,2 times daily
+bacitracin,polypeptide antibiotic,topical ointment,500 units,2 times daily
+mupirocin,topical antibiotic,ointment,2%,2 times daily
+fusidic acid,topical antibiotic,cream,2%,2 times daily
+retapamulin,topical antibiotic,ointment,1%,2 times daily
+daptomycin,lipopeptide antibiotic,injection,4 mg/kg,once daily
+telavancin,lipoglycopeptide antibiotic,injection,10 mg/kg,once daily
+dalbavancin,lipoglycopeptide antibiotic,injection,1000 mg,once weekly
+oritavancin,lipoglycopeptide antibiotic,injection,1200 mg,single dose
+tedizolid,oxazolidinone antibiotic,tablet,200 mg,once daily
+chloramphenicol,broad spectrum antibiotic,tablet/injection,500 mg,4 times daily
+rifabutin,rifamycin antibiotic,tablet,300 mg,once daily
+rifapentine,rifamycin antibiotic,tablet,600 mg,once weekly
+ethionamide,antitubercular drug,tablet,250 mg,2-3 times daily
+cycloserine,antitubercular drug,tablet,250 mg,2 times daily
+para aminosalicylic acid,antitubercular drug,granules,4 g,2 times daily
+clotrimazole,antifungal,cream/lozenge,1%,2 times daily
+econazole,antifungal,cream,1%,2 times daily
+miconazole,antifungal,cream/gel,2%,2 times daily
+nystatin,antifungal,suspension/tablet,500000 units,4 times daily
+terbinafine,antifungal,tablet,250 mg,once daily
+griseofulvin,antifungal,tablet,500 mg,once daily
+caspofungin,echinocandin antifungal,injection,70 mg,once daily
+micafungin,echinocandin antifungal,injection,100 mg,once daily
+anidulafungin,echinocandin antifungal,injection,100 mg,once daily
+isavuconazole,antifungal,capsule,200 mg,once daily
+flucytosine,antifungal,tablet,25 mg/kg,4 times daily
+ribavirin,antiviral,tablet,400 mg,2 times daily
+sofosbuvir,antiviral hepatitis c,tablet,400 mg,once daily
+ledipasvir,antiviral hepatitis c,tablet,90 mg,once daily
+velpatasvir,antiviral hepatitis c,tablet,100 mg,once daily
+daclatasvir,antiviral hepatitis c,tablet,60 mg,once daily
+glecaprevir,antiviral hepatitis c,tablet,300 mg,once daily
+pibrentasvir,antiviral hepatitis c,tablet,120 mg,once daily
+tenofovir,antiretroviral nucleotide inhibitor,tablet,300 mg,once daily
+emtricitabine,antiretroviral nrt inhibitor,tablet,200 mg,once daily
+lamivudine,antiretroviral nrt inhibitor,tablet,150 mg,2 times daily
+zidovudine,antiretroviral nrt inhibitor,tablet,300 mg,2 times daily
+abacavir,antiretroviral nrt inhibitor,tablet,300 mg,2 times daily
+efavirenz,antiretroviral nnrt inhibitor,tablet,600 mg,once daily
+nevirapine,antiretroviral nnrt inhibitor,tablet,200 mg,2 times daily
+lopinavir,protease inhibitor antiretroviral,tablet,400 mg,2 times daily
+ritonavir,protease inhibitor antiretroviral,tablet,100 mg,2 times daily
+darunavir,protease inhibitor antiretroviral,tablet,800 mg,once daily
+atazanavir,protease inhibitor antiretroviral,tablet,300 mg,once daily
+raltegravir,integrase inhibitor antiretroviral,tablet,400 mg,2 times daily
+dolutegravir,integrase inhibitor antiretroviral,tablet,50 mg,once daily
+cabotegravir,integrase inhibitor antiretroviral,injection,600 mg,monthly
+maraviroc,ccr5 antagonist antiretroviral,tablet,300 mg,2 times daily
+enfuvirtide,fusion inhibitor antiretroviral,injection,90 mg,2 times daily
+palivizumab,monoclonal antibody antiviral,injection,15 mg/kg,monthly
+omalizumab,monoclonal antibody anti-ige,injection,150 mg,monthly
+mepolizumab,monoclonal antibody anti-il5,injection,100 mg,monthly
+benralizumab,monoclonal antibody anti-il5,injection,30 mg,monthly
+dupilumab,monoclonal antibody anti-il4,injection,300 mg,biweekly
+omalizumab injection,monoclonal antibody,injection,150 mg,monthly
+cyclophosphamide injection,alkylating anticancer drug,injection,750 mg/m2,as prescribed
+methotrexate injection,antimetabolite anticancer drug,injection,25 mg,weekly
+vincristine,vinca alkaloid anticancer drug,injection,1.4 mg/m2,weekly
+vinblastine,vinca alkaloid anticancer drug,injection,6 mg/m2,weekly
+paclitaxel,taxane anticancer drug,injection,175 mg/m2,every 3 weeks
+docetaxel,taxane anticancer drug,injection,75 mg/m2,every 3 weeks
+cisplatin,platinum anticancer drug,injection,75 mg/m2,every 3 weeks
+carboplatin,platinum anticancer drug,injection,300 mg/m2,every 3 weeks
+oxaliplatin,platinum anticancer drug,injection,85 mg/m2,every 2 weeks
+doxorubicin,anthracycline anticancer drug,injection,60 mg/m2,every 3 weeks
+daunorubicin,anthracycline anticancer drug,injection,45 mg/m2,weekly
+bleomycin,antitumor antibiotic,injection,15 units,weekly
+etoposide,topoisomerase inhibitor anticancer drug,injection,100 mg/m2,3-5 days cycle
+topotecan,topoisomerase inhibitor anticancer drug,injection,1.5 mg/m2,5 days cycle
+irinotecan,topoisomerase inhibitor anticancer drug,injection,180 mg/m2,every 2 weeks
+imatinib,tyrosine kinase inhibitor,tablet,400 mg,once daily
+dasatinib,tyrosine kinase inhibitor,tablet,100 mg,once daily
+nilotinib,tyrosine kinase inhibitor,capsule,300 mg,2 times daily
+erlotinib,egfr inhibitor,tablet,150 mg,once daily
+gefitinib,egfr inhibitor,tablet,250 mg,once daily
+sorafenib,tyrosine kinase inhibitor,tablet,400 mg,2 times daily
+sunitinib,tyrosine kinase inhibitor,tablet,50 mg,once daily
+lenvatinib,tyrosine kinase inhibitor,tablet,24 mg,once daily
+regorafenib,tyrosine kinase inhibitor,tablet,160 mg,once daily
+bevacizumab,vegf inhibitor monoclonal antibody,injection,5 mg/kg,every 2 weeks
+rituximab,anti cd20 monoclonal antibody,injection,375 mg/m2,weekly
+trastuzumab,her2 monoclonal antibody,injection,8 mg/kg,every 3 weeks
+pertuzumab,her2 monoclonal antibody,injection,840 mg,every 3 weeks
+nivolumab,pd1 inhibitor immunotherapy,injection,240 mg,every 2 weeks
+pembrolizumab,pd1 inhibitor immunotherapy,injection,200 mg,every 3 weeks
+ipilimumab,ctla4 inhibitor immunotherapy,injection,3 mg/kg,every 3 weeks
+atezolizumab,pdl1 inhibitor immunotherapy,injection,1200 mg,every 3 weeks
+durvalumab,pdl1 inhibitor immunotherapy,injection,10 mg/kg,every 2 weeks
+avelumab,pdl1 inhibitor immunotherapy,injection,10 mg/kg,every 2 weeks
+filgrastim,gcsf growth factor,injection,5 mcg/kg,once daily
+pegfilgrastim,gcsf growth factor,injection,6 mg,single dose
+epoetin alfa,erythropoiesis stimulating agent,injection,4000 units,weekly
+darbepoetin alfa,erythropoiesis stimulating agent,injection,200 mcg,every 2 weeks
+romiplostim,thrombopoietin receptor agonist,injection,1 mcg/kg,weekly
+eltrombopag,thrombopoietin receptor agonist,tablet,50 mg,once daily
+thalidomide,immunomodulatory anticancer drug,tablet,100 mg,once daily
+lenalidomide,immunomodulatory anticancer drug,tablet,25 mg,once daily
+pomalidomide,immunomodulatory anticancer drug,tablet,4 mg,once daily
+zoledronic acid,bisphosphonate,injection,5 mg,yearly
+pamidronate,bisphosphonate,injection,90 mg,monthly
+alendronate,bisphosphonate,tablet,70 mg,weekly
+risedronate,bisphosphonate,tablet,35 mg,weekly
+ibandronate,bisphosphonate,tablet,150 mg,monthly
+denosumab,rankl inhibitor,injection,60 mg,6 monthly
+calcitonin,hormone osteoporosis drug,injection/nasal,200 IU,once daily
+teriparatide,parathyroid hormone analog,injection,20 mcg,once daily
+abaloparatide,parathyroid hormone analog,injection,80 mcg,once daily
+raloxifene,selective estrogen receptor modulator,tablet,60 mg,once daily
+tamoxifen,selective estrogen receptor modulator,tablet,20 mg,once daily
+anastrozole,aromatase inhibitor,tablet,1 mg,once daily
+letrozole,aromatase inhibitor,tablet,2.5 mg,once daily
+exemestane,aromatase inhibitor,tablet,25 mg,once daily
+leuprolide,gnrh agonist,injection,3.75 mg,monthly
+goserelin,gnrh agonist,injection,3.6 mg,monthly
+triptorelin,gnrh agonist,injection,3.75 mg,monthly
+bicalutamide,androgen receptor blocker,tablet,50 mg,once daily
+enzalutamide,androgen receptor inhibitor,tablet,160 mg,once daily
+abiraterone,androgen synthesis inhibitor,tablet,1000 mg,once daily
+finasteride topical,5 alpha reductase inhibitor,topical solution,1 ml,once daily
+dutasteride capsule,5 alpha reductase inhibitor,capsule,0.5 mg,once daily
+oxybutynin,anticholinergic bladder drug,tablet,5 mg,2-3 times daily
+tolterodine,anticholinergic bladder drug,tablet,2 mg,2 times daily
+solifenacin,anticholinergic bladder drug,tablet,5 mg,once daily
+darifenacin,anticholinergic bladder drug,tablet,7.5 mg,once daily
+mirabegron,beta3 agonist bladder drug,tablet,50 mg,once daily
+desmopressin,antidiuretic hormone analog,tablet/nasal,0.2 mg,once daily
+phenazopyridine,urinary analgesic,tablet,200 mg,3 times daily
+potassium citrate,urinary alkalinizer,tablet,10 mEq,3 times daily
+sodium bicarbonate,systemic alkalinizer,tablet,325 mg,3 times daily
+acetazolamide,carbonic anhydrase inhibitor,tablet,250 mg,2 times daily
+mannitol,osmotic diuretic,injection,20%,as prescribed
+glycerol,osmotic diuretic,oral solution,1 g/kg,as prescribed
+pilocarpine,miotic ophthalmic drug,eye drops,1%,4 times daily
+acetylcholine,cholinergic agonist,injection,20 mg,as prescribed
+carbachol,cholinergic agonist,eye drops,0.01%,2 times daily
+tropicamide,anticholinergic ophthalmic drug,eye drops,1%,as needed
+cyclopentolate,anticholinergic ophthalmic drug,eye drops,1%,as needed
+phenylephrine ophthalmic,alpha agonist ophthalmic drug,eye drops,2.5%,as needed
+ketorolac ophthalmic,nsaid ophthalmic drug,eye drops,0.5%,4 times daily
+nepafenac,nsaid ophthalmic drug,eye drops,0.1%,3 times daily
+bromfenac,nsaid ophthalmic drug,eye drops,0.07%,once daily
+olopatadine,antihistamine ophthalmic drug,eye drops,0.1%,2 times daily
+azelastine,antihistamine ophthalmic drug,eye drops,0.05%,2 times daily
+ketotifen,antihistamine ophthalmic drug,eye drops,0.025%,2 times daily
+sodium cromoglycate,mast cell stabilizer ophthalmic drug,eye drops,2%,4 times daily
+nedocromil,mast cell stabilizer inhaler,inhaler,4 mg,2 times daily
+montelukast sodium,leukotriene antagonist,tablet,10 mg,once daily
+levosalbutamol,short acting bronchodilator,inhaler,50 mcg,as needed
+indacaterol,long acting bronchodilator,inhaler,150 mcg,once daily
+vilanterol,long acting bronchodilator,inhaler,25 mcg,once daily
+umeclidinium,anticholinergic bronchodilator,inhaler,62.5 mcg,once daily
+glycopyrronium,anticholinergic bronchodilator,inhaler,50 mcg,once daily
+aclidinium,anticholinergic bronchodilator,inhaler,400 mcg,2 times daily
+tiotropium,anticholinergic bronchodilator,inhaler,18 mcg,once daily
+ciclesonide,inhaled corticosteroid,inhaler,160 mcg,2 times daily
+mometasone,inhaled corticosteroid,inhaler,200 mcg,once daily
+ciclesonide inhaler,inhaled corticosteroid,inhaler,160 mcg,2 times daily
+beclomethasone inhaler,inhaled corticosteroid,inhaler,200 mcg,2 times daily
+budesonide inhaler,inhaled corticosteroid,inhaler,200 mcg,2 times daily
+fluticasone inhaler,inhaled corticosteroid,inhaler,100 mcg,2 times daily
+ketamine,dissociative anesthetic,injection,1 mg/kg,as prescribed
+propofol,sedative anesthetic,injection,2 mg/kg,as prescribed
+thiopental,barbiturate anesthetic,injection,3 mg/kg,as prescribed
+etomidate,anesthetic,injection,0.3 mg/kg,as prescribed
+midazolam,benzodiazepine sedative,injection,2 mg,as needed
+dexmedetomidine,alpha2 sedative,injection,1 mcg/kg,as prescribed
+vecuronium,neuromuscular blocker,injection,0.1 mg/kg,as prescribed
+rocuronium,neuromuscular blocker,injection,0.6 mg/kg,as prescribed
+succinylcholine,depolarizing muscle relaxant,injection,1 mg/kg,as prescribed
+atracurium,neuromuscular blocker,injection,0.5 mg/kg,as prescribed
+cisatracurium,neuromuscular blocker,injection,0.15 mg/kg,as prescribed
+neostigmine,acetylcholinesterase inhibitor,injection,2.5 mg,as needed
+glycopyrrolate,anticholinergic,injection,0.2 mg,as needed
+sugammadex,neuromuscular blocker reversal,injection,2 mg/kg,as prescribed
+naloxone,opioid antagonist,injection,0.4 mg,as needed
+flumazenil,benzodiazepine antagonist,injection,0.2 mg,as needed
+dantrolene,muscle relaxant,injection,2.5 mg/kg,as prescribed
+baclofen,muscle relaxant antispastic,tablet,10 mg,3 times daily
+tizanidine,muscle relaxant alpha2 agonist,tablet,2 mg,3 times daily
+cyclobenzaprine,muscle relaxant,tablet,10 mg,3 times daily
+carisoprodol,muscle relaxant,tablet,350 mg,3 times daily
+gabapentin,antiepileptic neuropathic analgesic,capsule/tablet,300 mg,3 times daily
+pregabalin,antiepileptic neuropathic analgesic,capsule,75 mg,2 times daily
+carbamazepine,antiepileptic sodium channel blocker,tablet,200 mg,2 times daily
+oxcarbazepine,antiepileptic sodium channel blocker,tablet,300 mg,2 times daily
+valproate,antiepileptic broad spectrum,tablet,500 mg,2 times daily
+lamotrigine,antiepileptic sodium channel blocker,tablet,25 mg,once daily
+topiramate,antiepileptic carbonic anhydrase inhibitor,tablet,50 mg,2 times daily
+levetiracetam,antiepileptic synaptic vesicle inhibitor,tablet,500 mg,2 times daily
+phenytoin,antiepileptic sodium channel blocker,tablet/capsule,100 mg,3 times daily
+phenobarbital,barbiturate anticonvulsant,tablet,60 mg,once daily
+primidone,barbiturate anticonvulsant,tablet,250 mg,2 times daily
+ethosuximide,antiepileptic succinimide,capsule,250 mg,2 times daily
+lacosamide,antiepileptic sodium channel modulator,tablet,100 mg,2 times daily
+zonisamide,antiepileptic sulfonamide,capsule,100 mg,once daily
+rufinamide,antiepileptic sodium channel blocker,tablet,200 mg,2 times daily
+brivaracetam,antiepileptic sv2a ligand,tablet,50 mg,2 times daily
+perampanel,antiepileptic ampa antagonist,tablet,4 mg,once daily
+memantine,nmda receptor antagonist dementia drug,tablet,10 mg,2 times daily
+donepezil,acetylcholinesterase inhibitor dementia drug,tablet,10 mg,once daily
+rivastigmine,acetylcholinesterase inhibitor dementia drug,capsule/patch,6 mg,2 times daily
+galantamine,acetylcholinesterase inhibitor dementia drug,tablet,8 mg,2 times daily
+selegiline,mao b inhibitor antiparkinson drug,tablet,5 mg,2 times daily
+rasagiline,mao b inhibitor antiparkinson drug,tablet,1 mg,once daily
+entacapone,comt inhibitor antiparkinson drug,tablet,200 mg,3 times daily
+tolcapone,comt inhibitor antiparkinson drug,tablet,100 mg,3 times daily
+amantadine,antiparkinson antiviral drug,tablet,100 mg,2 times daily
+ropinirole,dopamine agonist antiparkinson drug,tablet,0.25 mg,3 times daily
+pramipexole,dopamine agonist antiparkinson drug,tablet,0.125 mg,3 times daily
+rotigotine,dopamine agonist antiparkinson drug,transdermal patch,2 mg,once daily
+benztropine,anticholinergic antiparkinson drug,tablet,1 mg,2 times daily
+trihexyphenidyl,anticholinergic antiparkinson drug,tablet,2 mg,3 times daily
+chlorpropamide,sulfonylurea antidiabetic,tablet,250 mg,once daily
+tolbutamide,sulfonylurea antidiabetic,tablet,500 mg,2 times daily
+tolazamide,sulfonylurea antidiabetic,tablet,100 mg,once daily
+glyburide,sulfonylurea antidiabetic,tablet,5 mg,once daily
+saxagliptin,dpp4 inhibitor antidiabetic,tablet,5 mg,once daily
+evogliptin,dpp4 inhibitor antidiabetic,tablet,5 mg,once daily
+trelagliptin,dpp4 inhibitor antidiabetic,tablet,100 mg,once weekly
+imeglimin,mitochondrial modulator antidiabetic,tablet,1000 mg,2 times daily
+colchicine probenecid,antigout combination,tablet,0.5 mg,2 times daily
+probenecid,uricosuric antigout drug,tablet,500 mg,2 times daily
+benzbromarone,uricosuric antigout drug,tablet,50 mg,once daily
+febuxostat,xanthine oxidase inhibitor antigout drug,tablet,40 mg,once daily
+pegloticase,urate oxidase antigout drug,injection,8 mg,biweekly
+sulfinpyrazone,uricosuric antigout drug,tablet,100 mg,2 times daily
+indapamide,thiazide like diuretic,tablet,1.5 mg,once daily
+metolazone,thiazide like diuretic,tablet,5 mg,once daily
+hydralazine,vasodilator antihypertensive,tablet,25 mg,3 times daily
+minoxidil,vasodilator antihypertensive,tablet,10 mg,once daily
+diazoxide,vasodilator antihypertensive,injection,150 mg,as prescribed
+nitroprusside,vasodilator antihypertensive,injection,0.5 mcg/kg/min,as prescribed
+clevidipine,calcium channel blocker antihypertensive,injection,1 mg/hr,as prescribed
+fenoldopam,dopamine agonist antihypertensive,injection,0.1 mcg/kg/min,as prescribed
+methysergide,serotonin antagonist antimigraine,tablet,2 mg,2 times daily
+ergotamine,ergot alkaloid antimigraine,tablet,2 mg,as needed
+sumatriptan,5ht1 agonist antimigraine,tablet,50 mg,as needed
+rizatriptan,5ht1 agonist antimigraine,tablet,10 mg,as needed
+zolmitriptan,5ht1 agonist antimigraine,tablet,2.5 mg,as needed
+naratriptan,5ht1 agonist antimigraine,tablet,2.5 mg,as needed
+eletriptan,5ht1 agonist antimigraine,tablet,40 mg,as needed
+frovatriptan,5ht1 agonist antimigraine,tablet,2.5 mg,as needed
+ubrogepant,cgrp receptor antagonist antimigraine,tablet,50 mg,as needed
+rimegepant,cgrp receptor antagonist antimigraine,tablet,75 mg,as needed
+lasmiditan,5ht1f agonist antimigraine,tablet,100 mg,as needed
+butalbital,barbiturate analgesic,tablet,50 mg,as needed
+caffeine,xanthine stimulant,tablet,100 mg,as needed
+ergotamine caffeine,ergot antimigraine combination,tablet,2 mg,as needed
