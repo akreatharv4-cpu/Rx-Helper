@@ -89,22 +89,112 @@ def calculate_who_indicators(detected_meds):
         "pc_edl": round((edl_count / total_drugs) * 100, 1)  # Added to output
     }
 
-# ---------------- CORE ANALYSIS PIPELINE ---------------- #
+# ---------------- DOSE CALCULATION HELPER ---------------- #
+
+def extract_dose_and_frequency(text, drug_name):
+    """
+    Scans text near a detected drug to calculate daily intake.
+    Example: 'Paracetamol 500mg TID' -> 1500mg
+    """
+    text = text.lower()
+    start_idx = text.find(drug_name.lower())
+    if start_idx == -1: return 0, 0
+    
+    # Look at the text immediately following the drug name
+    context = text[start_idx : start_idx + 70]
+    
+    # 1. Extract Strength (e.g., 500mg, 1g)
+    strength = 0
+    strength_match = re.search(r'(\d+(?:\.\d+)?)\s*(mg|g|mcg)', context)
+    if strength_match:
+        val = float(strength_match.group(1))
+        unit = strength_match.group(2)
+        strength = val * 1000 if unit == 'g' else val # Convert g to mg
+        
+    # 2. Extract Frequency (Clinical Shorthand)
+    freq = 1 
+    if any(x in context for x in ["tid", "t.i.d", "3 times", "tds"]): freq = 3
+    elif any(x in context for x in ["bid", "b.i.d", "2 times", "bd"]): freq = 2
+    elif any(x in context for x in ["qid", "q.i.d", "4 times"]): freq = 4
+    elif any(x in context for x in ["od", "o.d", "once daily", "hs"]): freq = 1
+    
+    return strength, freq
+
+# ---------------- UPDATED CORE ANALYSIS PIPELINE ---------------- #
 
 def run_analysis_pipeline(text: str):
-    # 0. Clean up line breaks from the OCR text for fallback scanning
     cleaned_text = text.replace("\n", " ").lower()
 
-    # 1. Extract raw names using BioBERT logic in ocr.py
+    # 1. Extract raw names
     raw_meds = extract_clean_drugs(text)
     
-    # 2. NOISE FILTER: Expanded to catch typical OCR artifacts like clinic names and doctor titles
+    # 2. NOISE FILTER
     stop_words = {
         "prescription", "tablet", "tablets", "capsule", "syrup", "syp", 
         "dr", "patient", "dose", "daily", "mg", "ml", "tab", "clinic", 
         "formate", "medical", "india", "name", "mbbs", "md", "hospital"
     }
     filtered_meds = [m for m in raw_meds if m.lower().strip() not in stop_words]
+    
+    final_meds = []
+    overdose_alerts = [] # NEW: To store calculated dose warnings
+    
+    # 3. FUZZY MATCHING & DOSE AUDITING
+    for m in filtered_meds:
+        clean_m = re.sub(r'\b(tablet|cap|syp|injection|inj|syrup|hcl|mg)\b.*', '', m, flags=re.IGNORECASE).strip()
+        if not clean_m: continue
+
+        if medicine_list:
+            match = process.extractOne(clean_m.lower(), medicine_list, scorer=fuzz.WRatio)
+            if match and match[1] >= 72:
+                drug_name = match[0].title()
+                final_meds.append(drug_name)
+                
+                # --- ACTIVE AUDIT: Calculate Daily Total vs CSV Limit ---
+                strength, freq = extract_dose_and_frequency(cleaned_text, drug_name)
+                daily_total = strength * freq
+                max_limit = dosage_dict.get(drug_name.lower(), 0)
+                
+                if max_limit > 0 and daily_total > max_limit:
+                    overdose_alerts.append({
+                        "drug1": drug_name,
+                        "drug2": "Limit Exceeded",
+                        "severity": "Severe",
+                        "message": f"🚨 OVERDOSE ALERT: Prescribed {daily_total}mg/day. Safe limit is {max_limit}mg/day."
+                    })
+                continue
+        
+        if len(clean_m) > 3:
+            final_meds.append(clean_m.title()) 
+
+    # 4. FALLBACK & DEDUPLICATION
+    for db_med in medicine_list:
+        if len(db_med) > 4 and db_med.title() not in final_meds:
+            if db_med.lower() in cleaned_text:
+                final_meds.append(db_med.title())
+
+    final_meds = list(set(final_meds))
+
+    # 5. DATA MERGING
+    who_data = calculate_who_indicators(final_meds)
+    
+    # Combine drug-drug interaction alerts + overdose alerts
+    interaction_alerts = check_interactions(final_meds)
+    all_safety_alerts = interaction_alerts + overdose_alerts
+    
+    dosage_limits = {
+        med: f"{dosage_dict.get(med.lower(), 'N/A')} mg/day" 
+        for med in final_meds
+    }
+
+    return {
+        "success": True,
+        "medicines": final_meds,
+        "who_indicators": who_data,
+        "interactions": all_safety_alerts, # Now sends both types of alerts
+        "max_dosages": dosage_limits,
+        "raw_text": text
+    }
     
     # 3. AGGRESSIVE FUZZY MATCHING (OCR Correction)
     final_meds = []
@@ -159,6 +249,10 @@ def run_analysis_pipeline(text: str):
 
 # ---------------- DATA MODELS ---------------- #
 
+# NEW: Add this model to handle the /analyze-text request structure
+class AnalysisRequest(BaseModel):
+    text: str
+
 class ChatRequest(BaseModel):
     message: str
     context_meds: Optional[List[str]] = []
@@ -170,12 +264,13 @@ class ChatRequest(BaseModel):
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# UPGRADED: Using AnalysisRequest model fixes the 422 error
 @app.post("/analyze-text")
-async def analyze_text(data: dict = Body(...)):
-    text = data.get("text", "")
-    if not text:
+async def analyze_text(data: AnalysisRequest): 
+    # data.text is now automatically validated and extracted
+    if not data.text:
         raise HTTPException(status_code=400, detail="No text provided")
-    return run_analysis_pipeline(text)
+    return run_analysis_pipeline(data.text)
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -183,7 +278,8 @@ async def upload(file: UploadFile = File(...)):
     filename = (file.filename or "").lower()
     
     text = ocr_pdf_bytes(content) if filename.endswith(".pdf") else ocr_image_bytes(content)
-    return run_analysis_pipeline(text)
+    # Ensure run_analysis_pipeline handles empty strings if OCR fails
+    return run_analysis_pipeline(text or "")
 
 @app.post("/chat")
 async def clinical_chat(data: ChatRequest):
