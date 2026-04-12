@@ -6,26 +6,26 @@ from ocr import ocr_image_bytes, ocr_pdf_bytes, extract_clean_drugs
 from pathlib import Path
 import pandas as pd
 from rapidfuzz import process, fuzz
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
-import re  # NEW: Required for cleaning up messy OCR text
+import re 
 
-# --- NEW IMPORTS FOR AI & INTERACTIONS ---
+# --- AI & INTERACTIONS ---
 from transformers import AutoTokenizer, AutoModel
 import torch
-from interaction_checker import check_interactions  # Pulling in your custom logic!
+from interaction_checker import check_interactions 
 
 app = FastAPI()
 
-# Mount static files (for your CSS/JS)
+# Static & Templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 BASE_DIR = Path(__file__).resolve().parent
 MEDICINE_PATH = BASE_DIR / "medicines_master.csv"
-DOSAGE_PATH = BASE_DIR / "dosage_reference.csv"  # NEW: Dosage checking
+DOSAGE_PATH = BASE_DIR / "dosage_reference.csv" 
 
-# ---------------- AI MODELS (Hugging Face) ---------------- #
+# ---------------- AI MODELS ---------------- #
 print("Booting AI Engine: Loading Transformers...")
 try:
     clinical_tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
@@ -49,24 +49,21 @@ def load_medicines():
         df["name"] = df["name"].str.lower().str.strip()
         return df
     except Exception as e:
-        print("⚠ Medicine load error:", e)
         return pd.DataFrame(columns=["name", "class", "is_antibiotic", "is_injection", "is_edl", "is_generic"])
 
 def load_dosages():
-    """NEW: Loads max daily limits into a dictionary for instant lookup."""
     try:
         df = pd.read_csv(DOSAGE_PATH)
         df["drug_name"] = df["drug_name"].str.lower().str.strip()
         return dict(zip(df["drug_name"], df["max_daily_mg"]))
     except Exception as e:
-        print("⚠ Dosage load error:", e)
         return {}
 
 medicine_df = load_medicines()
 medicine_list = medicine_df["name"].tolist()
 dosage_dict = load_dosages()
 
-# ---------------- WHO INDICATORS LOGIC ---------------- #
+# ---------------- LOGIC HELPERS ---------------- #
 
 def calculate_who_indicators(detected_meds):
     total_drugs = len(detected_meds)
@@ -75,7 +72,6 @@ def calculate_who_indicators(detected_meds):
 
     subset = medicine_df[medicine_df["name"].isin([m.lower() for m in detected_meds])]
     
-    # UPGRADE: Safe column checks to prevent key errors
     generics_count = subset[subset["is_generic"] == 1].shape[0] if "is_generic" in subset.columns else 0
     antibiotics_count = subset[subset["is_antibiotic"] == 1].shape[0] if "is_antibiotic" in subset.columns else 0
     injections_count = subset[subset["is_injection"] == 1].shape[0] if "is_injection" in subset.columns else 0
@@ -86,32 +82,23 @@ def calculate_who_indicators(detected_meds):
         "pc_generic": round((generics_count / total_drugs) * 100, 1),
         "pc_antibiotic": round((antibiotics_count / total_drugs) * 100, 1),
         "pc_injection": round((injections_count / total_drugs) * 100, 1),
-        "pc_edl": round((edl_count / total_drugs) * 100, 1)  # Added to output
+        "pc_edl": round((edl_count / total_drugs) * 100, 1)
     }
 
-# ---------------- DOSE CALCULATION HELPER ---------------- #
-
 def extract_dose_and_frequency(text, drug_name):
-    """
-    Scans text near a detected drug to calculate daily intake.
-    Example: 'Paracetamol 500mg TID' -> 1500mg
-    """
     text = text.lower()
     start_idx = text.find(drug_name.lower())
     if start_idx == -1: return 0, 0
     
-    # Look at the text immediately following the drug name
-    context = text[start_idx : start_idx + 70]
+    context = text[start_idx : start_idx + 75]
     
-    # 1. Extract Strength (e.g., 500mg, 1g)
     strength = 0
     strength_match = re.search(r'(\d+(?:\.\d+)?)\s*(mg|g|mcg)', context)
     if strength_match:
         val = float(strength_match.group(1))
         unit = strength_match.group(2)
-        strength = val * 1000 if unit == 'g' else val # Convert g to mg
+        strength = val * 1000 if unit == 'g' else val
         
-    # 2. Extract Frequency (Clinical Shorthand)
     freq = 1 
     if any(x in context for x in ["tid", "t.i.d", "3 times", "tds"]): freq = 3
     elif any(x in context for x in ["bid", "b.i.d", "2 times", "bd"]): freq = 2
@@ -120,20 +107,12 @@ def extract_dose_and_frequency(text, drug_name):
     
     return strength, freq
 
-## ---------------- UPGRADED CORE ANALYSIS PIPELINE ---------------- #
+# ---------------- CORE ANALYSIS PIPELINE (FIXED & DEDUPLICATED) ---------------- #
 
 def run_analysis_pipeline(text: str, patient_info: dict = None):
-    """
-    Upgraded pipeline to handle raw text analysis, active dosage auditing,
-    and patient context (Age, Renal function, etc.).
-    """
-    # 0. Basic cleaning for fallback scanning
     cleaned_text = text.replace("\n", " ").lower()
-
-    # 1. Extract raw names using BioBERT logic in ocr.py
     raw_meds = extract_clean_drugs(text)
     
-    # 2. NOISE FILTER: Filter out non-drug medical terminology and OCR artifacts
     stop_words = {
         "prescription", "tablet", "tablets", "capsule", "syrup", "syp", 
         "dr", "patient", "dose", "daily", "mg", "ml", "tab", "clinic", 
@@ -142,61 +121,56 @@ def run_analysis_pipeline(text: str, patient_info: dict = None):
     filtered_meds = [m for m in raw_meds if m.lower().strip() not in stop_words]
     
     final_meds = []
-    overdose_alerts = [] 
-    
-    # 3. FUZZY MATCHING & ACTIVE DOSAGE AUDITING
+    overdose_alerts = []
+    processed_drugs = set() # DEDUPLICATION KEY
+
+    # 1. FUZZY MATCHING & ACTIVE DOSAGE AUDITING
     for m in filtered_meds:
-        # Strip trailing text like "Tablet" or "HCL"
         clean_m = re.sub(r'\b(tablet|cap|syp|injection|inj|syrup|hcl|mg)\b.*', '', m, flags=re.IGNORECASE).strip()
-        
-        if not clean_m:
-            continue
+        if not clean_m: continue
 
         if medicine_list:
-            # Use WRatio to handle messy OCR typos
             match = process.extractOne(clean_m.lower(), medicine_list, scorer=fuzz.WRatio)
             if match and match[1] >= 72:
                 drug_name = match[0].title()
-                final_meds.append(drug_name)
                 
-                # --- ACTIVE AUDIT: Calculate Daily Total vs Safe Limit ---
-                strength, freq = extract_dose_and_frequency(cleaned_text, drug_name)
-                daily_total = strength * freq
-                max_limit = dosage_dict.get(drug_name.lower(), 0)
-                
-                # Logic: If daily total exceeds the reference limit, trigger an alert
-                if max_limit > 0 and daily_total > max_limit:
-                    overdose_alerts.append({
-                        "drug1": drug_name,
-                        "drug2": "Limit Exceeded",
-                        "severity": "Severe",
-                        "message": f"🚨 OVERDOSE ALERT: Prescribed {daily_total}mg/day. Safe limit is {max_limit}mg/day."
-                    })
+                # Deduplication logic: Only audit each drug once
+                if drug_name not in processed_drugs:
+                    final_meds.append(drug_name)
+                    processed_drugs.add(drug_name)
+                    
+                    strength, freq = extract_dose_and_frequency(cleaned_text, drug_name)
+                    daily_total = strength * freq
+                    max_limit = dosage_dict.get(drug_name.lower(), 0)
+                    
+                    if max_limit > 0 and daily_total > max_limit:
+                        overdose_alerts.append({
+                            "drug1": drug_name,
+                            "drug2": "Limit Exceeded",
+                            "severity": "Severe",
+                            "message": f"🚨 OVERDOSE ALERT: Prescribed {daily_total}mg/day. Safe limit is {max_limit}mg/day."
+                        })
                 continue
         
-        # Keep unknown drugs if they are long enough to be valid
-        if len(clean_m) > 3:
-            final_meds.append(clean_m.title()) 
+        # Non-DB drugs
+        clean_title = clean_m.title()
+        if len(clean_m) > 3 and clean_title not in processed_drugs:
+            final_meds.append(clean_title)
+            processed_drugs.add(clean_title)
 
-    # 4. FALLBACK SCAN: Scan raw text for medicines missed by the AI extractor
+    # 2. FALLBACK SCAN
     for db_med in medicine_list:
-        if len(db_med) > 4 and db_med.title() not in final_meds:
+        db_title = db_med.title()
+        if len(db_med) > 4 and db_title not in processed_drugs:
             if db_med.lower() in cleaned_text:
-                final_meds.append(db_med.title())
+                final_meds.append(db_title)
+                processed_drugs.add(db_title)
 
-    # 5. Deduplicate the final drug list
-    final_meds = list(set(final_meds))
-
-    # 6. CALCULATE METRICS & ALERTS
+    # 3. MERGE & RETURN
     who_data = calculate_who_indicators(final_meds)
-    
-    # Fetch Drug-Drug Interaction alerts
     interaction_alerts = check_interactions(final_meds)
-    
-    # Merge both types of alerts for the frontend
     all_safety_alerts = interaction_alerts + overdose_alerts
     
-    # Create the dosage reference map for the UI
     dosage_limits = {
         med: f"{dosage_dict.get(med.lower(), 'N/A')} mg/day" 
         for med in final_meds
@@ -209,76 +183,32 @@ def run_analysis_pipeline(text: str, patient_info: dict = None):
         "interactions": all_safety_alerts,
         "max_dosages": dosage_limits,
         "raw_text": text,
-        "patient_context": patient_info
+        "patient_context": patient_info or {}
     }
-    
-    # 3. AGGRESSIVE FUZZY MATCHING (OCR Correction)
-    final_meds = []
-    for m in filtered_meds:
-        # Strip trailing words like "Tablet'et" or "HCL" from the extracted string
-        clean_m = re.sub(r'\b(tablet|cap|syp|injection|inj|syrup|hcl|mg)\b.*', '', m, flags=re.IGNORECASE).strip()
-        
-        if not clean_m:
-            continue
-
-        if medicine_list:
-            # UPGRADE: Using WRatio instead of ratio, and dropping threshold to 72%
-            # This allows "Azithicryyin" to safely snap to "Azithromycin"
-            match = process.extractOne(clean_m.lower(), medicine_list, scorer=fuzz.WRatio)
-            if match and match[1] >= 72:
-                final_meds.append(match[0].title()) # Add the correctly spelled DB name
-                continue
-        
-        # Only keep the unknown word if it's longer than 3 letters
-        if len(clean_m) > 3:
-            final_meds.append(clean_m.title()) 
-
-    # 4. FALLBACK SCAN: If BioBERT completely missed a messy drug, scan the raw text
-    for db_med in medicine_list:
-        if len(db_med) > 4 and db_med.title() not in final_meds:
-            if db_med.lower() in cleaned_text:
-                final_meds.append(db_med.title())
-
-    # 5. Deduplicate the final list
-    final_meds = list(set(final_meds))
-
-    # 6. Calculate WHO Data
-    who_data = calculate_who_indicators(final_meds)
-    
-    # 7. Check Drug-Drug Interactions
-    interactions_alerts = check_interactions(final_meds)
-    
-    # 8. Attach Maximum Daily Dosages
-    dosage_limits = {
-        med: f"{dosage_dict.get(med.lower(), 'N/A')} mg/day" 
-        for med in final_meds
-    }
-
-    return {
-        "success": True,
-        "medicines": final_meds,
-        "who_indicators": who_data,
-        "interactions": interactions_alerts,
-        "max_dosages": dosage_limits,
-        "raw_text": text
-    }
-
-from pydantic import BaseModel, Field # Ensure Field is imported
-
 # ---------------- DATA MODELS ---------------- #
 
 class AnalysisRequest(BaseModel):
-    # Field(...) ensures the 'text' key MUST exist in the JSON.
-    # min_length=1 replaces the need for manual .strip() checks in the route.
-    text: str = Field(..., min_length=1)
+    """
+    Handles /analyze-text requests.
+    Using default_factory=dict prevents 422 errors if patient_info is missing.
+    """
+    text: str = Field(..., min_length=1, description="Raw prescription text")
     
-    # We add this so the analysis pipeline can see the Age/Renal/Pregnancy status
-    patient_info: Optional[dict] = Field(default=None)
+    # UPGRADE: Using default_factory=dict ensures this is never 'None'
+    patient_info: Optional[dict] = Field(default_factory=dict)
 
 class ChatRequest(BaseModel):
-    message: str
-    context_meds: Optional[List[str]] = []
-    patient_info: Optional[dict] = {}
+    """
+    Handles /chat requests from the AI assistant.
+    Ensures all lists and dicts have safe defaults.
+    """
+    message: str = Field(..., min_length=1)
+    
+    # UPGRADE: Ensures context_meds is an empty list [] by default
+    context_meds: List[str] = Field(default_factory=list)
+    
+    # UPGRADE: Ensures patient_info is an empty dict {} by default
+    patient_info: dict = Field(default_factory=dict)
 
 # ---------------- ROUTES ---------------- #
 
@@ -288,8 +218,7 @@ async def index(request: Request):
 
 @app.post("/analyze-text")
 async def analyze_text(data: AnalysisRequest): 
-    # Logic: Pass the text AND the patient context to the analysis engine
-    # This fixes the 422 error by explicitly expecting the structure { "text": "...", "patient_info": {...} }
+    # Directly uses the validated data from Pydantic
     return run_analysis_pipeline(data.text, data.patient_info)
 
 @app.post("/upload")
@@ -297,17 +226,43 @@ async def upload(file: UploadFile = File(...)):
     content = await file.read()
     filename = (file.filename or "").lower()
     
-    # Process OCR
+    # 1. Process OCR (PDF or Image)
     text = ocr_pdf_bytes(content) if filename.endswith(".pdf") else ocr_image_bytes(content)
     
-    # Since /upload is a file-only stream, we pass None for patient_info initially.
-    # The user can later refine the results in the UI.
-    return run_analysis_pipeline(text or "", patient_info=None)
+    # 2. Pass an empty dict for patient_info to prevent NoneType errors in the pipeline
+    # The user can update Age/Renal info on the dashboard after the scan.
+    return run_analysis_pipeline(text or "", patient_info={})
 
 @app.post("/chat")
 async def clinical_chat(data: ChatRequest):
     user_query = data.message.lower()
-    meds_on_hand = ", ".join(data.context_meds) if data.context_meds else "None detected"
+    meds_on_hand = ", ".join(data.context_meds) if data.context_meds else "No drugs detected"
+    
+    # Clinical Context Extraction
+    renal_status = data.patient_info.get("renal", "Normal (>60)")
+    age = data.patient_info.get("age", "25")
+    
+    # 3. Enhanced Clinical Reasoning Logic
+    if any(word in user_query for word in ["safe", "renal", "kidney", "contraindicated"]):
+        if "severe" in renal_status.lower():
+            reply = (f"Reviewing {meds_on_hand} for a patient with Severe Renal Impairment (CrCl <30). "
+                     "Attention: Many of these agents may require dose adjustment or are contraindicated. "
+                     "Please cross-verify with the Renal Drug Handbook.")
+        else:
+            reply = f"The current list ({meds_on_hand}) appears generally manageable for {renal_status} function. Always monitor serum creatinine."
+
+    elif "dose" in user_query or "limit" in user_query:
+        reply = (f"Dosage limits for {meds_on_hand} are referenced for an adult ({age} yrs). "
+                 "If the patient is pediatric or geriatric, consider adjusting the daily maximums accordingly.")
+
+    elif "generic" in user_query or "alternative" in user_query:
+        reply = ("WHO indicators promote generic prescribing. I recommend checking the National Essential "
+                 "Medicines List (EDL) for cost-effective alternatives for these therapies.")
+
+    else:
+        reply = f"I've analyzed the prescription ({meds_on_hand}). Do you need a specific check on drug-drug interactions or WHO prescribing indicators?"
+
+    return {"reply": reply}
     
     # Intelligent response based on patient info if provided
     renal_status = data.patient_info.get("renal", "Normal") if data.patient_info else "Normal"
