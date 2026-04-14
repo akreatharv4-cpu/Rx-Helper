@@ -1,0 +1,66 @@
+import os
+import time
+import easyocr
+from google.cloud import vision
+
+IMAGE_PATH = "test.jpeg"
+
+print("🔄 Booting EasyOCR Model...")
+reader = easyocr.Reader(['en'], gpu=False)
+
+def run_easyocr(image_path):
+    start = time.time()
+    try:
+        results = reader.readtext(image_path, detail=0, paragraph=True)
+        text = " ".join(results)
+        elapsed = time.time() - start
+        return text, elapsed
+    except Exception as e:
+        return f"EasyOCR Error: {e}", 0
+
+def run_vision(image_path):
+    start = time.time()
+    if not os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
+        return "ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.", 0
+    
+    try:
+        client = vision.ImageAnnotatorClient()
+        with open(image_path, 'rb') as image_file:
+            content = image_file.read()
+
+        image = vision.Image(content=content)
+        # Using document_text_detection for dense handwriting
+        response = client.document_text_detection(image=image)
+        text = response.full_text_annotation.text
+        elapsed = time.time() - start
+        return text, elapsed
+    except Exception as e:
+        return f"Vision Error: {e}", 0
+
+if __name__ == "__main__":
+    if not os.path.exists(IMAGE_PATH):
+        print(f"❌ ERROR: Cannot find '{IMAGE_PATH}' in the current folder.")
+    else:
+        print(f"\n🚀 Running Hybrid OCR Test on '{IMAGE_PATH}'...\n")
+
+        # 1. Run EasyOCR
+        easy_text, easy_time = run_easyocr(IMAGE_PATH)
+        print(f"--- 🟦 EasyOCR (Local) --- Time: {easy_time:.2f}s")
+        print(easy_text.strip() if easy_text.strip() else "[No text detected]")
+        print("-" * 50)
+
+        # 2. Run Google Vision
+        vision_text, vision_time = run_vision(IMAGE_PATH)
+        print(f"--- 🟧 Google Vision (Cloud) --- Time: {vision_time:.2f}s")
+        print(vision_text.strip() if vision_text.strip() else "[No text detected]")
+        print("-" * 50)
+
+        # 3. Hybrid Logic Simulation
+        print("\n--- 🧠 HYBRID DECISION ENGINE ---")
+        if "ERROR" in vision_text:
+            print("Action: Google Vision skipped due to missing API Key. Check credentials.")
+        elif len(easy_text) < 10 or "AZITHICRYYIN" in easy_text: 
+            # Example logic: If EasyOCR fails or gives low-confidence gibberish
+            print("Action: EasyOCR output deemed low quality. Switching to Google Vision as primary.")
+        else:
+            print("Action: EasyOCR provided sufficient data. No need to spend Google Cloud credits.")
